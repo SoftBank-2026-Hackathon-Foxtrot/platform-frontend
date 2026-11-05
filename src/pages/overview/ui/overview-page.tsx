@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeftRightIcon, CloudIcon, LayoutGridIcon, Settings2Icon } from "lucide-react";
+import { CloudIcon } from "lucide-react";
+import { RiArrowLeftRightFill, RiHomeFill, RiSettings3Fill } from "react-icons/ri";
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
 import { Separator } from "@/shared/ui/separator";
@@ -20,9 +21,9 @@ import {
 } from "@/shared/ui/sidebar";
 
 const navigation = [
-  { id: "applications", title: "애플리케이션", icon: LayoutGridIcon },
-  { id: "migrations", title: "마이그레이션", icon: ArrowLeftRightIcon },
-  { id: "settings", title: "설정", icon: Settings2Icon },
+  { id: "applications", title: "애플리케이션", icon: RiHomeFill },
+  { id: "migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
+  { id: "settings", title: "설정", icon: RiSettings3Fill },
 ] as const;
 
 type Section = (typeof navigation)[number]["id"];
@@ -64,7 +65,7 @@ function PlatformSidebar({ selected, onSelect }: PlatformSidebarProps) {
                       setOpenMobile(false);
                     }}
                   >
-                    <item.icon />
+                    <item.icon aria-hidden="true" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
