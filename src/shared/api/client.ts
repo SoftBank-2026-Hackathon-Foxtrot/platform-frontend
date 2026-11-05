@@ -23,9 +23,15 @@ export function getApiErrorMessage(error: Error): string {
     return "백엔드 응답 형식이 API 계약과 다릅니다.";
   }
   if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (typeof message === "string") return message;
     if (error.response?.status === 401) return "로그인이 필요합니다.";
     if (error.response?.status === 403) return "접근 권한이 없습니다.";
     return "백엔드에 연결하지 못했습니다. 서버 주소와 실행 상태를 확인하십시오.";
   }
   return "요청을 처리하지 못했습니다. 다시 확인하십시오.";
+}
+
+export function isUnauthorized(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 401;
 }
