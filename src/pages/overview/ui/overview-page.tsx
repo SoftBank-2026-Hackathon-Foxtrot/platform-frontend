@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { ArrowLeftRightIcon, CloudIcon, LayoutGridIcon, Settings2Icon } from "lucide-react";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/shared/ui/breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
 import { Separator } from "@/shared/ui/separator";
 import {
   Sidebar,
@@ -42,16 +36,14 @@ function PlatformSidebar({ selected, onSelect }: PlatformSidebarProps) {
   const { setOpenMobile } = useSidebar();
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="Foxtrot">
+            <SidebarMenuButton asChild tooltip="Foxtrot">
               <a href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <CloudIcon className="size-4" />
-                </div>
-                <span className="font-semibold">Foxtrot</span>
+                <CloudIcon />
+                <span className="font-medium">Foxtrot</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -91,23 +83,23 @@ export function OverviewPage() {
   const current = navigation.find((item) => item.id === selected) ?? navigation[0];
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-dvh min-h-0 overflow-hidden">
       <PlatformSidebar selected={selected} onSelect={setSelected} />
-      <SidebarInset aria-label={current.title}>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" aria-label="사이드바 전환" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">Foxtrot</BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{current.title}</BreadcrumbPage>
+      <SidebarInset aria-label={current.title} className="min-h-0 min-w-0 overflow-y-auto">
+        <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background px-4">
+          <SidebarTrigger aria-label="사이드바 전환" />
+          <Separator orientation="vertical" className="mx-1 h-4 self-center!" />
+          <Breadcrumb aria-label="현재 위치" className="min-w-0">
+            <BreadcrumbList className="flex-nowrap overflow-hidden">
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate" title={current.title}>
+                  {current.title}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col" />
+        <div className="flex min-h-0 flex-1 flex-col" />
       </SidebarInset>
     </SidebarProvider>
   );

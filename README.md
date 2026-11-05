@@ -47,6 +47,8 @@ vp run check
 
 시작 화면은 shadcn의 `SidebarProvider`·`Sidebar variant="inset"`·`SidebarInset`으로 구성합니다. 사이드바 접기, 모바일 메뉴, 애플리케이션·마이그레이션·설정 선택을 제공합니다. 본문은 비워 두었습니다. 기존 소개 카드와 API 연결 확인 화면은 제거했습니다.
 
+화면은 다크 모드로 고정합니다. [스타일 참고 화면](https://spotify.lth.so/share/hyun)의 Geist 글꼴, 중성 색상, 256px 사이드바, 32px 메뉴 행, 48px 상단 바를 따릅니다. 사이드바를 접으면 완전히 숨깁니다. 본문 안에서 스크롤하며, 상단 바는 고정합니다. 테마 토큰과 공개 props로 적용하며 shadcn 원본은 수정하지 않습니다.
+
 ## 데이터 요청 예제
 
 `pages/overview/api/health.ts`가 API 함수와 `queryOptions`의 예제입니다. API 함수는 Axios 요청·Zod 응답 검증을 담당합니다. query는 key와 취소 신호를 관리합니다. 본문에서 API 예제를 자동 호출하지 않습니다.
