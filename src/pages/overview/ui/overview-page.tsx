@@ -1,86 +1,107 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { CloudIcon } from "lucide-react";
+import { RiArrowLeftRightFill, RiHomeFill, RiSettings3Fill } from "react-icons/ri";
 
-import { apiBaseUrl, getApiErrorMessage } from "@/shared/api";
-import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
-import { Badge } from "@/shared/ui/badge";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
 import { Separator } from "@/shared/ui/separator";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from "@/shared/ui/sidebar";
 
-import { healthQueryOptions } from "../api/health";
+const navigation = [
+  { id: "applications", title: "애플리케이션", icon: RiHomeFill },
+  { id: "migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
+  { id: "settings", title: "설정", icon: RiSettings3Fill },
+] as const;
 
-export function OverviewPage() {
-  const health = useQuery({ ...healthQueryOptions(), enabled: false });
-  const status = health.isFetching
-    ? "확인 중"
-    : health.isError
-      ? "연결 실패"
-      : health.isSuccess
-        ? "연결됨"
-        : "미확인";
+type Section = (typeof navigation)[number]["id"];
+
+type PlatformSidebarProps = {
+  selected: Section;
+  onSelect: (section: Section) => void;
+};
+
+function PlatformSidebar({ selected, onSelect }: PlatformSidebarProps) {
+  const { setOpenMobile } = useSidebar();
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-4xl flex-col gap-8 px-6 py-12">
-      <header className="space-y-3">
-        <Badge variant="secondary">개발 환경</Badge>
-        <h1 className="text-3xl font-semibold tracking-tight">Foxtrot Platform</h1>
-        <p className="text-muted-foreground">앱 등록과 클라우드 이전을 관리할 플랫폼 콘솔입니다.</p>
-      </header>
-      <Separator />
-      <Card>
-        <CardHeader>
-          <CardTitle>프론트엔드 기본 구성</CardTitle>
-          <CardDescription>화면과 데이터 요청에 같은 규칙을 적용합니다.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {[
-            "Vite+",
-            "React",
-            "TypeScript",
-            "shadcn/ui",
-            "Tailwind CSS",
-            "FSD",
-            "Axios",
-            "TanStack Query",
-          ].map((name) => (
-            <Badge key={name} variant="outline">
-              {name}
-            </Badge>
-          ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle>플랫폼 API 연결</CardTitle>
-            <Badge variant="outline" aria-live="polite">
-              {status}
-            </Badge>
-          </div>
-          <CardDescription>
-            <code>{apiBaseUrl}/health</code>로 실제 요청을 보냅니다. 모의 응답은 사용하지 않습니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button disabled={health.isFetching} onClick={() => void health.refetch()}>
-            {health.isFetching ? "연결 확인 중" : "API 연결 확인"}
-          </Button>
-          {health.isError && (
-            <Alert variant="destructive">
-              <AlertTitle>API 요청 실패</AlertTitle>
-              <AlertDescription>{getApiErrorMessage(health.error)}</AlertDescription>
-            </Alert>
-          )}
-          {health.isSuccess && !health.isFetching && (
-            <p role="status" className="text-sm text-muted-foreground">
-              플랫폼 API가 정상 응답했습니다.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-      <p className="text-sm text-muted-foreground">
-        GitHub 로그인, 앱 등록, 마이그레이션 화면은 다음 단계에서 추가합니다.
-      </p>
-    </main>
+    <Sidebar variant="inset" collapsible="offcanvas">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Foxtrot">
+              <a href="/">
+                <CloudIcon />
+                <span className="font-medium">Foxtrot</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    isActive={selected === item.id}
+                    tooltip={item.title}
+                    aria-current={selected === item.id ? "page" : undefined}
+                    onClick={() => {
+                      onSelect(item.id);
+                      setOpenMobile(false);
+                    }}
+                  >
+                    <item.icon aria-hidden="true" />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
+
+export function OverviewPage() {
+  const [selected, setSelected] = useState<Section>("applications");
+  const current = navigation.find((item) => item.id === selected) ?? navigation[0];
+
+  return (
+    <SidebarProvider className="h-dvh min-h-0 overflow-hidden">
+      <PlatformSidebar selected={selected} onSelect={setSelected} />
+      <SidebarInset aria-label={current.title} className="min-h-0 min-w-0 overflow-y-auto">
+        <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background px-4">
+          <SidebarTrigger aria-label="사이드바 전환" />
+          <Separator orientation="vertical" className="mx-1 h-4 self-center!" />
+          <Breadcrumb aria-label="현재 위치" className="min-w-0">
+            <BreadcrumbList className="flex-nowrap overflow-hidden">
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate" title={current.title}>
+                  {current.title}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div className="flex min-h-0 flex-1 flex-col" />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
