@@ -8,11 +8,12 @@
     "dev": "vp dev",
     "build": "tsc && vp build",
     "preview": "vp preview",
-    "check": "vp check && vp run architecture:check && vp run ui:check",
+    "check": "vp check && vp run architecture:check && vp run ui:check && vp test",
     "architecture:check": "steiger src",
     "ui:check": "node scripts/shadcn-integrity.mjs",
     "ui:record": "node scripts/shadcn-integrity.mjs --record",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vp test"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
