@@ -4,6 +4,7 @@ const sample = {
   revision: 1,
   application: "goods",
   mode: "cloud",
+  readOnly: false,
   phase: "verified",
   source: { role: "app", policy: "workload-bucket", bucket: "source" },
   target: { principal: "app@gcp", bucket: "target", extraBucket: "demo" },
@@ -44,6 +45,11 @@ describe("security review navigation", () => {
         false,
       );
     expect(canContinue({ ...review, checks: [] }, now)).toBe(false);
+  });
+  it("defaults to read-only and never enables continuation in that mode", () => {
+    const review = reviewSchema.parse({ ...sample, readOnly: undefined });
+    expect(review.readOnly).toBe(true);
+    expect(canContinue(review, Date.parse(sample.verifiedAt))).toBe(false);
   });
   it("rejects success-shaped malformed API responses", () => {
     expect(reviewSchema.safeParse({ ...sample, revision: -1 }).success).toBe(false);
