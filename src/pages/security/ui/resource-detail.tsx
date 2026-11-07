@@ -56,9 +56,7 @@ export function ResourceDetail({
           <div className="security-empty">
             <CircleHelp aria-hidden="true" />
             <p>
-              {t(
-                resource.id === "app" ? "준비 상태 응답만 확인합니다." : "검사 대상이 아닙니다.",
-              )}
+              {t(resource.id === "app" ? "준비 상태 응답만 확인합니다." : "검사 대상이 아닙니다.")}
             </p>
             {resource.id === "app" && (
               <p>
@@ -171,9 +169,7 @@ export function ResourceDetail({
                 >
                   <SheetHeader className="pr-12">
                     <SheetTitle>{t("검사 근거")}</SheetTitle>
-                    <SheetDescription>
-                      {t("AWS 인라인 정책 · GCP 버킷 IAM")}
-                    </SheetDescription>
+                    <SheetDescription>{t("AWS 인라인 정책 · GCP 버킷 IAM")}</SheetDescription>
                   </SheetHeader>
                   <SheetClose asChild>
                     <Button
