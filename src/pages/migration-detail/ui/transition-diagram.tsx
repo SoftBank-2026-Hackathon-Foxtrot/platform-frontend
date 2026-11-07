@@ -221,12 +221,6 @@ export function TransitionDiagram({
       <style>{CSS}</style>
       <div className="diagram-layout">
         <aside className="diagram-info" aria-label={t("전환 구성도")}>
-          <div className="space-y-1">
-            <h2 className="text-sm font-semibold">{t("전환 구성도")}</h2>
-            <p className="text-[10px] leading-relaxed text-muted-foreground">
-              {t("리소스 사용 위치 · 복제 상태 · 현재 전환 단계 · 2초마다 갱신")}
-            </p>
-          </div>
           <FlowStory data={data} />
           {suspended && (
             <p className="text-xs text-warning">{t("관측 갱신 실패 · 마지막 상태 표시")}</p>
@@ -236,10 +230,6 @@ export function TransitionDiagram({
           {expandedItem?.kind === "REDIS" && (
             <div className="space-y-3 border-t pt-3 text-xs" data-module-role-summary>
               <div>
-                <p className="font-semibold">Redis proxy</p>
-                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  {t("앱의 Redis 요청을 라우팅합니다.")}
-                </p>
                 <p className="mt-1 text-info">{proxyLabel}</p>
                 {!proxy.stale && proxy.paused === false && (
                   <p className="mt-1 text-[10px] text-muted-foreground">{t("쓰기 허용")}</p>
@@ -251,10 +241,6 @@ export function TransitionDiagram({
                 )}
               </div>
               <div>
-                <p className="font-semibold">Sync Worker</p>
-                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  {t("저장소 간 변경 데이터를 복제합니다.")}
-                </p>
                 <p className="mt-1 text-info">
                   {t(suspended ? "관측 갱신 대기" : detailCopyLabel)}
                 </p>
@@ -710,22 +696,6 @@ export function TransitionDiagram({
           </svg>
         </div>
       </div>
-      <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-success" />
-          {t("현재 사용")}
-        </span>
-        <span>{t("저장소 사이의 파란 선: 데이터 복제 · 점선: 제어")}</span>
-        <span>{t("흐름은 확인된 설정의 시각화이며 실제 요청 수가 아닙니다.")}</span>
-        <a
-          href="https://github.com/caru-ini/stack-diagram"
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto underline underline-offset-2"
-        >
-          stack-diagram · AWS / svgl / Lucide
-        </a>
-      </figcaption>
     </figure>
   );
 }

@@ -5,7 +5,7 @@ import { t, useLocale } from "@/shared/lib/i18n";
 import { Badge } from "@/shared/ui/badge";
 
 import type { Detail } from "../api/migrations";
-import { isMoving, preparationFlow, STAGE_EXPLANATION, trafficFlow } from "./flow-model";
+import { isMoving, preparationFlow, trafficFlow } from "./flow-model";
 import { STEP_LABELS } from "./module-detail-model";
 
 export function FlowStory({ data }: { data: Detail }) {
@@ -29,15 +29,15 @@ export function FlowStory({ data }: { data: Detail }) {
       <span className="font-semibold">
         {t(stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "단계 미확인")}
       </span>
-      <span className="text-muted-foreground">
-        {paused
-          ? t("엔진 정지 · 외부 작업은 계속될 수 있습니다.")
-          : waiting
-            ? t("승인 대기 · 확인 후 다음 작업을 시작합니다.")
-            : done
-              ? t("작업이 종료되었습니다. 마지막 관측 상태입니다.")
-              : t(STAGE_EXPLANATION[stage?.kind ?? ""] ?? "관측 대기")}
-      </span>
+      {(paused || waiting) && (
+        <span className="text-muted-foreground">
+          {paused
+            ? t("엔진 정지 · 외부 작업은 계속될 수 있습니다.")
+            : waiting
+              ? t("승인 대기 · 확인 후 다음 작업을 시작합니다.")
+              : null}
+        </span>
+      )}
       {data.hold.desired === "HOLD" && (
         <Badge variant="outline" className="border-warning text-warning">
           {t("앱 업무 정지 중")}
