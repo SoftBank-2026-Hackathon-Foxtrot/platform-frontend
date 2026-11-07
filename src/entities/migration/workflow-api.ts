@@ -16,7 +16,8 @@ export type WorkflowCommand = z.infer<typeof workflowCommandSchema>;
 export const workflowSchema = z.object({
   id: z.string(),
   application: z.string(),
-  ownerId: z.string(),
+  // Personal-workspace backends own each workflow; the shared release backend does not say.
+  ownerId: z.string().optional(),
   applicationSnapshot: z
     .object({
       name: z.string(),
@@ -32,6 +33,7 @@ export const workflowSchema = z.object({
   createdAt: z.string(),
   createdBy: z.string(),
   finishedAt: z.string().nullable(),
+  approvedThrough: z.number().optional(),
   status: z.enum([
     "PLANNED",
     "RUNNING",
@@ -43,7 +45,7 @@ export const workflowSchema = z.object({
     "ABORTED",
   ]),
   halt: z
-    .object({ code: z.string(), message: z.string(), blockers: z.array(z.string()) })
+    .object({ code: z.string(), message: z.string(), blockers: z.array(z.string()).default([]) })
     .nullable(),
   reconcileRequested: z.boolean(),
   rolledBack: z.array(resourceKindSchema),
@@ -59,8 +61,8 @@ export const workflowDetailSchema = z.object({
       status: z.string(),
       step: z.string(),
       detail: z.string(),
-      startedAt: z.string().nullable(),
-      finishedAt: z.string().nullable(),
+      startedAt: z.string().nullish(),
+      finishedAt: z.string().nullish(),
     }),
   ),
   resources: z.array(
@@ -83,7 +85,8 @@ export const workflowDetailSchema = z.object({
     }),
   ),
   hold: z.object({
-    desired: z.enum(["RUN", "HOLD"]),
+    // The release backend reports UNKNOWN when it has no live directive.
+    desired: z.enum(["RUN", "HOLD", "UNKNOWN"]),
     generation: z.number(),
     heldSince: z.string().nullable(),
     actors: z.array(
@@ -121,6 +124,10 @@ export const workflowStatus: Record<Workflow["status"], string> = {
   COMPLETED: "완료",
   ABORTED: "취소 완료",
 };
+export const workflowKeys = {
+  all: (workspace: string) => ["workflows", workspace] as const,
+  detail: (workspace: string, id: string) => ["workflows", workspace, id] as const,
+};
 export const workflowOptions = (workspace: string, id: string) =>
   queryOptions({
     queryKey: ["workflows", workspace, id],
@@ -149,12 +156,18 @@ export const workflowEventsOptions = (workspace: string, id: string, after: stri
       ),
     refetchInterval: 4000,
   });
+/**
+ * A registered application is named by `applicationId`. The seed application of the shared
+ * release backend has none, and that backend refuses unknown fields, so it is left out.
+ */
 export async function createWorkflow(
-  input: { applicationId: string; sourceEnv: string; targetEnv: string },
+  input: { applicationId?: string; sourceEnv: string; targetEnv: string },
   key: string,
 ) {
+  const { applicationId, ...direction } = input;
+  const body = applicationId ? { applicationId, ...direction } : direction;
   return workflowDetailSchema.parse(
-    (await apiClient.post("/v1/workflows", input, { headers: commandHeaders(key) })).data,
+    (await apiClient.post("/v1/workflows", body, { headers: commandHeaders(key) })).data,
   );
 }
 export async function commandWorkflow(
@@ -162,6 +175,10 @@ export async function commandWorkflow(
   command: WorkflowCommand,
   resourceId: ResourceKind | undefined,
   key: string,
+  rollback: { mode: "normal" | "failure"; confirmTargetFailure: boolean } = {
+    mode: "normal",
+    confirmTargetFailure: false,
+  },
 ) {
   return workflowDetailSchema.parse(
     (
@@ -170,7 +187,8 @@ export async function commandWorkflow(
         {
           command,
           expectedVersion: workflow.version,
-          ...(resourceId ? { resourceId, mode: "normal" } : {}),
+          ...(resourceId ? { resourceId, mode: rollback.mode } : {}),
+          ...(resourceId && rollback.confirmTargetFailure ? { confirmTargetFailure: true } : {}),
         },
         { headers: commandHeaders(key) },
       )

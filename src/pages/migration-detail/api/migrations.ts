@@ -1,7 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { apiBaseUrl, apiClient } from "@/shared/api";
+import { workflowKeys, workflowSchema } from "@/entities/migration";
+import { apiClient, isNotFound } from "@/shared/api";
 
 const text = z.string().nullable().optional();
 const number = z.number().nullable().optional();
@@ -36,17 +37,6 @@ const operation = z.object({
   startedAt: text,
   finishedAt: text,
 });
-export const workflowSchema = z.object({
-  id: z.string(),
-  application: z.string(),
-  sourceEnv: z.string(),
-  targetEnv: z.string(),
-  status: z.string(),
-  currentStage: z.number(),
-  createdAt: z.string(),
-  finishedAt: text,
-  halt: z.object({ code: z.string(), message: z.string() }).nullable().optional(),
-});
 const flow = z.object({ state: text, backlog: number, lagSeconds: number }).optional();
 const resourceSchema = z.object({
   kind: z.string(),
@@ -60,20 +50,22 @@ const resourceSchema = z.object({
   businessWriteAccess: text,
   transitionId: text,
   activeOperationId: text,
-  observation,
-  progress: z.object({ completed: number, total: number, unit: text }).nullable(),
-  checks: z.array(
-    z.object({
-      code: z.string(),
-      stage: z.string(),
-      decision,
-      currentResult: z.string(),
-      observedAt: text,
-      validUntil: text,
-    }),
-  ),
-  rollback: z.object({ method: text, reasons: z.array(z.string()).default([]) }).nullable(),
-  readiness: z.record(z.string(), decision).nullable(),
+  observation: observation.default({ freshness: "UNKNOWN" }),
+  progress: z.object({ completed: number, total: number, unit: text }).nullish(),
+  checks: z
+    .array(
+      z.object({
+        code: z.string(),
+        stage: z.string(),
+        decision,
+        currentResult: z.string(),
+        observedAt: text,
+        validUntil: text,
+      }),
+    )
+    .default([]),
+  rollback: z.object({ method: text, reasons: z.array(z.string()).default([]) }).nullish(),
+  readiness: z.record(z.string(), decision).nullish(),
   replication: z
     .object({
       forward: flow,
@@ -82,93 +74,95 @@ const resourceSchema = z.object({
         .object({ completed: number, total: number, bytes: number, totalBytes: number })
         .optional(),
     })
-    .nullable(),
-  details: z.object({
-    database: z
-      .object({
-        observedAt: text,
-        proxyPaused: z.boolean().nullable().optional(),
-        sourceWriterSessions: number,
-        targetWriterSessions: number,
-        sourcePreparedTransactions: number,
-        targetReachable: z.boolean().nullable().optional(),
-        accessEvidence: text,
-        verification: verification.nullable().optional(),
-      })
-      .optional(),
-    redis: z
-      .object({
-        consumerRoute: text,
-        producerRoute: text,
-        drainStatus: text,
-        sync: z
-          .object({
-            direction: text,
-            freshness: text,
-            backlog: number,
-            copied: number,
-            oldestDirtyAgeMs: number,
-            lag_ms: number,
-            observedAt: text,
-            error: text,
-            epoch: text,
-            verification: verification.nullable().optional(),
-          })
-          .optional(),
-        proxy: z
-          .object({
-            paused: z.boolean().nullable().optional(),
-            freshness: text,
-            inflight_writes: number,
-            open_tx: number,
-            last_pause_ms: number,
-            pubsub_sessions: number,
-            observedAt: text,
-          })
-          .optional(),
-      })
-      .optional(),
-    object: z
-      .object({
-        expectedApps: number,
-        lastSuccessfulSyncAt: text,
-        syncFreshness: text,
-        initialCopyObservedAt: text,
-        forwardObservedAt: text,
-        reverseObservedAt: text,
-        lastVerificationAt: text,
-        lastProgressAt: text,
-        apps: z
-          .object({
-            live: number,
-            acked: number,
-            waiting: number,
-            generation: number,
-            recovering: z.boolean(),
-            observedAt: text,
-          })
-          .nullable()
-          .optional(),
-        readiness: z
-          .record(
-            z.string(),
-            z.object({
-              result: z.string(),
-              checks: z
-                .array(
-                  z.object({
-                    name: z.string(),
-                    ok: z.boolean(),
-                    verification: verification.optional(),
-                  }),
-                )
-                .default([]),
-            }),
-          )
-          .optional(),
-      })
-      .optional(),
-  }),
+    .nullish(),
+  details: z
+    .object({
+      database: z
+        .object({
+          observedAt: text,
+          proxyPaused: z.boolean().nullable().optional(),
+          sourceWriterSessions: number,
+          targetWriterSessions: number,
+          sourcePreparedTransactions: number,
+          targetReachable: z.boolean().nullable().optional(),
+          accessEvidence: text,
+          verification: verification.nullable().optional(),
+        })
+        .optional(),
+      redis: z
+        .object({
+          consumerRoute: text,
+          producerRoute: text,
+          drainStatus: text,
+          sync: z
+            .object({
+              direction: text,
+              freshness: text,
+              backlog: number,
+              copied: number,
+              oldestDirtyAgeMs: number,
+              lag_ms: number,
+              observedAt: text,
+              error: text,
+              epoch: text,
+              verification: verification.nullable().optional(),
+            })
+            .optional(),
+          proxy: z
+            .object({
+              paused: z.boolean().nullable().optional(),
+              freshness: text,
+              inflight_writes: number,
+              open_tx: number,
+              last_pause_ms: number,
+              pubsub_sessions: number,
+              observedAt: text,
+            })
+            .optional(),
+        })
+        .optional(),
+      object: z
+        .object({
+          expectedApps: number,
+          lastSuccessfulSyncAt: text,
+          syncFreshness: text,
+          initialCopyObservedAt: text,
+          forwardObservedAt: text,
+          reverseObservedAt: text,
+          lastVerificationAt: text,
+          lastProgressAt: text,
+          apps: z
+            .object({
+              live: number,
+              acked: number,
+              waiting: number,
+              generation: number,
+              recovering: z.boolean(),
+              observedAt: text,
+            })
+            .nullable()
+            .optional(),
+          readiness: z
+            .record(
+              z.string(),
+              z.object({
+                result: z.string(),
+                checks: z
+                  .array(
+                    z.object({
+                      name: z.string(),
+                      ok: z.boolean(),
+                      verification: verification.optional(),
+                    }),
+                  )
+                  .default([]),
+              }),
+            )
+            .optional(),
+        })
+        .optional(),
+    })
+    .default({}),
 });
 export type Resource = z.infer<typeof resourceSchema>;
 const preparation = z.object({
@@ -195,6 +189,7 @@ const preparation = z.object({
 });
 export const detailSchema = z.object({
   workflow: workflowSchema,
+  allowedCommands: z.array(z.string()).default([]),
   stages: z.array(
     z.object({
       index: z.number(),
@@ -205,14 +200,16 @@ export const detailSchema = z.object({
     }),
   ),
   resources: z.array(resourceSchema),
-  preparation: z.record(z.string(), preparation),
+  // Observation fields below come from the release backend; the personal-workspace backend
+  // omits them, and the page then shows that they are not provided instead of zeros.
+  preparation: z.record(z.string(), preparation).default({}),
   traffic: z.array(
     z.object({
       operationId: z.string(),
       requested: z.record(z.string(), z.number()),
-      applied: z.record(z.string(), z.number()).nullable(),
-      effectivePercent: z.record(z.string(), z.number()).nullable(),
-      configVerified: z.boolean(),
+      applied: z.record(z.string(), z.number()).nullish(),
+      effectivePercent: z.record(z.string(), z.number()).nullish(),
+      configVerified: z.boolean().default(false),
       adapterOperationId: text,
       operationStatus: text,
       at: z.string(),
@@ -238,25 +235,27 @@ export const detailSchema = z.object({
         z.object({ firstFailureAt: z.string(), lastFailureAt: z.string(), recoveredAt: text }),
       ),
     })
-    .nullable(),
-  businessProbes: z.array(
-    z.object({
-      env: z.string(),
-      freshness: z.string(),
-      collectionState: z.string(),
-      latest: z
-        .object({
-          passed: z.boolean(),
-          reason: z.string(),
-          finishedAt: z.string(),
-          steps: z.record(z.string(), z.number()),
-        })
-        .nullable(),
-    }),
-  ),
+    .nullish(),
+  businessProbes: z
+    .array(
+      z.object({
+        env: z.string(),
+        freshness: z.string(),
+        collectionState: z.string(),
+        latest: z
+          .object({
+            passed: z.boolean(),
+            reason: z.string(),
+            finishedAt: z.string(),
+            steps: z.record(z.string(), z.number()),
+          })
+          .nullable(),
+      }),
+    )
+    .default([]),
   hold: z.object({
     desired: z.string(),
-    isLive: z.boolean(),
+    isLive: z.boolean().default(true),
     observedAt: text,
     requestedAt: text,
     releasedAt: text,
@@ -274,18 +273,20 @@ export const detailSchema = z.object({
       }),
     ),
   }),
-  commands: z.array(
-    z.object({
-      resource: z.string(),
-      action: z.string(),
-      phase: z.string(),
-      operationId: text,
-      status: text,
-      errorCode: text,
-      attempt: z.number(),
-      observation: operation,
-    }),
-  ),
+  commands: z
+    .array(
+      z.object({
+        resource: z.string(),
+        action: z.string(),
+        phase: z.string(),
+        operationId: text,
+        status: text,
+        errorCode: text,
+        attempt: z.number(),
+        observation: operation,
+      }),
+    )
+    .default([]),
 });
 export type Detail = z.infer<typeof detailSchema>;
 const eventPage = z.object({
@@ -311,25 +312,9 @@ const historyPage = z.object({
   ),
   nextCursor: text,
 });
-const baseKey = [
-  "migration-console",
-  apiBaseUrl,
-  "registered-workspace",
-  "registered-application",
-] as const;
-export function workflowsQuery() {
-  return queryOptions<z.infer<typeof workflowSchema>[]>({
-    queryKey: [...baseKey, "workflows"],
-    refetchInterval: (query) => (query.state.error ? false : 5000),
-    queryFn: async ({ signal }) =>
-      z
-        .array(workflowSchema)
-        .parse((await apiClient.get<unknown>("/v1/workflows", { signal })).data),
-  });
-}
-export function detailQuery(id: string) {
+export function detailQuery(workspace: string, id: string) {
   return queryOptions<Detail>({
-    queryKey: [...baseKey, id, "detail"],
+    queryKey: [...workflowKeys.detail(workspace, id), "detail"],
     refetchInterval: (query) => (query.state.error ? false : 2000),
     queryFn: async ({ signal }) =>
       detailSchema.parse(
@@ -337,9 +322,9 @@ export function detailQuery(id: string) {
       ),
   });
 }
-export function eventsQuery(id: string, after: string | null) {
+export function eventsQuery(workspace: string, id: string, after: string | null) {
   return queryOptions<z.infer<typeof eventPage>>({
-    queryKey: [...baseKey, id, "events", after],
+    queryKey: [...workflowKeys.detail(workspace, id), "events", after],
     refetchInterval: (query) => (query.state.error ? false : 5000),
     queryFn: async ({ signal }) =>
       eventPage.parse(
@@ -352,18 +337,20 @@ export function eventsQuery(id: string, after: string | null) {
       ),
   });
 }
-export function historyQuery(id: string, cursor: string | null, since: string) {
-  return queryOptions<z.infer<typeof historyPage>>({
-    queryKey: [...baseKey, id, "history", since, cursor],
-    refetchInterval: (query) => (query.state.error ? false : 5000),
-    queryFn: async ({ signal }) =>
-      historyPage.parse(
-        (
-          await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/observations`, {
-            signal,
-            params: { since, cursor, limit: 30 },
-          })
-        ).data,
+export function historyQuery(workspace: string, id: string, cursor: string | null, since: string) {
+  return queryOptions<z.infer<typeof historyPage> | null>({
+    queryKey: [...workflowKeys.detail(workspace, id), "history", since, cursor],
+    refetchInterval: (query) => (query.state.error || query.state.data === null ? false : 5000),
+    queryFn: ({ signal }) =>
+      unlessMissing(async () =>
+        historyPage.parse(
+          (
+            await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/observations`, {
+              signal,
+              params: { since, cursor, limit: 30 },
+            })
+          ).data,
+        ),
       ),
   });
 }
@@ -394,17 +381,29 @@ export const telemetrySchema = z.object({
     }),
   ),
 });
-export function telemetryQuery(id: string) {
-  return queryOptions<z.infer<typeof telemetrySchema>>({
-    queryKey: [...baseKey, id, "telemetry"],
-    refetchInterval: (query) => (query.state.error ? false : 10000),
-    queryFn: async ({ signal }) =>
-      telemetrySchema.parse(
-        (
-          await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/telemetry`, {
-            signal,
-          })
-        ).data,
+export function telemetryQuery(workspace: string, id: string) {
+  return queryOptions<z.infer<typeof telemetrySchema> | null>({
+    queryKey: [...workflowKeys.detail(workspace, id), "telemetry"],
+    refetchInterval: (query) => (query.state.error || query.state.data === null ? false : 10000),
+    queryFn: ({ signal }) =>
+      unlessMissing(async () =>
+        telemetrySchema.parse(
+          (
+            await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/telemetry`, {
+              signal,
+            })
+          ).data,
+        ),
       ),
   });
+}
+
+/** Observation history and OTEL exist only on the release backend: 404 there means "not offered". */
+async function unlessMissing<T>(load: () => Promise<T>): Promise<T | null> {
+  try {
+    return await load();
+  } catch (error) {
+    if (isNotFound(error)) return null;
+    throw error;
+  }
 }

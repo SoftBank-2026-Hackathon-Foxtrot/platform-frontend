@@ -26,7 +26,7 @@ describe("control-plane observation contract", () => {
   });
   it("passes query cancellation and scopes the cache to its workflow", async () => {
     const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: fixture });
-    const options = detailQuery("workflow-test");
+    const options = detailQuery("personal:test", "workflow-test");
     const controller = new AbortController();
     // Query context is supplied by TanStack at runtime; only signal is consumed here.
     if (typeof options.queryFn !== "function") throw new Error("Missing query function");
@@ -61,7 +61,7 @@ it("keeps OTEL backend outages distinct from zero measurements and forwards canc
     telemetrySchema.parse({ ...payload, metrics: [{ name: "lag", value: "0" }] }),
   ).toThrow();
   const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: payload });
-  const options = telemetryQuery("workflow/otel");
+  const options = telemetryQuery("personal:test", "workflow/otel");
   if (typeof options.queryFn !== "function") throw new Error("Missing query function");
   const controller = new AbortController();
   await options.queryFn({

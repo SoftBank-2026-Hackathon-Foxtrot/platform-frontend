@@ -5,6 +5,8 @@ export {
   getApiErrorMessage,
   shouldRetryQuery,
   isUnauthorized,
+  isNotFound,
+  getApiErrorDetail,
 } from "./client";
 export {
   providerSchema,

@@ -33,3 +33,9 @@ export type {
   Verification,
   MigrationPolicy,
 } from "./managed-api";
+export {
+  consoleApplicationsOptions,
+  parseConsoleApplications,
+  seedApplicationSchema,
+} from "./console-api";
+export type { ConsoleApplications, SeedApplication } from "./console-api";
