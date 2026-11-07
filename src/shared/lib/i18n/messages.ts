@@ -49,6 +49,11 @@ export const messages: Record<string, { en: string; ja: string }> = {
   사용: { en: "Enabled", ja: "有効" },
   미사용: { en: "Disabled", ja: "無効" },
   "확정한 대상 사양": { en: "Selected target sizing", ja: "確定した移行先の仕様" },
+  "조회 전용": { en: "Read only", ja: "読み取り専用" },
+  "조회 전용으로 연결되어 있습니다.": {
+    en: "Connected in read-only mode.",
+    ja: "読み取り専用で接続されています。",
+  },
   "시스템 메트릭": { en: "System metrics", ja: "システムメトリクス" },
   시스템: { en: "System", ja: "システム" },
   "모니터링 종류": { en: "Monitoring scope", ja: "監視の種類" },
