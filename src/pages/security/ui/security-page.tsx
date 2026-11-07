@@ -145,7 +145,7 @@ export function SecurityPage() {
               className="aria-disabled:opacity-50"
               onClick={() => {
                 if (busy) return;
-                if (review.phase === "plan") {
+                if (!review.readOnly && review.phase === "plan") {
                   setSelected("object");
                   requestAnimationFrame(() => {
                     const title = document.getElementById("security-plan-title");
