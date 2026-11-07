@@ -11,6 +11,7 @@ import {
   trafficFlow,
 } from "./flow-model";
 import { STACK_ICONS } from "./stack-icons";
+import { activeModule, STEP_LABELS } from "./module-detail-model";
 import "./flow-visuals.css";
 
 // stack-diagram tiles and orthogonal edges, arranged as paired source/target rows.
@@ -62,6 +63,8 @@ const CSS = `
 .migration-stack .copy-link.moving { stroke-dasharray:7 7; animation:copy-dashes 1s linear infinite; }
 .migration-stack .copy-packet { fill:var(--info); offset-distance:0%; animation:request-travel 2s linear infinite; }
 .migration-stack .copy-label { font-size:11px; font-weight:600; }
+.migration-stack .module-detail-node { animation:module-detail-reveal .2s ease-out; }
+@keyframes module-detail-reveal { from { opacity:0; } to { opacity:1; } }
 @keyframes copy-dashes { to { stroke-dashoffset:-28; } }
 `;
 function cloud(env: string) {
@@ -96,7 +99,7 @@ function StackNode({
   useLocale();
   return (
     <div
-      className="node"
+      className="node justify-start whitespace-normal text-left"
       style={{ left: cx - width / 2, top, width }}
       data-state={state}
       data-motion={motion}
@@ -156,6 +159,14 @@ export function TransitionDiagram({
   const finished = ["COMPLETED", "ABORTED"].includes(wf.status);
   const traffic = trafficFlow(data);
   const preparation = preparationFlow(data);
+  const candidate = activeModule(data);
+  const expanded = RESOURCE_FLOW.findIndex((item) => item.kind === candidate);
+  const height = H + (expanded >= 0 ? 96 : 0);
+  const rows = ROWS.map((row, index) => row + (expanded >= 0 && index > expanded ? 96 : 0));
+  const expandedItem = expanded >= 0 ? RESOURCE_FLOW[expanded] : undefined;
+  const expandedTop = expanded >= 0 ? rows[expanded]! : 0;
+  const expandedResource = data.resources.find((item) => item.kind === expandedItem?.kind);
+  const detailFlow = resourceFlow(data, expandedResource);
   const preparing = !suspended && stage?.kind === "PREPARE" && preparation.running;
   const environments = [wf.sourceEnv, wf.targetEnv] as const;
   const byKind = new Map(data.resources.map((resource) => [resource.kind, resource]));
@@ -176,14 +187,14 @@ export function TransitionDiagram({
       {stage?.kind === "PREPARE" && <PreparationActivity data={data} />}
       <div className="overflow-x-auto rounded-md border">
         <svg
-          viewBox={`0 0 ${W} ${H}`}
+          viewBox={`0 0 ${W} ${height}`}
           className="mx-auto block w-full min-w-[760px] max-w-[1080px]"
-          role="img"
+          role="group"
           aria-label={label}
         >
           <title>{label}</title>
-          <foreignObject width={W} height={H}>
-            <div className="canvas">
+          <foreignObject width={W} height={height}>
+            <div className="canvas" style={{ height }} data-expanded-module={expandedItem?.kind}>
               {environments.map((env, index) => {
                 const provider = cloud(env);
                 return (
@@ -196,7 +207,10 @@ export function TransitionDiagram({
                       ((stage?.kind === "PREPARE" && index === 1) ||
                         (stage?.kind === "FINALIZE" && index === 0))
                     }
-                    style={{ left: GROUPS[index === 0 ? 0 : 1].x }}
+                    style={{
+                      left: GROUPS[index === 0 ? 0 : 1].x,
+                      height: 360 + (expanded >= 0 ? 96 : 0),
+                    }}
                   >
                     <div className="group-head">
                       {provider.icon === "aws" ? (
@@ -214,7 +228,7 @@ export function TransitionDiagram({
                   </div>
                 );
               })}
-              <svg className="absolute inset-0" width={W} height={H} aria-hidden="true">
+              <svg className="absolute inset-0" width={W} height={height} aria-hidden="true">
                 <defs>
                   <marker
                     id={marker}
@@ -292,7 +306,7 @@ export function TransitionDiagram({
                   const observedFlow = resourceFlow(data, resource);
                   const flow = { ...observedFlow, moving: observedFlow.moving && !suspended };
                   const sides = activeSides(resource);
-                  const y = ROWS[index === 0 ? 0 : index === 1 ? 1 : 2] + 28;
+                  const y = rows[index === 0 ? 0 : index === 1 ? 1 : 2]! + 28;
                   const directions =
                     flow.forward && flow.reverse
                       ? (["forward", "reverse"] as const)
@@ -307,6 +321,62 @@ export function TransitionDiagram({
                         : sides.source
                           ? wf.sourceEnv
                           : t("미확인");
+                  if (index === expanded) {
+                    const top = y - 28;
+                    const sourceActive = resource?.route === "SOURCE";
+                    const targetActive = resource?.route === "TARGET";
+                    const reverseOnly = flow.reverse && !flow.forward;
+                    return (
+                      <g
+                        key={item.kind}
+                        data-copy-link={item.kind}
+                        data-module-detail-edges={item.kind}
+                      >
+                        <path
+                          className="edge control"
+                          d={`M636 292 H666 V${top + 18} H626`}
+                          markerEnd={arrow}
+                        />
+                        <path
+                          className="edge"
+                          style={{ stroke: sourceActive ? "var(--info)" : undefined }}
+                          opacity={sourceActive ? 1 : 0.25}
+                          d={`M330 ${top + 22} H454`}
+                          markerEnd={arrow}
+                        />
+                        <path
+                          className="edge"
+                          style={{ stroke: targetActive ? "var(--info)" : undefined }}
+                          opacity={targetActive ? 1 : 0.25}
+                          d={`M626 ${top + 22} H750`}
+                          markerEnd={arrow}
+                        />
+                        {[
+                          reverseOnly
+                            ? `M454 ${top + 98} H370 V${top + 44} H330`
+                            : `M330 ${top + 44} H370 V${top + 98} H454`,
+                          reverseOnly
+                            ? `M750 ${top + 44} H710 V${top + 98} H626`
+                            : `M626 ${top + 98} H710 V${top + 44} H750`,
+                        ].map((path, line) => (
+                          <path
+                            key={line}
+                            d={path}
+                            className={
+                              "copy-link " +
+                              (flow.copying && !flow.stale ? "active " : "") +
+                              (flow.moving ? "moving" : "")
+                            }
+                            markerEnd={flow.copying ? arrow : undefined}
+                            markerStart={flow.forward && flow.reverse ? arrow : undefined}
+                          />
+                        ))}
+                        <text className="edge-label" x="540" y={top + 145} textAnchor="middle">
+                          {transferMetric(resource)}
+                        </text>
+                      </g>
+                    );
+                  }
                   return (
                     <g key={item.kind} data-copy-link={item.kind} data-copy-moving={flow.moving}>
                       {directions.map((direction, line) => {
@@ -364,6 +434,39 @@ export function TransitionDiagram({
                   );
                 })}
               </svg>
+              {expandedItem && (
+                <div className="module-detail-node" data-module-detail={expandedItem.kind}>
+                  <StackNode
+                    cx={540}
+                    top={expandedTop}
+                    width={164}
+                    icon="server"
+                    name={
+                      expandedItem.kind === "REDIS"
+                        ? "Redis proxy"
+                        : expandedItem.kind === "DATABASE"
+                          ? "PgBouncer"
+                          : "객체 라우터"
+                    }
+                    sub={t(
+                      suspended
+                        ? "관측 갱신 대기"
+                        : (STEP_LABELS[stage?.step ?? ""] ?? stage?.step ?? "단계 보고 대기"),
+                    )}
+                    state="focus"
+                  />
+                  <StackNode
+                    cx={540}
+                    top={expandedTop + 70}
+                    width={164}
+                    icon="server"
+                    name={expandedItem.kind === "REDIS" ? "Sync Worker" : "데이터 복제"}
+                    sub={t(suspended ? "관측 갱신 대기" : detailFlow.label)}
+                    motion={!suspended && detailFlow.moving ? "copying" : undefined}
+                    stale={detailFlow.stale}
+                  />
+                </div>
+              )}
               <StackNode
                 cx={540}
                 top={12}
@@ -436,7 +539,7 @@ export function TransitionDiagram({
                         <StackNode
                           key={item.kind + (resource?.route ?? "UNKNOWN")}
                           cx={cx}
-                          top={ROWS[row === 0 ? 0 : row === 1 ? 1 : 2]}
+                          top={rows[row === 0 ? 0 : row === 1 ? 1 : 2]!}
                           icon={item.icon}
                           name={item.name}
                           sub={

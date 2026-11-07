@@ -1557,5 +1557,48 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Observation refresh failed · Showing the last state",
     ja: "観測の更新失敗 · 最後の状態を表示",
   },
-  "양방향 복제": { en: "Bidirectional replication", ja: "双方向複製" },
+  "양방향 복제": {
+    en: "Bidirectional replication",
+    ja: "双方向複製",
+  },
+  "객체 라우터": {
+    en: "Object router",
+    ja: "オブジェクトルーター",
+  },
+  "데이터 복제": {
+    en: "Data replication",
+    ja: "データ複製",
+  },
+  "전환 조건 확인": {
+    en: "Check prerequisites",
+    ja: "切替条件の確認",
+  },
+  "앱 업무 정지": {
+    en: "Hold workload",
+    ja: "アプリ処理を停止",
+  },
+  "쓰기 정지 확인": {
+    en: "Quiesce writes",
+    ja: "書き込み停止の確認",
+  },
+  "경로 전환": {
+    en: "Switch route",
+    ja: "経路切替",
+  },
+  "쓰기 재개": {
+    en: "Resume writes",
+    ja: "書き込み再開",
+  },
+  "앱 업무 재개": {
+    en: "Release workload",
+    ja: "アプリ処理を再開",
+  },
+  "전환 후 검증": {
+    en: "Verify transition",
+    ja: "切替後の検証",
+  },
+  "단계 보고 대기": {
+    en: "Awaiting stage report",
+    ja: "段階の報告待ち",
+  },
 };
