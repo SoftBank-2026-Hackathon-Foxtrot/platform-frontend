@@ -1,0 +1,64 @@
+{
+  "aws": {
+    "source": "aws",
+    "url": "https://d1.awsstatic.com/onedam/marketing-channels/website/public/shared/architecture-icon-release/Icon-package_07312026.5846e92413caa21490223536cc97f1269e44fa92.zip#Architecture-Group-Icons_07312026/AWS-Cloud-logo_32.svg",
+    "file": "aws.svg",
+    "bytes": 6364,
+    "dark_file": "aws_dark.svg",
+    "dark_url": "https://d1.awsstatic.com/onedam/marketing-channels/website/public/shared/architecture-icon-release/Icon-package_07312026.5846e92413caa21490223536cc97f1269e44fa92.zip#Architecture-Group-Icons_07312026/AWS-Cloud-logo_32_Dark.svg"
+  },
+  "gcp": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/google-cloud.svg",
+    "file": "gcp.svg",
+    "bytes": 1139
+  },
+  "cloudflare": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/cloudflare.svg",
+    "file": "cloudflare.svg",
+    "bytes": 1473
+  },
+  "redis": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/redis.svg",
+    "file": "redis.svg",
+    "bytes": 1928
+  },
+  "postgresql": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/postgresql.svg",
+    "file": "postgresql.svg",
+    "bytes": 3944
+  },
+  "app": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/boxes.svg",
+    "file": "app.svg",
+    "bytes": 897
+  },
+  "object": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/archive.svg",
+    "file": "object.svg",
+    "bytes": 415
+  },
+  "user": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/users.svg",
+    "file": "user.svg",
+    "bytes": 456
+  },
+  "control": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/workflow.svg",
+    "file": "control.svg",
+    "bytes": 427
+  },
+  "server": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/server.svg",
+    "file": "server.svg",
+    "bytes": 487
+  }
+}
