@@ -14,5 +14,8 @@
   "sidebar.tsx": "12d3eeca8ce1bf727eaf3488d9f0f82e3cceb185f868122757b1a6c23e73af32",
   "skeleton.tsx": "4c2af7fa9c645358a0fb188779deab6f0b981733b62befc25e18aaebea1350dc",
   "table.tsx": "300dc171ff0e09543dce0787f43a3ceb0d168fa800eaecb98b6c5630f3c6d7e9",
+  "tabs.tsx": "4441d00edc402539d2183845bac2f56ca60d3794113febbef1d58cc60e3aed66",
+  "toggle-group.tsx": "31788228c0f2787b65035d1c6bb872d959535bf2b4b2ece90b5136a868e8f089",
+  "toggle.tsx": "5fb58fc5f5da383322cbad37bfe275eec4a1b035efed9f922b4fb28cd2851040",
   "tooltip.tsx": "e94530dd6877132d5eda73f6fb0d217f345477232f140f2ca6e024d790177f6a"
 }

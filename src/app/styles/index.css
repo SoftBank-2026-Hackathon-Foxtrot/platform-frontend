@@ -2,10 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-aws: var(--aws);
+  --color-gcp: var(--gcp);
   --font-heading: var(--font-sans);
   --font-sans: "Geist Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -53,6 +56,8 @@
 }
 
 :root {
+  --aws: #eb6834;
+  --gcp: #2a78d6;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -93,6 +98,8 @@
 }
 
 .dark {
+  --aws: #d95926;
+  --gcp: #3987e5;
   color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

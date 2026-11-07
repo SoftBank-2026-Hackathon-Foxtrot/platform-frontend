@@ -86,7 +86,7 @@ VITE_API_MODE=demo vp dev --host 127.0.0.1 --port 4210
 
 `/security`에서 ‘데모 계정으로 시작’으로 진입한다. `VITE_API_MODE=demo`일 때만 기존 Axios mock을 설치한다. 기본값 `real`에서는 기존 인증/API를 그대로 사용한다. 보안 예시는 브라우저 내 메모리에만 있으며 새로고침하면 초기화된다.
 
-이번 데모는 보안 화면 검토용이다. 승인 후 마이그레이션 목록은 빈 목록이며, 보안 화면의 승인으로 workflow를 생성하지 않는다. 기존 앱 등록·배포의 전체 데모 API는 이번 범위에 포함하지 않는다.
+이번 데모는 보안 화면 검토용이다. 보안 화면의 승인으로 workflow를 생성하지 않는다. 마이그레이션 목록에는 모니터링 화면과 공유하는 기존 예시 workflow가 표시된다. 기존 앱 등록·배포의 전체 데모 API는 이번 범위에 포함하지 않는다.
 
 - `src/pages/security/model/demo.ts`: 명시적 fixture, 단계 전환과 검사 건수
 - `src/pages/security/ui/`: 요약, 연결 맵, 상세, 증거, 기록

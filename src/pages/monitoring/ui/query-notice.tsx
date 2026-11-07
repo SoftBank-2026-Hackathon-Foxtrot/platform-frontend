@@ -1,0 +1,55 @@
+import { getApiErrorMessage } from "@/shared/api";
+import { t } from "@/shared/lib/i18n";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
+import { Button } from "@/shared/ui/button";
+import { Skeleton } from "@/shared/ui/skeleton";
+
+export function QueryNotice({
+  query,
+  subject,
+}: {
+  query: { isPending: boolean; error: Error | null; data: unknown; refetch: () => unknown };
+  subject: string;
+}) {
+  if (query.error)
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>{t("{0} 조회 실패", [subject])}</AlertTitle>
+        <AlertDescription>
+          {getApiErrorMessage(query.error)}
+          {query.data != null && t(" 이전 값이 표시되어 있다면 최신 상태를 보장하지 않습니다.")}
+          <Button variant="outline" onClick={() => void query.refetch()}>
+            {t("다시 조회")}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  if (query.isPending)
+    return (
+      <div role="status" className="space-y-3 py-4">
+        <span className="sr-only">{t("{0} 불러오는 중", [subject])}</span>
+        <Skeleton className="h-5 w-1/3" />
+        <Skeleton className="h-36 w-full" />
+      </div>
+    );
+  if (query.data === null)
+    return (
+      <Alert>
+        <AlertTitle>{t("{0} 미제공", [subject])}</AlertTitle>
+        <AlertDescription>
+          {t("연결된 서버가 이 관측 데이터를 제공하지 않습니다.")}
+        </AlertDescription>
+      </Alert>
+    );
+  return null;
+}
+export function Empty({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      role="status"
+      className="rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground"
+    >
+      {children}
+    </p>
+  );
+}

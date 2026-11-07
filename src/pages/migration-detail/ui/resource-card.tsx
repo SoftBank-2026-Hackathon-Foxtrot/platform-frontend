@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/shared/ui/button";
 import { t, useLocale, localeTag } from "@/shared/lib/i18n";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -40,7 +42,13 @@ export function Metric({ label, children }: { label: string; children: React.Rea
     </div>
   );
 }
-export function ResourceCard({ resource: r }: { resource: Resource }) {
+export function ResourceCard({
+  resource: r,
+  workflowId,
+}: {
+  resource: Resource;
+  workflowId?: string;
+}) {
   useLocale();
   const db = r.details.database;
   const redis = r.details.redis;
@@ -59,7 +67,23 @@ export function ResourceCard({ resource: r }: { resource: Resource }) {
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle>{names[r.kind] ?? r.kind}</CardTitle>
-          <State state={r.observation.freshness} />
+          <div className="flex items-center gap-2">
+            {workflowId && (
+              <Button asChild variant="link" size="sm">
+                <Link
+                  to="/monitoring"
+                  search={{
+                    workflow: workflowId,
+                    comp: r.kind === "DATABASE" ? "db" : r.kind === "REDIS" ? "redis" : "obj",
+                  }}
+                  hash="mx"
+                >
+                  {t("지표 보기")}
+                </Link>
+              </Button>
+            )}
+            <State state={r.observation.freshness} />
+          </div>
         </div>
         <CardDescription>
           {r.migrationId

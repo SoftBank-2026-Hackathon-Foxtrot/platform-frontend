@@ -14,6 +14,7 @@ import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
 import { LoginPage } from "@/pages/login";
 import { MigrationPage } from "@/pages/migration-detail";
+import { MonitoringPage, monitoringSearchSchema } from "@/pages/monitoring";
 import { MigrationsPage } from "@/pages/migrations";
 import { SecurityPage } from "@/pages/security";
 import { SettingsPage } from "@/pages/settings";
@@ -113,6 +114,25 @@ const securityRoute = createRoute({
   path: "/security",
   component: SecurityPage,
 });
+const monitoringRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/monitoring",
+  validateSearch: monitoringSearchSchema,
+  component: function MonitoringRoute() {
+    const search = monitoringRoute.useSearch();
+    const navigate = monitoringRoute.useNavigate();
+    const hash = useRouterState({ select: (state) => state.location.hash });
+    return (
+      <MonitoringPage
+        search={search}
+        tab={hash === "tr" || hash === "lg" ? hash : "mx"}
+        onNavigate={(next, tab, replace) =>
+          void navigate({ search: next, hash: tab, replace, resetScroll: false })
+        }
+      />
+    );
+  },
+});
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
@@ -126,6 +146,7 @@ export const router = createRouter({
     applicationRoute,
     migrationsRoute,
     migrationRoute,
+    monitoringRoute,
     settingsRoute,
     securityRoute,
   ]),
