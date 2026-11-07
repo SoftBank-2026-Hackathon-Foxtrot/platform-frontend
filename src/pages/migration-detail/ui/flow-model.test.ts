@@ -103,11 +103,19 @@ describe("migration visual evidence", () => {
     const resource = detail().resources[0]!;
     resource.lifecycle = "READY";
     resource.route = "SOURCE";
-    expect(activeSides(resource)).toEqual({ source: true, target: false });
+    expect(activeSides(resource)).toEqual({ source: true, target: false, sourceFallback: false });
     resource.route = "MIXED";
-    expect(activeSides(resource)).toEqual({ source: true, target: true });
+    expect(activeSides(resource)).toEqual({ source: true, target: true, sourceFallback: false });
     resource.route = null;
-    expect(activeSides(resource)).toEqual({ source: false, target: false });
+    expect(activeSides(resource)).toEqual({ source: false, target: false, sourceFallback: false });
+  });
+  it("shows a cut-over object store on its target, with the source only serving read fallback", () => {
+    const object = detail().resources.find((r) => r.kind === "OBJECT_STORAGE")!;
+    object.lifecycle = "ACTIVE";
+    object.route = "MIXED";
+    expect(activeSides(object)).toEqual({ source: false, target: true, sourceFallback: true });
+    object.route = "TARGET";
+    expect(activeSides(object)).toEqual({ source: false, target: true, sourceFallback: false });
   });
   it("does not invent infrastructure completion from the overall stage", () => {
     const data = detail();

@@ -155,9 +155,14 @@ export function resourceFlow(data: Detail, resource: Resource | undefined) {
   };
 }
 export function activeSides(resource: Resource | undefined) {
+  const mixed = resource?.route === "MIXED";
+  // After its cutover, object storage writes to the target and reports MIXED only because reads
+  // still fall back to the source bucket until FINALIZE. The source then serves reads, not traffic.
+  const sourceFallback = mixed && resource?.kind === "OBJECT_STORAGE";
   return {
-    source: resource?.route === "SOURCE" || resource?.route === "MIXED",
-    target: resource?.route === "TARGET" || resource?.route === "MIXED",
+    source: resource?.route === "SOURCE" || (mixed && !sourceFallback),
+    target: resource?.route === "TARGET" || mixed,
+    sourceFallback,
   };
 }
 export function preparationFlow(data: Detail) {

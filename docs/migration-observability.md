@@ -41,3 +41,5 @@ CP의 현재 step 보고는 왼쪽 단계 설명에서 번역합니다. 복제 �
 ROLLING_BACK에서는 현재 정방향 단계가 아니라 workflow.rollback.resource에 해당하는 내부 노드를 펼칩니다. 역방향은 실제 replication/streams 보고를 따라 표시하며, Proxy 원본 복귀는 route가 SOURCE일 때만 확정합니다. 확정 대기에서 개별 롤백이 허용되지 않는 현재 API 명령 정책은 바꾸지 않습니다. 트래픽 전환 중 일시 정지 후 리소스 롤백을 요청할 수 있습니다.
 
 상세 응답의 `simulation`이 true이면 합성 수치이므로 화면에 MOCK을 표시합니다.
+
+객체 저장소는 전환 뒤에도 FINALIZE 전까지 원본 버킷을 읽기 보조로 사용하므로 route를 MIXED로 보고합니다. 이때 대상만 사용 중으로 표시하고 원본은 읽기 보조로 표시합니다.

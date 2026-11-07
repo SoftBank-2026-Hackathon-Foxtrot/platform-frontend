@@ -1161,6 +1161,14 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "In use",
     ja: "使用中",
   },
+  "읽기 보조": {
+    en: "Read fallback",
+    ja: "読み取り補助",
+  },
+  "{0} 읽기 보조": {
+    en: "{0} read fallback",
+    ja: "{0} 読み取り補助",
+  },
   대기: {
     en: "Standby",
     ja: "待機",

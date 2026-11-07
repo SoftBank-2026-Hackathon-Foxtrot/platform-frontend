@@ -416,6 +416,8 @@ export function TransitionDiagram({
                     const location =
                       sides.source && sides.target
                         ? wf.sourceEnv + " + " + wf.targetEnv
+                        : sides.sourceFallback
+                          ? wf.targetEnv + " · " + t("{0} 읽기 보조", [wf.sourceEnv])
                           : sides.target
                             ? wf.targetEnv
                             : sides.source
@@ -764,7 +766,15 @@ export function TransitionDiagram({
                                 : undefined
                             }
                             sub={
-                              t(active ? "사용 중" : resource?.route ? "대기" : "경로 미확인") +
+                              t(
+                                active
+                                  ? "사용 중"
+                                  : index === 0 && sides.sourceFallback
+                                    ? "읽기 보조"
+                                    : resource?.route
+                                      ? "대기"
+                                      : "경로 미확인",
+                              ) +
                               " · " +
                               t(
                                 LIFECYCLE[resource?.lifecycle ?? ""] ??
