@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { canContinue, reviewSchema } from "./review";
+import { canApply, canContinue, reviewSchema } from "./review";
 const sample = {
   revision: 1,
   application: "goods",
@@ -55,5 +55,31 @@ describe("security review navigation", () => {
     expect(reviewSchema.safeParse({ ...sample, revision: -1 }).success).toBe(false);
     expect(reviewSchema.safeParse({ ...sample, appReady: "true" }).success).toBe(false);
     expect(reviewSchema.safeParse({ ...sample, phase: "approved" }).success).toBe(false);
+  });
+});
+
+describe("security change plan", () => {
+  it("permits only a current plan for the configured account and buckets", () => {
+    const review = reviewSchema.parse({
+      ...sample,
+      phase: "plan",
+      plan: {
+        id: "plan-1",
+        bucket: "demo",
+        retainBucket: "target",
+        principal: "app@gcp",
+        removeRoles: ["roles/storage.objectUser"],
+        expiresAt: "2026-11-08T00:10:00Z",
+      },
+    });
+    const now = Date.parse("2026-11-08T00:01:00Z");
+    expect(canApply(review, now)).toBe(true);
+    expect(canApply({ ...review, readOnly: true }, now)).toBe(false);
+    expect(canApply({ ...review, phase: "error" }, now)).toBe(false);
+    expect(canApply({ ...review, appReady: null }, now)).toBe(false);
+    expect(canApply({ ...review, plan: { ...review.plan!, bucket: "app-bucket" } }, now)).toBe(
+      false,
+    );
+    expect(canApply(review, Date.parse(review.plan!.expiresAt))).toBe(false);
   });
 });

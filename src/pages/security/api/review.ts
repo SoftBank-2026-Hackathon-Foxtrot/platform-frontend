@@ -55,6 +55,17 @@ export type Review = z.infer<typeof reviewSchema>;
 export type Action = "scan" | "plan" | "apply" | "verify";
 export const busyReview = (review: Review) =>
   ["scanning", "applying", "verifying"].includes(review.phase);
+export const canApply = (review: Review, now = Date.now()) =>
+  !review.readOnly &&
+  review.phase === "plan" &&
+  review.appReady === true &&
+  !review.error &&
+  !!review.plan &&
+  review.plan.bucket === review.target.extraBucket &&
+  review.plan.retainBucket === review.target.bucket &&
+  review.plan.principal === review.target.principal &&
+  review.plan.removeRoles.length > 0 &&
+  now < Date.parse(review.plan.expiresAt);
 export const canContinue = (review: Review, now = Date.now()) =>
   !review.readOnly &&
   review.uiCanContinue &&

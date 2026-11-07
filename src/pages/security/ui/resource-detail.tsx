@@ -1,6 +1,17 @@
 import { CircleAlert, CircleHelp, Check, X } from "lucide-react";
 import { t, useLocale } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/shared/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import {
   Sheet,
@@ -18,11 +29,13 @@ export function ResourceDetail({
   resource,
   review,
   busy,
+  canApply,
   onApply,
 }: {
   resource: SecurityResource;
   review: Review;
   busy: boolean;
+  canApply: boolean;
   onApply: () => void;
 }) {
   const locale = useLocale();
@@ -72,7 +85,7 @@ export function ResourceDetail({
           </div>
         ) : (
           <>
-            {review.plan && !review.readOnly && (
+            {review.plan && review.phase === "plan" && (
               <section className="security-plan" aria-labelledby="security-plan-title">
                 <h3
                   id="security-plan-title"
@@ -102,9 +115,59 @@ export function ResourceDetail({
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                   {t("이 계정의 추가 버킷 권한만 제거합니다.")}
                 </p>
-                <Button className="mt-4 w-full" disabled={busy} onClick={onApply}>
-                  {t("GCP에 적용")}
-                </Button>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("변경안 유효 시각 {0}", [
+                    new Date(review.plan.expiresAt).toLocaleTimeString(locale),
+                  ])}
+                </p>
+                {review.readOnly ? (
+                  <p className="mt-3 text-sm">
+                    {t("변경안만 확인할 수 있습니다. 적용 권한은 연결되지 않았습니다.")}
+                  </p>
+                ) : !canApply && !busy ? (
+                  <p className="mt-3 text-sm">{t("권한을 다시 조회하고 변경안을 확인하세요.")}</p>
+                ) : null}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button className="mt-4 w-full" disabled={busy || !canApply}>
+                      {t("추가 권한 제거")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("이 추가 권한을 제거할까요?")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("데모 버킷의 접근 권한만 제거합니다. 앱 버킷 권한은 유지합니다.")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <dl className="space-y-3 text-sm [overflow-wrap:anywhere]">
+                      <div>
+                        <dt className="text-muted-foreground">{t("GCP 앱 계정")}</dt>
+                        <dd className="font-mono text-xs">
+                          {review.plan.principal.replace("serviceAccount:", "")}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">{t("제거")}</dt>
+                        <dd className="font-mono text-xs">
+                          {review.plan.bucket}
+                          <br />
+                          {review.plan.removeRoles.join(", ")}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">{t("유지")}</dt>
+                        <dd className="font-mono text-xs">{review.plan.retainBucket}</dd>
+                      </div>
+                    </dl>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("취소")}</AlertDialogCancel>
+                      <AlertDialogAction disabled={busy || !canApply} onClick={onApply}>
+                        {t("추가 권한 제거")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </section>
             )}
             {!review.checks.length ? (
