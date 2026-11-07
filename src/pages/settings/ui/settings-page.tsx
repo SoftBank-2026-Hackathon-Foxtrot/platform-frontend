@@ -1,6 +1,6 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { Moon, Sun } from "lucide-react";
-
 import { sessionOptions } from "@/entities/session";
 import { workspaceOptions } from "@/entities/workspace";
 import { apiBaseUrl, getApiErrorMessage } from "@/shared/api";
@@ -8,10 +8,9 @@ import { setTheme, useTheme } from "@/shared/lib/theme";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-
 import { healthQueryOptions } from "../api/health";
-
 export function SettingsPage() {
+  useLocale();
   const session = useQuery(sessionOptions());
   const workspaceId = session.data?.workspaceId;
   const workspace = useQuery({
@@ -21,24 +20,24 @@ export function SettingsPage() {
   const theme = useTheme();
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-8">
-      <h1 className="text-2xl font-semibold tracking-tight">설정</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t("설정")}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>계정과 workspace</CardTitle>
+          <CardTitle>{t("계정과 workspace")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <Row label="사용자">{session.data?.user.login ?? "미확인"}</Row>
+          <Row label={t("사용자")}>{session.data?.user.login ?? t("미확인")}</Row>
           <Row label="workspace">
             {workspace.data
               ? `${workspace.data.name} (${workspace.data.id})`
-              : (workspaceId ?? "미확인")}
+              : (workspaceId ?? t("미확인"))}
           </Row>
-          <Row label="GitHub 연결">
+          <Row label={t("GitHub 연결")}>
             {workspace.data
               ? workspace.data.githubConnected
-                ? "연결됨"
-                : "로컬 개발 계정"
-              : "미확인"}
+                ? t("연결됨")
+                : t("로컬 개발 계정")
+              : t("미확인")}
           </Row>
           {workspace.error && (
             <p className="text-destructive">{getApiErrorMessage(workspace.error)}</p>
@@ -47,8 +46,8 @@ export function SettingsPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>화면</CardTitle>
-          <CardDescription>이 브라우저에만 저장됩니다.</CardDescription>
+          <CardTitle>{t("화면")}</CardTitle>
+          <CardDescription>{t("이 브라우저에만 저장됩니다.")}</CardDescription>
         </CardHeader>
         <CardContent className="flex gap-2">
           <Button
@@ -56,14 +55,14 @@ export function SettingsPage() {
             onClick={() => setTheme("dark")}
           >
             <Moon />
-            다크
+            {t("다크")}
           </Button>
           <Button
             variant={theme === "light" ? "default" : "outline"}
             onClick={() => setTheme("light")}
           >
             <Sun />
-            라이트
+            {t("라이트")}
           </Button>
         </CardContent>
       </Card>
@@ -71,36 +70,37 @@ export function SettingsPage() {
     </main>
   );
 }
-
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  useLocale();
   return (
     <div className="flex justify-between gap-4">
-      <span className="text-muted-foreground">{label}</span>
+      <span className="text-muted-foreground">{t(label)}</span>
       <span className="text-right break-all">{children}</span>
     </div>
   );
 }
-
 function HealthCheck() {
+  useLocale();
   const health = useQuery({ ...healthQueryOptions(), enabled: false });
   const status = health.isFetching
-    ? "확인 중"
+    ? t("확인 중")
     : health.isError
-      ? "연결 실패"
+      ? t("연결 실패")
       : health.isSuccess
-        ? "연결됨"
-        : "미확인";
+        ? t("연결됨")
+        : t("미확인");
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle>플랫폼 API 연결</CardTitle>
+          <CardTitle>{t("플랫폼 API 연결")}</CardTitle>
           <Badge variant="outline" aria-live="polite">
-            {status}
+            {t(status)}
           </Badge>
         </div>
         <CardDescription>
-          <code>{apiBaseUrl}/health</code>로 실제 요청을 보냅니다.
+          <code>{apiBaseUrl}/health</code>
+          {t("로 실제 요청을 보냅니다.")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -109,7 +109,7 @@ function HealthCheck() {
           disabled={health.isFetching}
           onClick={() => void health.refetch()}
         >
-          {health.isFetching ? "연결 확인 중" : "API 연결 확인"}
+          {health.isFetching ? t("연결 확인 중") : t("API 연결 확인")}
         </Button>
         {health.isError && (
           <p className="text-sm text-destructive">{getApiErrorMessage(health.error)}</p>

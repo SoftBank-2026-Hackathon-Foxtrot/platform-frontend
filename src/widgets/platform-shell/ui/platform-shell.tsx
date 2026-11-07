@@ -1,9 +1,9 @@
+import { LOCALES, setLocale, t, useLocale } from "@/shared/lib/i18n";
 import type { ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CloudIcon, LogOut, Moon, Sun } from "lucide-react";
 import { RiArrowLeftRightFill, RiHomeFill, RiSettings3Fill } from "react-icons/ri";
-
 import { type Session, logout } from "@/entities/session";
 import { setTheme, useTheme } from "@/shared/lib/theme";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
@@ -25,14 +25,13 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/shared/ui/sidebar";
-
 const navigation = [
   { to: "/applications", title: "애플리케이션", icon: RiHomeFill },
   { to: "/migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
   { to: "/settings", title: "설정", icon: RiSettings3Fill },
 ] as const;
-
 function PlatformSidebar({ pathname, session }: { pathname: string; session: Session }) {
+  useLocale();
   const { setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
   const signOut = useMutation({
@@ -68,12 +67,12 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
                     <SidebarMenuButton
                       asChild
                       isActive={active}
-                      tooltip={item.title}
+                      tooltip={t(item.title)}
                       aria-current={active ? "page" : undefined}
                     >
                       <Link to={item.to} onClick={() => setOpenMobile(false)}>
                         <item.icon aria-hidden="true" />
-                        <span>{item.title}</span>
+                        <span>{t(item.title)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -94,7 +93,7 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="로그아웃"
+            aria-label={t("로그아웃")}
             disabled={signOut.isPending}
             onClick={() => signOut.mutate()}
           >
@@ -102,13 +101,13 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
           </Button>
         </div>
       </SidebarFooter>
-      <SidebarRail />
+      <SidebarRail aria-label={t("사이드바 전환")} title={t("사이드바 전환")} />
     </Sidebar>
   );
 }
-
 /** Taehyun's inset sidebar shell, driven by the router. */
 export function PlatformShell({ session, children }: { session: Session; children: ReactNode }) {
+  useLocale();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const theme = useTheme();
   const current = navigation.find((item) => pathname.startsWith(item.to)) ?? navigation[0];
@@ -116,19 +115,19 @@ export function PlatformShell({ session, children }: { session: Session; childre
   return (
     <SidebarProvider className="h-dvh min-h-0 overflow-hidden">
       <PlatformSidebar pathname={pathname} session={session} />
-      <SidebarInset aria-label={current.title} className="min-h-0 min-w-0 overflow-y-auto">
+      <SidebarInset aria-label={t(current.title)} className="min-h-0 min-w-0 overflow-y-auto">
         <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background/90 px-4 backdrop-blur">
-          <SidebarTrigger aria-label="사이드바 전환" />
+          <SidebarTrigger aria-label={t("사이드바 전환")} />
           <Separator orientation="vertical" className="mx-1 h-4 self-center!" />
-          <Breadcrumb aria-label="현재 위치" className="min-w-0 flex-1">
+          <Breadcrumb aria-label={t("현재 위치")} className="min-w-0 flex-1">
             <BreadcrumbList className="flex-nowrap overflow-hidden">
               <BreadcrumbItem className="min-w-0">
                 {detail ? (
                   <Link to={current.to} className="truncate">
-                    {current.title}
+                    {t(current.title)}
                   </Link>
                 ) : (
-                  <BreadcrumbPage className="truncate">{current.title}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate">{t(current.title)}</BreadcrumbPage>
                 )}
               </BreadcrumbItem>
               {detail && (
@@ -148,14 +147,40 @@ export function PlatformShell({ session, children }: { session: Session; childre
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환"}
+            aria-label={theme === "dark" ? t("라이트 모드로 전환") : t("다크 모드로 전환")}
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
+          <LanguageSwitcher />
         </header>
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function LanguageSwitcher() {
+  const locale = useLocale();
+  return (
+    <div
+      role="group"
+      aria-label={t("언어")}
+      className="flex shrink-0 items-center rounded-md border p-0.5"
+    >
+      {LOCALES.map((option) => (
+        <Button
+          key={option.value}
+          variant={locale === option.value ? "secondary" : "ghost"}
+          size="sm"
+          className="h-6 px-2 text-[11px]"
+          lang={option.value}
+          aria-pressed={locale === option.value}
+          onClick={() => setLocale(option.value)}
+        >
+          {option.label}
+        </Button>
+      ))}
+    </div>
   );
 }

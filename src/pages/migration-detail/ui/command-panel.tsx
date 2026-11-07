@@ -1,7 +1,7 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CircleCheck, CircleStop, Pause, Play, RotateCcw, ScanSearch } from "lucide-react";
-
 import {
   type ResourceKind,
   type Workflow,
@@ -27,17 +27,22 @@ import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Label } from "@/shared/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
-
 type CommandName = WorkflowCommand;
-type Rollback = { mode: "normal" | "failure"; confirmTargetFailure: boolean };
-type Intent = { command: CommandName; resource?: ResourceKind; rollback?: Rollback };
+type Rollback = {
+  mode: "normal" | "failure";
+  confirmTargetFailure: boolean;
+};
+type Intent = {
+  command: CommandName;
+  resource?: ResourceKind;
+  rollback?: Rollback;
+};
 type Spec = {
   label: string;
   icon: typeof Play;
   confirm: string;
   variant: "default" | "outline" | "destructive";
 };
-
 const COMMANDS: Record<CommandName, Spec> = {
   APPROVE: {
     label: "승인하고 진행",
@@ -91,19 +96,31 @@ const RESOURCE_NAMES: Record<string, string> = {
   REDIS: "Redis",
   OBJECT_STORAGE: "객체 저장소",
 };
-
 const RESOURCES: ResourceKind[] = ["DATABASE", "REDIS", "OBJECT_STORAGE"];
-
-type Props = { workflow: Workflow; allowedCommands: string[] };
-
+type Props = {
+  workflow: Workflow;
+  allowedCommands: string[];
+};
 export function CommandPanel({ workflow, allowedCommands }: Props) {
+  useLocale();
   const session = useQuery(sessionOptions());
   const queryClient = useQueryClient();
-  const [intent, setIntent] = useState<(Intent & { key: string }) | null>(null);
+  const [intent, setIntent] = useState<
+    | (Intent & {
+        key: string;
+      })
+    | null
+  >(null);
   const mutation = useMutation({
     // The session's CSRF token rides on every change through the shared API client.
-    mutationFn: ({ command, resource, rollback, key }: Intent & { key: string }) =>
-      commandWorkflow(workflow, command, resource, key, rollback),
+    mutationFn: ({
+      command,
+      resource,
+      rollback,
+      key,
+    }: Intent & {
+      key: string;
+    }) => commandWorkflow(workflow, command, resource, key, rollback),
     onSuccess: async () => {
       setIntent(null);
       if (session.data) {
@@ -115,7 +132,7 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
   });
   const available = ORDER.filter((name) => allowedCommands.includes(name));
   if (!available.length) {
-    return <p className="text-xs text-muted-foreground">실행 가능한 명령 없음</p>;
+    return <p className="text-xs text-muted-foreground">{t("실행 가능한 명령 없음")}</p>;
   }
   const send = (next: Intent) => {
     // Retrying the same failed intent keeps its key, so the backend applies it once.
@@ -154,19 +171,18 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
       </div>
       {mutation.isPending && (
         <p role="status" className="text-sm text-muted-foreground">
-          명령을 보내는 중입니다.
+          {t("명령을 보내는 중입니다.")}
         </p>
       )}
       {mutation.error && (
         <Alert variant="destructive">
-          <AlertTitle>명령이 거절됐습니다</AlertTitle>
+          <AlertTitle>{t("명령이 거절됐습니다")}</AlertTitle>
           <AlertDescription>{getApiErrorMessage(mutation.error)}</AlertDescription>
         </Alert>
       )}
     </div>
   );
 }
-
 function ConfirmButton({
   spec,
   pending,
@@ -176,34 +192,34 @@ function ConfirmButton({
   pending: boolean;
   onConfirm: () => void;
 }) {
+  useLocale();
   const Icon = spec.icon;
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button size="sm" variant={spec.variant} disabled={pending}>
           <Icon />
-          {spec.label}
+          {t(spec.label)}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{spec.label}</AlertDialogTitle>
-          <AlertDialogDescription>{spec.confirm}</AlertDialogDescription>
+          <AlertDialogTitle>{t(spec.label)}</AlertDialogTitle>
+          <AlertDialogDescription>{t(spec.confirm)}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>닫기</AlertDialogCancel>
+          <AlertDialogCancel>{t("닫기")}</AlertDialogCancel>
           <AlertDialogAction
             variant={spec.variant === "destructive" ? "destructive" : "default"}
             onClick={onConfirm}
           >
-            {spec.label}
+            {t(spec.label)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
 }
-
 function RollbackDialog({
   resources,
   pending,
@@ -217,6 +233,7 @@ function RollbackDialog({
     confirmTargetFailure: boolean,
   ) => void;
 }) {
+  useLocale();
   const spec = COMMANDS.ROLLBACK_RESOURCE;
   const [resource, setResource] = useState<ResourceKind | "">("");
   const [mode, setMode] = useState<"normal" | "failure">("normal");
@@ -228,17 +245,17 @@ function RollbackDialog({
       <AlertDialogTrigger asChild>
         <Button size="sm" variant={spec.variant} disabled={pending}>
           <RotateCcw />
-          {spec.label}
+          {t(spec.label)}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{spec.label}</AlertDialogTitle>
-          <AlertDialogDescription>{spec.confirm}</AlertDialogDescription>
+          <AlertDialogTitle>{t(spec.label)}</AlertDialogTitle>
+          <AlertDialogDescription>{t(spec.confirm)}</AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="rollback-resource">리소스</Label>
+            <Label htmlFor="rollback-resource">{t("리소스")}</Label>
             <Select
               value={resource}
               onValueChange={(next) => {
@@ -248,12 +265,12 @@ function RollbackDialog({
               }}
             >
               <SelectTrigger id="rollback-resource" className="w-full">
-                <SelectValue placeholder="되돌릴 리소스를 고르십시오" />
+                <SelectValue placeholder={t("되돌릴 리소스를 고르십시오")} />
               </SelectTrigger>
               <SelectContent>
                 {resources.map((kind) => (
                   <SelectItem key={kind} value={kind}>
-                    {RESOURCE_NAMES[kind] ?? kind}
+                    {t(RESOURCE_NAMES[kind] ?? kind)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -261,7 +278,7 @@ function RollbackDialog({
           </div>
           {resource === "REDIS" && (
             <div className="space-y-2">
-              <Label htmlFor="rollback-mode">방식</Label>
+              <Label htmlFor="rollback-mode">{t("방식")}</Label>
               <Select
                 value={mode}
                 onValueChange={(next) => setMode(next === "failure" ? "failure" : "normal")}
@@ -270,8 +287,10 @@ function RollbackDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="normal">정상 되돌리기 (역방향 동기화)</SelectItem>
-                  <SelectItem value="failure">대상 장애 되돌리기 (데이터 유실 가능)</SelectItem>
+                  <SelectItem value="normal">{t("정상 되돌리기 (역방향 동기화)")}</SelectItem>
+                  <SelectItem value="failure">
+                    {t("대상 장애 되돌리기 (데이터 유실 가능)")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -284,19 +303,21 @@ function RollbackDialog({
                 onCheckedChange={(next) => setConfirmed(next === true)}
               />
               <Label htmlFor="rollback-confirm" className="leading-snug">
-                대상 Redis 장애를 확인했고, 동기화되지 않은 쓰기가 유실될 수 있음을 이해합니다.
+                {t(
+                  "대상 Redis 장애를 확인했고, 동기화되지 않은 쓰기가 유실될 수 있음을 이해합니다.",
+                )}
               </Label>
             </div>
           )}
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel>닫기</AlertDialogCancel>
+          <AlertDialogCancel>{t("닫기")}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={!ready}
             onClick={() => resource && onConfirm(resource, mode, failure && confirmed)}
           >
-            되돌리기 요청
+            {t("되돌리기 요청")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

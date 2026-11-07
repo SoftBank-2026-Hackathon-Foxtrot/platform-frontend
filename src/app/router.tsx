@@ -1,3 +1,4 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import {
   Outlet,
@@ -8,7 +9,6 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { z } from "zod";
-
 import { sessionOptions } from "@/entities/session";
 import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
@@ -18,15 +18,15 @@ import { MigrationsPage } from "@/pages/migrations";
 import { SettingsPage } from "@/pages/settings";
 import { getApiErrorMessage } from "@/shared/api";
 import { PlatformShell } from "@/widgets/platform-shell";
-
 /** The session decides between the login screen and the console; pages assume a session. */
 function Root() {
+  useLocale();
   const session = useQuery(sessionOptions());
   const location = useRouterState({ select: (state) => state.location });
   if (session.isPending) {
     return (
       <p role="status" className="grid min-h-dvh place-items-center text-muted-foreground">
-        로그인 상태를 확인하는 중입니다.
+        {t("로그인 상태를 확인하는 중입니다.")}
       </p>
     );
   }
@@ -52,7 +52,6 @@ function Root() {
     </PlatformShell>
   );
 }
-
 const rootRoute = createRootRoute({ component: Root });
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -97,7 +96,6 @@ const settingsRoute = createRoute({
   path: "/settings",
   component: SettingsPage,
 });
-
 export const router = createRouter({
   routeTree: rootRoute.addChildren([
     indexRoute,
@@ -109,7 +107,6 @@ export const router = createRouter({
     settingsRoute,
   ]),
 });
-
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;

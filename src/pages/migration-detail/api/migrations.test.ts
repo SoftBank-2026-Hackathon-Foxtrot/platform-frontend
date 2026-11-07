@@ -4,12 +4,31 @@ import { createElement } from "react";
 import { QueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "@/shared/api";
+import { setLocale } from "@/shared/lib/i18n";
 
 import { detailQuery, detailSchema, telemetryQuery, telemetrySchema } from "./migrations";
 import fixture from "./control-plane.fixture.json";
 import { ResourceCard } from "../ui/resource-card";
+import { TransitionDiagram } from "../ui/transition-diagram";
 
 afterEach(() => vi.restoreAllMocks());
+
+it.each(["en", "ja"] as const)("renders diagram and resource text in %s", (locale) => {
+  setLocale(locale);
+  try {
+    const detail = detailSchema.parse(fixture);
+    const diagram = renderToStaticMarkup(createElement(TransitionDiagram, { data: detail }));
+    const resources = detail.resources
+      .map((resource) => renderToStaticMarkup(createElement(ResourceCard, { resource })))
+      .join("");
+    expect(diagram.match(/[가-힣][^<"]*/g)).toBeNull();
+    expect(resources.match(/[가-힣][^<"]*/g)).toBeNull();
+    expect(diagram).toContain(locale === "en" ? "Object storage" : "オブジェクトストレージ");
+    expect(resources).toContain(locale === "en" ? "Unknown" : "未確認");
+  } finally {
+    setLocale("ko");
+  }
+});
 
 describe("control-plane observation contract", () => {
   it("accepts the actual backend projection and preserves unknown sockets", () => {

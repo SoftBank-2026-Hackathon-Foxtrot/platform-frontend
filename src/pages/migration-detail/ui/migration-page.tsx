@@ -1,8 +1,8 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronLeft, Info, RefreshCw } from "lucide-react";
-
 import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
 import { getApiErrorMessage } from "@/shared/api";
@@ -11,7 +11,6 @@ import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
-
 import {
   type Detail,
   detailQuery,
@@ -22,15 +21,16 @@ import {
 import { CommandPanel } from "./command-panel";
 import { Metric, ResourceCard, State, value, when } from "./resource-card";
 import { TransitionDiagram } from "./transition-diagram";
-
 function ErrorNotice({ error, retry }: { error: Error; retry: () => void }) {
+  useLocale();
   return (
     <Alert variant="destructive">
-      <AlertTitle>관측값을 갱신하지 못했습니다</AlertTitle>
+      <AlertTitle>{t("관측값을 갱신하지 못했습니다")}</AlertTitle>
       <AlertDescription>
-        {getApiErrorMessage(error)} 이전 값이 표시되어 있다면 최신 상태를 보장하지 않습니다.
+        {getApiErrorMessage(error)}
+        {t(" 이전 값이 표시되어 있다면 최신 상태를 보장하지 않습니다.")}
         <Button variant="outline" onClick={retry}>
-          다시 조회
+          {t("다시 조회")}
         </Button>
       </AlertDescription>
     </Alert>
@@ -41,9 +41,10 @@ function split(weights: Record<string, number> | null | undefined) {
     ? Object.entries(weights)
         .map(([env, percent]) => `${env} ${percent}%`)
         .join(" / ")
-    : "미확인";
+    : t("미확인");
 }
 export function MigrationPage({ id }: { id: string }) {
+  useLocale();
   const session = useQuery(sessionOptions());
   return (
     <main className="mx-auto w-full max-w-7xl space-y-2 px-3 py-2 sm:px-4">
@@ -52,19 +53,20 @@ export function MigrationPage({ id }: { id: string }) {
   );
 }
 function Workflow({ workspace, id }: { workspace: string; id: string }) {
+  useLocale();
   const detail = useQuery(detailQuery(workspace, id));
   return (
     <div className="space-y-2">
-      {detail.isPending && <p role="status">관측값을 불러오는 중입니다.</p>}
+      {detail.isPending && <p role="status">{t("관측값을 불러오는 중입니다.")}</p>}
       {detail.error && <ErrorNotice error={detail.error} retry={() => void detail.refetch()} />}
       {detail.data && (
         <>
           <Summary data={detail.data} refresh={() => void detail.refetch()} />
           <Card size="sm" className="gap-2">
             <CardHeader className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <CardTitle>전환 구성도</CardTitle>
+              <CardTitle>{t("전환 구성도")}</CardTitle>
               <CardDescription className="text-xs">
-                리소스 사용 위치 · 복제 상태 · 현재 전환 단계 · 2초마다 갱신
+                {t("리소스 사용 위치 · 복제 상태 · 현재 전환 단계 · 2초마다 갱신")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -98,13 +100,14 @@ const NEXT_STEP: Record<string, string> = {
   ABORTED: "취소된 마이그레이션입니다.",
 };
 function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
+  useLocale();
   const stage = d.stages.find((item) => item.index === d.workflow.currentStage);
   return (
     <Card size="sm" className="gap-2 py-2">
       <CardHeader className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div className="flex shrink-0 items-center gap-2">
           <Button asChild variant="ghost" size="icon-sm">
-            <Link to="/migrations" aria-label="마이그레이션 목록">
+            <Link to="/migrations" aria-label={t("마이그레이션 목록")}>
               <ChevronLeft className="size-4" />
             </Link>
           </Button>
@@ -116,12 +119,17 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
           </span>
           <WorkflowStatusBadge status={d.workflow.status} />
         </div>
-        <div className="min-w-0 flex-1 basis-48 border-l pl-3" title={NEXT_STEP[d.workflow.status]}>
+        <div
+          className="min-w-0 flex-1 basis-48 border-l pl-3"
+          title={t(NEXT_STEP[d.workflow.status])}
+        >
           <p className="text-xs">
             <span className="font-semibold">
-              {stage
-                ? `${stage.index + 1}. ${STAGE_LABELS[stage.kind] ?? stage.kind}`
-                : "단계 미확인"}
+              {t(
+                stage
+                  ? `${stage.index + 1}. ${t(STAGE_LABELS[stage.kind] ?? stage.kind)}`
+                  : t("단계 미확인"),
+              )}
             </span>
             {stage?.detail && (
               <span className="ml-2 break-words text-muted-foreground">{stage.detail}</span>
@@ -132,19 +140,29 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
           <CommandPanel workflow={d.workflow} allowedCommands={d.allowedCommands} />
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="작업 정보">
+              <Button variant="ghost" size="icon-sm" aria-label={t("작업 정보")}>
                 <Info className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>
-                {d.workflow.id} · 버전 {d.workflow.version}
+                {d.workflow.id}
+                {t(" · 버전 ")}
+                {d.workflow.version}
               </p>
-              <p>시작 {when(d.workflow.createdAt)}</p>
-              {d.workflow.createdBy && <p>실행자 {d.workflow.createdBy}</p>}
+              <p>
+                {t("시작 ")}
+                {when(d.workflow.createdAt)}
+              </p>
+              {d.workflow.createdBy && (
+                <p>
+                  {t("실행자 ")}
+                  {d.workflow.createdBy}
+                </p>
+              )}
             </TooltipContent>
           </Tooltip>
-          <Button variant="ghost" size="icon-sm" onClick={refresh} aria-label="새로고침">
+          <Button variant="ghost" size="icon-sm" onClick={refresh} aria-label={t("새로고침")}>
             <RefreshCw className="size-4" />
           </Button>
         </div>
@@ -154,7 +172,7 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
         {(d.workflow.status === "PLANNED" ||
           d.workflow.status === "WAITING_APPROVAL" ||
           d.workflow.status === "HALTED") && (
-          <p className="text-xs text-muted-foreground">{NEXT_STEP[d.workflow.status]}</p>
+          <p className="text-xs text-muted-foreground">{t(NEXT_STEP[d.workflow.status])}</p>
         )}
         {d.workflow.halt && (
           <Alert variant="destructive">
@@ -170,6 +188,7 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
   );
 }
 function StageStepper({ data: d }: { data: Detail }) {
+  useLocale();
   const finished = d.workflow.status === "COMPLETED";
   return (
     <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
@@ -200,7 +219,7 @@ function StageStepper({ data: d }: { data: Detail }) {
               {passed ? <Check className="size-3" /> : item.index + 1}
             </span>
             <span className={`text-xs ${current ? "font-semibold" : "text-muted-foreground"}`}>
-              {STAGE_LABELS[item.kind] ?? item.kind}
+              {t(STAGE_LABELS[item.kind] ?? item.kind)}
             </span>
           </li>
         );
@@ -208,16 +227,16 @@ function StageStepper({ data: d }: { data: Detail }) {
     </ol>
   );
 }
-
 function Preparation({ data }: { data: Detail }) {
+  useLocale();
   return (
-    <section aria-label="배포 준비" className="grid gap-4 md:grid-cols-2">
+    <section aria-label={t("배포 준비")} className="grid gap-4 md:grid-cols-2">
       {Object.entries(data.preparation).map(([kind, report]) => (
         <Card key={kind} size="sm">
           <CardHeader>
             <div className="flex justify-between gap-2">
               <CardTitle>
-                {kind === "INFRA" ? "IaC · 인프라 준비" : "컴퓨트 · 앱 배포 준비"}
+                {kind === "INFRA" ? t("IaC · 인프라 준비") : t("컴퓨트 · 앱 배포 준비")}
               </CardTitle>
               <State state={report.observation.freshness} />
             </div>
@@ -225,12 +244,12 @@ function Preparation({ data }: { data: Detail }) {
           <CardContent>
             {report.data ? (
               <dl>
-                <Metric label="작업 / 상태">
+                <Metric label={t("작업 / 상태")}>
                   {value(report.data.stage)} / {value(report.data.status)}
                 </Metric>
-                <Metric label="대상 VM">{value(report.data.vmId)}</Metric>
+                <Metric label={t("대상 VM")}>{value(report.data.vmId)}</Metric>
                 {report.data.changes && (
-                  <Metric label="생성 / 수정 / 삭제 / 교체">
+                  <Metric label={t("생성 / 수정 / 삭제 / 교체")}>
                     {[
                       report.data.changes.create,
                       report.data.changes.update,
@@ -243,19 +262,21 @@ function Preparation({ data }: { data: Detail }) {
                 )}
                 {kind === "COMPUTE" && (
                   <>
-                    <Metric label="이미지">{value(report.data.imageId)}</Metric>
-                    <Metric label="내부 검사">{value(report.data.check)}</Metric>
-                    <Metric label="최근 명령">
+                    <Metric label={t("이미지")}>{value(report.data.imageId)}</Metric>
+                    <Metric label={t("내부 검사")}>{value(report.data.check)}</Metric>
+                    <Metric label={t("최근 명령")}>
                       {report.data.operations
                         ?.map((op) => `${op.action}: ${op.status}`)
-                        .join(" · ") || "미확인"}
+                        .join(" · ") || t("미확인")}
                     </Metric>
                   </>
                 )}
-                <Metric label="결과 기록">{when(report.data.observedAt)}</Metric>
+                <Metric label={t("결과 기록")}>{when(report.data.observedAt)}</Metric>
               </dl>
             ) : (
-              <p className="text-muted-foreground">실제 실행 결과가 아직 보고되지 않았습니다.</p>
+              <p className="text-muted-foreground">
+                {t("실제 실행 결과가 아직 보고되지 않았습니다.")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -264,59 +285,64 @@ function Preparation({ data }: { data: Detail }) {
   );
 }
 function Traffic({ data }: { data: Detail }) {
+  useLocale();
   const configured = data.traffic.at(-1);
   const p = data.publicProbe;
   return (
     <Card>
       <CardHeader>
-        <CardTitle>트래픽 전환과 공용 경로 확인</CardTitle>
+        <CardTitle>{t("트래픽 전환과 공용 경로 확인")}</CardTitle>
         <CardDescription>
-          LB 설정과 공용 probe의 실제 도착 위치를 구분합니다. probe 비율은 전체 사용자 트래픽 비율이
-          아닙니다.
+          {t(
+            "LB 설정과 공용 probe의 실제 도착 위치를 구분합니다. probe 비율은 전체 사용자 트래픽 비율이 아닙니다.",
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
         <dl>
-          <Metric label="요청 가중치">{split(configured?.requested)}</Metric>
-          <Metric label="LB 확인 가중치">{split(configured?.effectivePercent)}</Metric>
-          <Metric label="설정 확인">{configured?.configVerified ? "확인됨" : "미확인"}</Metric>
-          <Metric label="Traffic 작업 ID">{value(configured?.adapterOperationId)}</Metric>
-          <Metric label="작업 상태">{value(configured?.operationStatus)}</Metric>
+          <Metric label={t("요청 가중치")}>{split(configured?.requested)}</Metric>
+          <Metric label={t("LB 확인 가중치")}>{split(configured?.effectivePercent)}</Metric>
+          <Metric label={t("설정 확인")}>
+            {configured?.configVerified ? t("확인됨") : t("미확인")}
+          </Metric>
+          <Metric label={t("Traffic 작업 ID")}>{value(configured?.adapterOperationId)}</Metric>
+          <Metric label={t("작업 상태")}>{value(configured?.operationStatus)}</Metric>
         </dl>
         <div>
           {p ? (
             <>
               <dl>
-                <Metric label="Probe 최신성">
+                <Metric label={t("Probe 최신성")}>
                   <State state={p.freshness} />
                 </Metric>
-                <Metric label="관측된 도착 비율">{split(p.observedPercent)}</Metric>
-                <Metric label="시도 / 위치 확인">
+                <Metric label={t("관측된 도착 비율")}>{split(p.observedPercent)}</Metric>
+                <Metric label={t("시도 / 위치 확인")}>
                   {p.total} / {p.knownLocationSamples}
                 </Metric>
-                <Metric label="실패 / 시간 초과">
+                <Metric label={t("실패 / 시간 초과")}>
                   {p.failed} / {p.timeouts}
                 </Metric>
-                <Metric label="위치 미확인 / 누락">
+                <Metric label={t("위치 미확인 / 누락")}>
                   {p.unknownLocation} / {p.missingSamples}
                 </Metric>
-                <Metric label="성공 p95 / 최대 간격">
+                <Metric label={t("성공 p95 / 최대 간격")}>
                   {value(p.p95Ms)} ms / {p.maxSampleGapSeconds} s
                 </Metric>
               </dl>
               <p className="mt-2 text-xs text-muted-foreground">
                 {when(p.windowStart)} — {when(p.windowEnd)}
-                {!p.enoughSamples && " · 확인된 표본 30개 미만"}
+                {!p.enoughSamples && t(" · 확인된 표본 30개 미만")}
               </p>
               {p.failureIntervals.map((failure) => (
                 <p key={failure.firstFailureAt} className="mt-2 text-xs text-destructive">
-                  관측 실패 {when(failure.firstFailureAt)} — {when(failure.lastFailureAt)} · 회복{" "}
-                  {when(failure.recoveredAt)}
+                  {t("관측 실패 ")}
+                  {when(failure.firstFailureAt)} — {when(failure.lastFailureAt)}
+                  {t(" · 회복")} {when(failure.recoveredAt)}
                 </p>
               ))}
             </>
           ) : (
-            <p className="text-muted-foreground">공용 probe가 아직 수집되지 않았습니다.</p>
+            <p className="text-muted-foreground">{t("공용 probe가 아직 수집되지 않았습니다.")}</p>
           )}
         </div>
       </CardContent>
@@ -324,13 +350,16 @@ function Traffic({ data }: { data: Detail }) {
   );
 }
 function Workload({ data }: { data: Detail }) {
+  useLocale();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>앱 업무 확인과 연결 소진</CardTitle>
+        <CardTitle>{t("앱 업무 확인과 연결 소진")}</CardTitle>
         <CardDescription>
-          {data.hold.isLive ? "현재 업무 지시" : "보관된 업무 지시"} {data.hold.desired} · 세대{" "}
-          {data.hold.generation} · 전체 정지 확인 {when(data.hold.heldSince)}
+          {data.hold.isLive ? t("현재 업무 지시") : t("보관된 업무 지시")} {data.hold.desired}
+          {t(" · 세대")} {data.hold.generation}
+          {t(" · 전체 정지 확인 ")}
+          {when(data.hold.heldSince)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -343,7 +372,7 @@ function Workload({ data }: { data: Detail }) {
                 <State state={probe.latest ? (probe.latest.passed ? "PASS" : "FAIL") : "UNKNOWN"} />
               </p>
               <p className="text-xs text-muted-foreground">
-                {probe.collectionState === "SKIPPED_HELD" ? "HOLD 중 검사를 건너뜁니다. " : ""}
+                {probe.collectionState === "SKIPPED_HELD" ? t("HOLD 중 검사를 건너뜁니다. ") : ""}
                 {when(probe.latest?.finishedAt)} {probe.latest?.reason}
               </p>
             </div>
@@ -352,10 +381,10 @@ function Workload({ data }: { data: Detail }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>앱 역할</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>보고 / 기대</TableHead>
-              <TableHead>업무 in-flight</TableHead>
+              <TableHead>{t("앱 역할")}</TableHead>
+              <TableHead>{t("상태")}</TableHead>
+              <TableHead>{t("보고 / 기대")}</TableHead>
+              <TableHead>{t("업무 in-flight")}</TableHead>
               <TableHead>WebSocket</TableHead>
             </TableRow>
           </TableHeader>
@@ -370,7 +399,7 @@ function Workload({ data }: { data: Detail }) {
                 <TableCell>
                   {actor.reported >= actor.expected
                     ? actor.inFlight
-                    : `${actor.inFlight} (일부 보고)`}
+                    : t("{0} (일부 보고)", [actor.inFlight])}
                 </TableCell>
                 <TableCell>{value(actor.activeWebSockets)}</TableCell>
               </TableRow>
@@ -378,28 +407,31 @@ function Workload({ data }: { data: Detail }) {
           </TableBody>
         </Table>
         <p className="text-xs text-muted-foreground">
-          WebSocket은 기존 연결의 잔존 수입니다. 신규 HTTP 요청의 도착 위치와 별도로 확인합니다.
+          {t(
+            "WebSocket은 기존 연결의 잔존 수입니다. 신규 HTTP 요청의 도착 위치와 별도로 확인합니다.",
+          )}
         </p>
       </CardContent>
     </Card>
   );
 }
 function Operations({ data }: { data: Detail }) {
+  useLocale();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>실행 명령</CardTitle>
+        <CardTitle>{t("실행 명령")}</CardTitle>
       </CardHeader>
       <CardContent>
         {data.commands.length ? (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>모듈 / 명령</TableHead>
-                <TableHead>실제 작업 ID</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>시작</TableHead>
-                <TableHead>종료</TableHead>
+                <TableHead>{t("모듈 / 명령")}</TableHead>
+                <TableHead>{t("실제 작업 ID")}</TableHead>
+                <TableHead>{t("상태")}</TableHead>
+                <TableHead>{t("시작")}</TableHead>
+                <TableHead>{t("종료")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -422,30 +454,32 @@ function Operations({ data }: { data: Detail }) {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-muted-foreground">아직 실행된 명령이 없습니다.</p>
+          <p className="text-muted-foreground">{t("아직 실행된 명령이 없습니다.")}</p>
         )}
       </CardContent>
     </Card>
   );
 }
 function NotOffered() {
+  useLocale();
   return (
     <p className="text-sm text-muted-foreground">
-      연결된 컨트롤 플레인이 이 관측 정보를 제공하지 않습니다.
+      {t("연결된 컨트롤 플레인이 이 관측 정보를 제공하지 않습니다.")}
     </p>
   );
 }
 function History({ workspace, id }: { workspace: string; id: string }) {
+  useLocale();
   const [eventCursor, setEventCursor] = useState<string | null>(null);
   const [historyCursor, setHistoryCursor] = useState<string | null>(null);
-  const [since] = useState(() => new Date(Date.now() - 5 * 60_000).toISOString());
+  const [since] = useState(() => new Date(Date.now() - 5 * 60000).toISOString());
   const events = useQuery(eventsQuery(workspace, id, eventCursor));
   const history = useQuery(historyQuery(workspace, id, historyCursor, since));
   return (
-    <section className="grid items-start gap-4 lg:grid-cols-2" aria-label="관측 이력">
+    <section className="grid items-start gap-4 lg:grid-cols-2" aria-label={t("관측 이력")}>
       <Card>
         <CardHeader>
-          <CardTitle>단계 이벤트</CardTitle>
+          <CardTitle>{t("단계 이벤트")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {events.error && <ErrorNotice error={events.error} retry={() => void events.refetch()} />}
@@ -459,22 +493,22 @@ function History({ workspace, id }: { workspace: string; id: string }) {
               </li>
             ))}
           </ol>
-          {events.isPending && <p>이벤트를 불러오는 중입니다.</p>}
-          {events.data?.events.length === 0 && <p>아직 이벤트가 없습니다.</p>}
+          {events.isPending && <p>{t("이벤트를 불러오는 중입니다.")}</p>}
+          {events.data?.events.length === 0 && <p>{t("아직 이벤트가 없습니다.")}</p>}
           <Button
             variant="outline"
             disabled={!events.data?.nextCursor}
             onClick={() => setEventCursor(events.data?.nextCursor ?? null)}
           >
-            다음 이벤트
+            {t("다음 이벤트")}
           </Button>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>최근 관측 표본</CardTitle>
+          <CardTitle>{t("최근 관측 표본")}</CardTitle>
           <CardDescription>
-            화면 진입 전 5분부터 수집된 표본입니다. 수집 실패도 남습니다.
+            {t("화면 진입 전 5분부터 수집된 표본입니다. 수집 실패도 남습니다.")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -484,9 +518,9 @@ function History({ workspace, id }: { workspace: string; id: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>수집</TableHead>
-                <TableHead>모듈</TableHead>
-                <TableHead>단계 / 오류</TableHead>
+                <TableHead>{t("수집")}</TableHead>
+                <TableHead>{t("모듈")}</TableHead>
+                <TableHead>{t("단계 / 오류")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -504,22 +538,21 @@ function History({ workspace, id }: { workspace: string; id: string }) {
               ))}
             </TableBody>
           </Table>
-          {history.isPending && <p>표본을 불러오는 중입니다.</p>}
+          {history.isPending && <p>{t("표본을 불러오는 중입니다.")}</p>}
           {history.data === null && <NotOffered />}
-          {history.data?.observations.length === 0 && <p>이 구간에 표본이 없습니다.</p>}
+          {history.data?.observations.length === 0 && <p>{t("이 구간에 표본이 없습니다.")}</p>}
           <Button
             variant="outline"
             disabled={!history.data?.nextCursor}
             onClick={() => setHistoryCursor(history.data?.nextCursor ?? null)}
           >
-            다음 표본
+            {t("다음 표본")}
           </Button>
         </CardContent>
       </Card>
     </section>
   );
 }
-
 const metricNames: Record<string, string> = {
   foxtrot_observation_age: "원본 관측 경과 (초)",
   foxtrot_observation_available: "관측 가능 (1/0)",
@@ -539,34 +572,37 @@ const metricNames: Record<string, string> = {
   foxtrot_probe_p95ms: "공용 검사 p95 (ms)",
 };
 function Telemetry({ workspace, id }: { workspace: string; id: string }) {
+  useLocale();
   const query = useQuery(telemetryQuery(workspace, id));
   return (
     <Card>
       <CardHeader>
-        <CardTitle>OTEL 수집 상태와 작업 추적</CardTitle>
+        <CardTitle>{t("OTEL 수집 상태와 작업 추적")}</CardTitle>
         <CardDescription>
-          Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께
-          확인하세요.
+          {t(
+            "Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께 확인하세요.",
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {query.isPending && <p role="status">수집 결과를 불러오는 중입니다.</p>}
+        {query.isPending && <p role="status">{t("수집 결과를 불러오는 중입니다.")}</p>}
         {query.error && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}
         {query.data === null && <NotOffered />}
         {query.data && (
           <>
             <p className="flex flex-wrap gap-3">
-              메트릭 <State state={query.data.metricsState} /> 추적{" "}
-              <State state={query.data.tracesState} />
+              {t("메트릭 ")}
+              <State state={query.data.metricsState} />
+              {t(" 추적")} <State state={query.data.tracesState} />
             </p>
             {query.data.metrics.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>대상</TableHead>
-                    <TableHead>수치</TableHead>
-                    <TableHead>값</TableHead>
-                    <TableHead>표본</TableHead>
+                    <TableHead>{t("대상")}</TableHead>
+                    <TableHead>{t("수치")}</TableHead>
+                    <TableHead>{t("값")}</TableHead>
+                    <TableHead>{t("표본")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -576,7 +612,7 @@ function Telemetry({ workspace, id }: { workspace: string; id: string }) {
                         {[m.resource, m.direction, m.actor].filter(Boolean).join(" / ") ||
                           m.service}
                       </TableCell>
-                      <TableCell>{metricNames[m.name] ?? m.name}</TableCell>
+                      <TableCell>{t(metricNames[m.name] ?? m.name)}</TableCell>
                       <TableCell>
                         {m.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </TableCell>
@@ -588,15 +624,15 @@ function Telemetry({ workspace, id }: { workspace: string; id: string }) {
                 </TableBody>
               </Table>
             ) : (
-              <p>수집된 메트릭이 없습니다.</p>
+              <p>{t("수집된 메트릭이 없습니다.")}</p>
             )}
             {query.data.traces.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>작업 추적 ID</TableHead>
-                    <TableHead>시작 서비스 / 작업</TableHead>
-                    <TableHead>소요 (ms)</TableHead>
+                    <TableHead>{t("작업 추적 ID")}</TableHead>
+                    <TableHead>{t("시작 서비스 / 작업")}</TableHead>
+                    <TableHead>{t("소요 (ms)")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -612,7 +648,7 @@ function Telemetry({ workspace, id }: { workspace: string; id: string }) {
                 </TableBody>
               </Table>
             ) : (
-              <p>수집된 작업 추적이 없습니다.</p>
+              <p>{t("수집된 작업 추적이 없습니다.")}</p>
             )}
           </>
         )}

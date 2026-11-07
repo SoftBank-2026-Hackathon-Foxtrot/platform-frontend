@@ -1,10 +1,8 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { useId } from "react";
-
 import { STAGE_LABELS } from "@/entities/migration";
-
 import type { Detail, Resource } from "../api/migrations";
 import { STACK_ICONS } from "./stack-icons";
-
 // Adapted from stack-diagram's tile, group and edge geometry.
 // Official logos remain unmodified; source URLs: docs/stack-diagram-icons.json.
 const W = 1080;
@@ -66,11 +64,11 @@ function cloud(env: string) {
   return { name: env, icon: "server" as const, style: "" };
 }
 function routeLabel(resource: Resource | undefined, target: boolean) {
-  if (!resource?.route) return "경로 미확인";
-  if (!["SOURCE", "TARGET", "MIXED"].includes(resource.route)) return "경로 미확인";
+  if (!resource?.route) return t("경로 미확인");
+  if (!["SOURCE", "TARGET", "MIXED"].includes(resource.route)) return t("경로 미확인");
   return resource.route === "MIXED" || resource.route === (target ? "TARGET" : "SOURCE")
-    ? "사용 중"
-    : "대기";
+    ? t("사용 중")
+    : t("대기");
 }
 function StackNode({
   cx,
@@ -87,19 +85,20 @@ function StackNode({
   sub: string;
   state?: "active" | "focus";
 }) {
+  useLocale();
   return (
     <div
       className="node"
       style={{ left: cx - 66, top }}
       data-state={state}
-      title={name + " · " + sub}
+      title={t(name) + " · " + sub}
     >
       <div className="tile">
         <img src={STACK_ICONS[icon]} alt="" />
         {state === "active" && <span className="dot" />}
       </div>
       <div className="name">
-        <span>{name}</span>
+        <span>{t(name)}</span>
       </div>
       <div className="sub">
         <span>{sub}</span>
@@ -108,6 +107,7 @@ function StackNode({
   );
 }
 export function TransitionDiagram({ data }: { data: Detail }) {
+  useLocale();
   const marker = useId().replaceAll(":", "");
   const wf = data.workflow;
   const stage = data.stages.find((s) => s.index === wf.currentStage);
@@ -121,7 +121,7 @@ export function TransitionDiagram({ data }: { data: Detail }) {
     (stage?.kind === "SYNC" ||
       stage?.kind === kind + "_CUTOVER" ||
       (kind === "OBJECT_STORAGE" && stage?.kind === "OBJECT_CUTOVER"));
-  const label = wf.sourceEnv + "에서 " + wf.targetEnv + "로 이전하는 구성도";
+  const label = t("{0}에서 {1}로 이전하는 구성도", [wf.sourceEnv, wf.targetEnv]);
   const arrow = "url(#" + marker + ")";
   return (
     <figure className="migration-stack space-y-2">
@@ -131,9 +131,9 @@ export function TransitionDiagram({ data }: { data: Detail }) {
           viewBox={"0 0 " + W + " " + H}
           className="mx-auto block w-full min-w-[760px] max-w-[1080px]"
           role="img"
-          aria-label={label}
+          aria-label={t(label)}
         >
-          <title>{label}</title>
+          <title>{t(label)}</title>
           <foreignObject width={W} height={H}>
             <div className="canvas">
               {environments.map((env, index) => {
@@ -161,7 +161,7 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                       {provider.name}
                       <span className="font-normal text-muted-foreground">/ {env}</span>
                       <span className="role">
-                        {index === 0 ? "SOURCE · 원본" : "TARGET · 대상"}
+                        {index === 0 ? t("SOURCE · 원본") : t("TARGET · 대상")}
                       </span>
                     </div>
                   </div>
@@ -212,7 +212,7 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                         y="136"
                         textAnchor="middle"
                       >
-                        {share === undefined ? "비율 미확인" : share + "%"}
+                        {share === undefined ? t("비율 미확인") : share + "%"}
                       </text>
                       <path
                         className="edge control"
@@ -281,7 +281,7 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                   });
                 })}
               </svg>
-              <StackNode cx={104} top={24} icon="user" name="사용자" sub="공용 서비스" />
+              <StackNode cx={104} top={24} icon="user" name={t("사용자")} sub={t("공용 서비스")} />
               <StackNode
                 cx={540}
                 top={24}
@@ -289,10 +289,10 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                 name="Traffic LB"
                 sub={
                   latest?.effectivePercent
-                    ? "LB 확인 가중치"
+                    ? t("LB 확인 가중치")
                     : latest
-                      ? "요청 가중치 · 확인 전"
-                      : "트래픽 관측 대기"
+                      ? t("요청 가중치 · 확인 전")
+                      : t("트래픽 관측 대기")
                 }
                 state={
                   !finished && (stage?.kind === "TRAFFIC" || stage?.kind === "CANARY")
@@ -305,7 +305,7 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                 top={24}
                 icon="control"
                 name="Control plane"
-                sub={"업무 지시 · " + data.hold.desired}
+                sub={t("업무 지시 · ") + data.hold.desired}
                 state={data.hold.desired === "HOLD" ? "focus" : undefined}
               />
               {environments.map((env, index) => {
@@ -321,14 +321,14 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                       cx={GROUPS[index === 0 ? 0 : 1].cx}
                       top={220}
                       icon="app"
-                      name={env + " 애플리케이션"}
+                      name={t("{0} 애플리케이션", [env])}
                       sub={
-                        "프로세스 " +
+                        t("프로세스 ") +
                         reported +
                         "/" +
                         expected +
                         " · " +
-                        (probe?.freshness ?? "미확인")
+                        (probe?.freshness ?? t("미확인"))
                       }
                       state={(split?.[env] ?? 0) > 0 ? "active" : undefined}
                     />
@@ -345,14 +345,16 @@ export function TransitionDiagram({ data }: { data: Detail }) {
                           sub={
                             route +
                             " · " +
-                            (LIFECYCLE[resource?.lifecycle ?? ""] ??
-                              resource?.lifecycle ??
-                              "미확인")
+                            t(
+                              LIFECYCLE[resource?.lifecycle ?? ""] ??
+                                resource?.lifecycle ??
+                                "미확인",
+                            )
                           }
                           state={
                             focused(item.kind)
                               ? "focus"
-                              : route === "사용 중"
+                              : route === t("사용 중")
                                 ? "active"
                                 : undefined
                           }
@@ -369,13 +371,13 @@ export function TransitionDiagram({ data }: { data: Detail }) {
       <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-success" />
-          현재 사용
+          {t("현재 사용")}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full border border-info" />
-          현재 전환 대상
+          {t("현재 전환 대상")}
         </span>
-        <span>점선: 제어 · 움직이는 파란 선: 관측된 복제 방향</span>
+        <span>{t("점선: 제어 · 움직이는 파란 선: 관측된 복제 방향")}</span>
         <span className="ml-auto">
           icons: AWS Architecture Icons / svgl / Lucide ·{" "}
           <a
@@ -389,8 +391,9 @@ export function TransitionDiagram({ data }: { data: Detail }) {
         </span>
       </figcaption>
       <span className="sr-only">
-        현재 단계: {stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "미확인"}. 업무 지시:{" "}
-        {data.hold.desired}.
+        {t("현재 단계: ")}
+        {t(stage ? t(STAGE_LABELS[stage.kind] ?? stage.kind) : t("미확인"))}
+        {t(". 업무 지시:")} {data.hold.desired}.
       </span>
     </figure>
   );

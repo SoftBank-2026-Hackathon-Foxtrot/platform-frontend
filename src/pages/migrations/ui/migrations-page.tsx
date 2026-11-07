@@ -1,7 +1,7 @@
+import { t, useLocale, localeTag } from "@/shared/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronRight } from "lucide-react";
-
 import {
   STAGE_LABELS,
   type Workflow,
@@ -13,11 +13,10 @@ import { getApiErrorMessage } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-
 const STAGE_ORDER = Object.keys(STAGE_LABELS);
 const FINISHED = new Set(["COMPLETED", "ABORTED"]);
-
 export function MigrationsPage() {
+  useLocale();
   const session = useQuery(sessionOptions());
   const workspace = session.data?.workspaceId;
   const workflows = useQuery({ ...workflowsOptions(workspace ?? ""), enabled: Boolean(workspace) });
@@ -25,25 +24,25 @@ export function MigrationsPage() {
     <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">마이그레이션</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("마이그레이션")}</h1>
           <p className="text-sm text-muted-foreground">
-            최근에 만든 순서입니다. 한 번에 하나만 진행할 수 있습니다.
+            {t("최근에 만든 순서입니다. 한 번에 하나만 진행할 수 있습니다.")}
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link to="/applications">새 마이그레이션은 애플리케이션에서</Link>
+          <Link to="/applications">{t("새 마이그레이션은 애플리케이션에서")}</Link>
         </Button>
       </header>
-      {workflows.isPending && <p role="status">목록을 불러오는 중입니다.</p>}
+      {workflows.isPending && <p role="status">{t("목록을 불러오는 중입니다.")}</p>}
       {workflows.error && (
         <Alert variant="destructive">
-          <AlertTitle>목록을 불러오지 못했습니다</AlertTitle>
+          <AlertTitle>{t("목록을 불러오지 못했습니다")}</AlertTitle>
           <AlertDescription>{getApiErrorMessage(workflows.error)}</AlertDescription>
         </Alert>
       )}
       {workflows.data?.length === 0 && (
         <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          아직 마이그레이션이 없습니다.
+          {t("아직 마이그레이션이 없습니다.")}
         </p>
       )}
       <div className="space-y-2">
@@ -54,8 +53,8 @@ export function MigrationsPage() {
     </main>
   );
 }
-
 function Row({ workflow: w }: { workflow: Workflow }) {
+  useLocale();
   const stageKind = STAGE_ORDER[w.currentStage];
   const finished = FINISHED.has(w.status);
   const done = w.status === "COMPLETED" ? STAGE_ORDER.length : w.currentStage;
@@ -75,11 +74,14 @@ function Row({ workflow: w }: { workflow: Workflow }) {
           <WorkflowStatusBadge status={w.status} />
           {!finished && stageKind && (
             <Badge variant="secondary">
-              {w.currentStage + 1}. {STAGE_LABELS[stageKind]}
+              {w.currentStage + 1}. {t(STAGE_LABELS[stageKind] ?? stageKind)}
             </Badge>
           )}
         </div>
-        <div className="flex gap-1" aria-label={`${STAGE_ORDER.length}단계 중 ${done}단계 완료`}>
+        <div
+          className="flex gap-1"
+          aria-label={t("{0}단계 중 {1}단계 완료", [STAGE_ORDER.length, done])}
+        >
           {STAGE_ORDER.map((kind, index) => (
             <span
               key={kind}
@@ -94,7 +96,7 @@ function Row({ workflow: w }: { workflow: Workflow }) {
           ))}
         </div>
         <p className="font-mono text-xs text-muted-foreground">
-          {w.id} · {new Date(w.createdAt).toLocaleString("ko-KR", { hour12: false })}
+          {w.id} · {new Date(w.createdAt).toLocaleString(localeTag(), { hour12: false })}
           {w.createdBy ? ` · ${w.createdBy}` : ""}
         </p>
       </div>

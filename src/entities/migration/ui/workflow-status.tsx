@@ -1,5 +1,5 @@
+import { t, useLocale } from "@/shared/lib/i18n";
 import { Badge } from "@/shared/ui/badge";
-
 export const STAGE_LABELS: Record<string, string> = {
   PREPARE: "대상 환경 준비",
   SYNC: "데이터 동기화",
@@ -10,8 +10,13 @@ export const STAGE_LABELS: Record<string, string> = {
   TRAFFIC: "트래픽 전환",
   FINALIZE: "마무리",
 };
-
-const STATUS: Record<string, { label: string; tone: "ok" | "run" | "wait" | "bad" | "idle" }> = {
+const STATUS: Record<
+  string,
+  {
+    label: string;
+    tone: "ok" | "run" | "wait" | "bad" | "idle";
+  }
+> = {
   PLANNED: { label: "승인 대기", tone: "wait" },
   WAITING_APPROVAL: { label: "승인 대기", tone: "wait" },
   RUNNING: { label: "진행 중", tone: "run" },
@@ -21,7 +26,6 @@ const STATUS: Record<string, { label: string; tone: "ok" | "run" | "wait" | "bad
   COMPLETED: { label: "완료", tone: "ok" },
   ABORTED: { label: "취소됨", tone: "idle" },
 };
-
 const TONES = {
   ok: "border-success/40 bg-success/15 text-success",
   run: "border-info/40 bg-info/15 text-info",
@@ -29,15 +33,15 @@ const TONES = {
   bad: "border-destructive/40 bg-destructive/15 text-destructive",
   idle: "",
 };
-
 export function WorkflowStatusBadge({ status }: { status: string }) {
+  useLocale();
   const spec = STATUS[status] ?? { label: status, tone: "idle" as const };
   return (
     <Badge variant="outline" className={TONES[spec.tone]}>
       {spec.tone === "run" && (
         <span className="mr-0.5 size-1.5 animate-pulse rounded-full bg-current" aria-hidden />
       )}
-      {spec.label}
+      {t(spec.label)}
     </Badge>
   );
 }
