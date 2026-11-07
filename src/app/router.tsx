@@ -16,6 +16,7 @@ import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
 import { LoginPage } from "@/pages/login";
 import { MigrationPage } from "@/pages/migration-detail";
+import { SystemMonitoringPage, systemSearchSchema } from "@/pages/system-monitoring";
 import { MonitoringPage, monitoringSearchSchema } from "@/pages/monitoring";
 import { MigrationsPage } from "@/pages/migrations";
 import { SecurityPage } from "@/pages/security";
@@ -156,6 +157,21 @@ const monitoringRoute = createRoute({
     );
   },
 });
+const systemRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/monitoring/systems",
+  validateSearch: systemSearchSchema,
+  component: function SystemRoute() {
+    const search = systemRoute.useSearch();
+    const navigate = systemRoute.useNavigate();
+    return (
+      <SystemMonitoringPage
+        search={search}
+        onNavigate={(next) => void navigate({ search: next, resetScroll: false })}
+      />
+    );
+  },
+});
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
@@ -172,6 +188,7 @@ export const router = createRouter({
     migrationsRoute,
     migrationRoute,
     monitoringRoute,
+    systemRoute,
     settingsRoute,
     securityRoute,
     aiRoute,

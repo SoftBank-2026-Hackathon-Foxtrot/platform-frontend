@@ -1,3 +1,4 @@
+import { MonitoringNav } from "@/widgets/monitoring-nav";
 import { useEffect, useRef, useState } from "react";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -54,6 +55,7 @@ export function MonitoringPage(props: Props) {
       className="monitoring mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-8"
     >
       <span id={props.tab} aria-hidden="true" className="block h-0 scroll-mt-12" />
+      <MonitoringNav active="migration" app={workflow?.application} workflow={workflow?.id} />
       <ReturnLink search={props.search} workflow={workflow} />
       {!workflow && (
         <h1 id="monitoring-title" className="text-2xl font-semibold tracking-tight">

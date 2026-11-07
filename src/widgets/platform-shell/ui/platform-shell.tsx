@@ -83,8 +83,10 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
                       aria-current={active ? "page" : undefined}
                     >
                       <Link
-                        to={item.to}
-                        search={item.to === "/monitoring" ? { comp: "app" } : undefined}
+                        to={item.to === "/monitoring" ? "/monitoring/systems" : item.to}
+                        search={
+                          item.to === "/monitoring" ? { category: "cpu", minutes: 15 } : undefined
+                        }
                         onClick={() => setOpenMobile(false)}
                       >
                         <item.icon aria-hidden="true" />

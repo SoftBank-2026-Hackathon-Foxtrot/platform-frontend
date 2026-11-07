@@ -14,6 +14,7 @@ import { ApplicationForm } from "@/features/save-application";
 import { StartMigration } from "@/features/start-migration";
 import { getApiErrorMessage } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
+import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 const RESOURCE_NAMES: Record<string, string> = {
@@ -123,6 +124,11 @@ function SeedApp({ app }: { app: SeedApplication }) {
             <CardTitle className="flex items-center gap-2">
               <Server className="size-4" /> {app.id}
             </CardTitle>
+            <Button asChild variant="outline" size="sm" className="w-fit">
+              <Link to="/monitoring/systems" search={{ app: app.id, category: "cpu", minutes: 15 }}>
+                {t("시스템 메트릭")}
+              </Link>
+            </Button>
             <CardDescription className="font-mono text-xs">{app.scope}</CardDescription>
           </div>
           <div className="flex flex-wrap gap-1">
