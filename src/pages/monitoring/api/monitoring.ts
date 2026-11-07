@@ -1,3 +1,5 @@
+import { apiClient } from "@/shared/api";
+import { workflowSchema } from "@/entities/migration";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { componentSchema, readTelemetry, type TelemetryComponent } from "@/entities/telemetry";
@@ -206,5 +208,16 @@ export function scopeOptions(workspace: string, workflow: string) {
       return data;
     },
     staleTime: 15000,
+  });
+}
+
+export function liveWorkflowsOptions(workspace: string) {
+  return queryOptions({
+    queryKey: ["monitoring-live-workflows", workspace],
+    queryFn: async ({ signal }) =>
+      z
+        .array(workflowSchema)
+        .parse((await apiClient.get("/v1/telemetry/workflows", { signal })).data),
+    refetchInterval: 15000,
   });
 }

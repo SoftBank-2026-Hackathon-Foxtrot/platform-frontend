@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, RefreshCw } from "lucide-react";
@@ -11,7 +12,10 @@ import { MonitoringNav } from "@/widgets/monitoring-nav";
 import { deploymentsOptions, instancesOptions, seriesOptions, systemKey } from "../api/system";
 import { categories, type SystemSearch } from "../model/system";
 import { BackendState, MetricPanel, time } from "./metric-panel";
-type Props = { search: SystemSearch; onNavigate: (search: SystemSearch) => void };
+type Props = {
+  search: SystemSearch;
+  onNavigate: (search: SystemSearch, replace?: boolean) => void;
+};
 function ErrorNotice({ error }: { error: Error | null }) {
   return error ? (
     <p role="alert" className="text-sm text-destructive">
@@ -33,7 +37,9 @@ function Choice({
   return (
     <Select value={value ?? ""} onValueChange={onChange}>
       <SelectTrigger aria-label={label} className="w-full min-w-0 sm:w-44">
-        <SelectValue placeholder={label} />
+        <SelectValue placeholder={label}>
+          {value && !choices.some((row) => row.value === value) ? value : undefined}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {choices.map((choice) => (
@@ -66,12 +72,15 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
   const instances = useQuery(
     instancesOptions(session.workspaceId, app?.id ?? "", deployment ?? ""),
   );
-  const instance =
-    search.instance ??
-    instances.data?.instances.find((row) => !row.stale)?.id ??
-    instances.data?.instances[0]?.id;
+  const liveInstances = instances.data?.instances.filter((row) => !row.stale) ?? [];
+  const instance = search.instance ?? liveInstances[0]?.id;
   const selectedInstance = instances.data?.instances.find((row) => row.id === instance);
   const resolved = { ...search, app: app?.id, env, deployment, instance };
+  useEffect(() => {
+    if (deployment && instance && (!search.deployment || !search.instance)) {
+      onNavigate({ ...search, app: app?.id, deployment, instance, env }, true);
+    }
+  }, [deployment, instance, search, app?.id, env, onNavigate]);
   const metrics = useQuery({
     ...seriesOptions(session.workspaceId, resolved),
     enabled: valid && Boolean(instance),
@@ -129,7 +138,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
             label={t("실행 인스턴스")}
             value={instance}
             choices={
-              instances.data?.instances.map((row) => ({
+              liveInstances.map((row) => ({
                 value: row.id,
                 label: `${row.role} · ${row.id}`,
               })) ?? []
@@ -186,8 +195,17 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
         </p>
       ) : (applications.error && !applications.data) ||
         (deployments.error && !deployments.data) ||
-        (instances.error && !instances.data) ? null : !valid ? (
-        <p role="status">{t("선택할 앱 배포가 없습니다")}</p>
+        (instances.error && !instances.data) ? null : deployments.data &&
+        deployments.data.state !== "OK" ? (
+        <BackendState state={deployments.data.state} />
+      ) : !valid ? (
+        <p role="status">
+          {t(
+            search.deployment
+              ? "선택한 배포의 수집이 중단되었습니다"
+              : "수집 중인 앱 배포가 없습니다",
+          )}
+        </p>
       ) : instances.data?.state !== "OK" && instances.data ? (
         <BackendState state={instances.data.state} />
       ) : !instance ? (

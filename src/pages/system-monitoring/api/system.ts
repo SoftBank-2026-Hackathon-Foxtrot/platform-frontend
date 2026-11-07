@@ -29,6 +29,7 @@ const instancesSchema = z.object({
   ),
 });
 const deploymentsSchema = z.object({
+  state,
   environments: z.array(
     z.object({
       environmentId: z.string(),
@@ -40,11 +41,15 @@ const deploymentsSchema = z.object({
 });
 export function deploymentsOptions(workspace: string, app: string) {
   return queryOptions({
-    queryKey: ["system-deployments", workspace, app],
+    queryKey: ["system-live-deployments", workspace, app],
     queryFn: async ({ signal }) =>
       deploymentsSchema.parse(
-        (await apiClient.get(`/v1/applications/${encodeURIComponent(app)}/deployments`, { signal }))
-          .data,
+        (
+          await apiClient.get(
+            `/v1/applications/${encodeURIComponent(app)}/system-metrics/deployments`,
+            { signal },
+          )
+        ).data,
       ),
     enabled: Boolean(app),
     refetchInterval: 15000,
