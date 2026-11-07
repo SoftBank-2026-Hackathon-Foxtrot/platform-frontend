@@ -1,14 +1,14 @@
 import { useId, useState } from "react";
 import type { TargetConfiguration } from "@/entities/migration";
-import { t } from "@/shared/lib/i18n";
+import { t, useLocale } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import type { SizingOptions } from "../api/sizing";
 
 const LABELS: Record<string, string> = {
-  db_instance_class: "DB 인스턴스",
-  db_tier: "DB 인스턴스",
+  db_instance_class: "대상 DB 사양",
+  db_tier: "대상 DB 사양",
   db_storage_gib: "DB 저장 공간 (GiB)",
   db_max_storage_gib: "DB 저장 공간 상한 (GiB)",
   db_multi_az: "DB 고가용성",
@@ -18,6 +18,20 @@ const LABELS: Record<string, string> = {
   cache_memory_gib: "Redis 메모리 (GiB)",
   cache_high_availability: "Redis 고가용성",
 };
+
+// Provider specifications, not estimates from the app's allocation:
+// https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.Summary.html
+// https://docs.cloud.google.com/sql/docs/postgres/machine-series-overview
+function databaseLabel(value: string) {
+  const aws: Record<string, [number, number]> = {
+    "db.t3.micro": [2, 1],
+    "db.t3.small": [2, 2],
+    "db.m6g.large": [2, 8],
+  };
+  const custom = /^db-custom-(\d+)-(\d+)$/.exec(value);
+  const spec = custom ? [Number(custom[1]), Number(custom[2]) / 1024] : aws[value];
+  return spec ? t("{0} vCPU · 메모리 {1} GiB", spec) : value;
+}
 
 export function TargetSizing({ data, disabled }: { data: SizingOptions; disabled: boolean }) {
   const deployment = data.deployment!;
@@ -84,6 +98,9 @@ export function TargetSizing({ data, disabled }: { data: SizingOptions; disabled
             value={memory}
             onChange={(event) => setMemory(event.target.value)}
           />
+          {Number(memory) > 0 && (
+            <p className="text-xs text-muted-foreground">{Number(memory) / 1024} GiB</p>
+          )}
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -114,6 +131,7 @@ export function TargetSizing({ data, disabled }: { data: SizingOptions; disabled
               initial={String(deployment.sizing[key])}
               values={rule.type === "boolean" ? ["false", "true"] : (rule.enum ?? [])}
               boolean={rule.type === "boolean"}
+              database={key === "db_tier" || key === "db_instance_class"}
             />
           ),
         )}
@@ -127,28 +145,40 @@ function Choice({
   initial,
   values,
   boolean,
+  database,
 }: {
   name: string;
   label: string;
   initial: string;
   values: string[];
   boolean: boolean;
+  database: boolean;
 }) {
   const [value, setValue] = useState(initial);
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div role="group" aria-label={label} className="flex flex-wrap gap-1">
+      <div role="group" aria-label={label} className="flex flex-wrap gap-2">
         {values.map((option) => (
           <Button
             type="button"
             key={option}
             size="sm"
+            className={database ? "h-auto flex-col items-start gap-1 px-3 py-2" : undefined}
             variant={value === option ? "secondary" : "outline"}
             aria-pressed={value === option}
             onClick={() => setValue(option)}
           >
-            {boolean ? t(option === "true" ? "사용" : "미사용") : option}
+            {database ? (
+              <>
+                <span>{databaseLabel(option)}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{option}</span>
+              </>
+            ) : boolean ? (
+              t(option === "true" ? "사용" : "미사용")
+            ) : (
+              option
+            )}
           </Button>
         ))}
       </div>
@@ -158,6 +188,7 @@ function Choice({
 }
 
 export function TargetSizingSummary({ configuration }: { configuration: TargetConfiguration }) {
+  useLocale();
   return (
     <div className="space-y-2 rounded-md border p-3 text-xs">
       <p className="font-medium">{t("확정한 대상 사양")}</p>
@@ -172,13 +203,26 @@ export function TargetSizingSummary({ configuration }: { configuration: TargetCo
         {configuration.app.memoryMiB !== undefined && (
           <div>
             <dt className="text-muted-foreground">{t("앱 메모리 (MiB)")}</dt>
-            <dd>{configuration.app.memoryMiB}</dd>
+            <dd>
+              {configuration.app.memoryMiB} MiB · {configuration.app.memoryMiB / 1024} GiB
+            </dd>
           </div>
         )}
         {Object.entries(configuration.sizing).map(([key, value]) => (
           <div key={key}>
             <dt className="text-muted-foreground">{t(LABELS[key] ?? key)}</dt>
-            <dd>{typeof value === "boolean" ? t(value ? "사용" : "미사용") : String(value)}</dd>
+            <dd>
+              {key === "db_tier" || key === "db_instance_class" ? (
+                <>
+                  <span className="block">{databaseLabel(String(value))}</span>
+                  <span className="font-mono text-muted-foreground">{String(value)}</span>
+                </>
+              ) : typeof value === "boolean" ? (
+                t(value ? "사용" : "미사용")
+              ) : (
+                String(value)
+              )}
+            </dd>
           </div>
         ))}
       </dl>

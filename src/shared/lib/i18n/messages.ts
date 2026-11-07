@@ -1,4 +1,9 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "대상 DB 사양": { en: "Target database sizing", ja: "移行先DBの仕様" },
+  "{0} vCPU · 메모리 {1} GiB": {
+    en: "{0} vCPU · {1} GiB memory",
+    ja: "{0} vCPU · メモリ {1} GiB",
+  },
   "대상 사양 설정": { en: "Target sizing", ja: "移行先の仕様設定" },
   "현재 사양 유지": { en: "Keep current sizing", ja: "現在の仕様を維持" },
   "사양 변경": { en: "Change sizing", ja: "仕様を変更" },
@@ -38,7 +43,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Allocation for each container.",
     ja: "各コンテナへの割り当てです。",
   },
-  "DB 인스턴스": { en: "DB instance", ja: "DBインスタンス" },
   "DB 저장 공간 (GiB)": { en: "DB storage (GiB)", ja: "DBストレージ (GiB)" },
   "DB 저장 공간 상한 (GiB)": { en: "DB storage limit (GiB)", ja: "DBストレージ上限 (GiB)" },
   "DB 고가용성": { en: "DB high availability", ja: "DBの高可用性" },
