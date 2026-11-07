@@ -16,7 +16,7 @@ The map explains one thing: which account the app uses to access each data servi
 
 ## States and behavior
 
-Unscanned → scan → gap → draft → apply/recheck → verified → approved. Counts are derived from the 12 example checks. Unscanned checks remain unknown. Draft/apply do not close the gap. Only a completed simulated verification exposes approval. Reset cancels the pending timer and clears the example history.
+Unscanned → scan → gap → change plan → applied → verified. Three checks come from the server. Applying a plan is separate from verification. Only fresh verification plus app readiness enables this page’s migration link. Existing workflow approvals remain separate. Server revisions and audit events survive browser refresh; expired or failed checks cannot enable the link.
 
 Resource selection is immediate. No entrances or stagger on frequently used controls. Busy feedback uses text and a spinner; reduced motion removes the spinner and sheet movement. Evidence uses a keyboard-accessible Sheet with focus restoration. Timeline timestamps use the active locale.
 
@@ -24,9 +24,9 @@ Below 1200px, the detail follows the map. Below 640px, the relationship map beco
 
 ## Copy
 
-Explain a finding or action, not a product promise: “Redis 접근 권한을 줄여야 합니다”, “변경안 확인”, “검사 근거 보기”. Keep “예시 데이터” and the simulation notice visible. No invented PRs, deployment logs, scan timestamps or AI summaries. Document implementation details in the handoff, not in an empty AI placeholder on the screen.
+Explain a finding or action, not a product promise: “GCP의 접근 범위가 기존보다 넓습니다”, “변경안 확인”, “검사 근거 보기”. Show “클라우드 조회” for cloud mode and “예시 데이터” only for local fixtures. No invented PRs, deployment logs, scan timestamps or AI summaries. Document implementation details in the handoff, not in an empty AI placeholder on the screen.
 
-Reference: `migration-security-dashboard-handoff` images and SPEC at `d8ae63a`; existing platform source at `edb66ef`. Adapt its Kubernetes target to the user's Compose/Ansible environment.
+Reference: `migration-security-dashboard-handoff` images and SPEC at `d8ae63a`; existing platform source at `edb66ef`. The current implementation follows the requested AWS → GCP object-access demo. DB/Redis are context only. Keep the same map geometry and platform tokens.
 
 # Monitoring
 

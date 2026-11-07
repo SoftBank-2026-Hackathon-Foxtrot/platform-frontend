@@ -479,3 +479,27 @@
 .security-page h2 {
   scroll-margin-top: 64px;
 }
+
+.security-continue {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.security-edge-label code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.security-resource-bottom {
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .security-continue {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
