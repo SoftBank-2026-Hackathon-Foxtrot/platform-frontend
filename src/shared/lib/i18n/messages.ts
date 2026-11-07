@@ -2562,4 +2562,75 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "The currently allowed configurations cannot support the observed usage.",
     ja: "現在許可されたリソース構成では、観測使用量を処理できません。",
   },
+  "준비 대기": { en: "Awaiting preparation", ja: "準備待ち" },
+  "컷오버 승인": { en: "Approve cutover", ja: "切り替えを承認" },
+  "컷오버 승인 대기": { en: "Awaiting cutover approval", ja: "切り替え承認待ち" },
+  "컷오버 완료 · 처리 선택": {
+    en: "Cutover complete · Choose next action",
+    ja: "切り替え済み · 次の操作を選択",
+  },
+  "원본 복귀 완료": { en: "Rollback complete", ja: "移行元への復帰完了" },
+  "전환 완료 처리": { en: "Finalize migration", ja: "移行を確定" },
+  "전환 완료": { en: "Finalize migration", ja: "移行を確定" },
+  롤백: { en: "Roll back", ja: "ロールバック" },
+  "복사와 변경분 동기화가 준비되었습니다. 승인하면 객체 저장소, 앱 트래픽, Redis, DB를 순서대로 전환합니다.":
+    {
+      en: "Initial copy and change sync are ready. Approval starts the object storage, application traffic, Redis and database cutovers.",
+      ja: "初期コピーと差分同期の準備ができました。承認すると、オブジェクトストレージ、アプリのトラフィック、Redis、DBの切り替えを順に進めます。",
+    },
+  "DB, Redis, 객체 저장소, 앱 트래픽 순서로 원본에 복귀합니다. 중간에 실패하면 멈추고 실패한 지점부터 다시 시도할 수 있습니다.":
+    {
+      en: "Return the database, Redis, object storage and application traffic to the source in order. A failure stops the rollback and allows retrying from that point.",
+      ja: "DB、Redis、オブジェクトストレージ、アプリのトラフィックの順に移行元へ戻します。途中で失敗した場合は停止し、その位置から再試行できます。",
+    },
+  "역방향 동기화와 임시 자원을 정리하고 전환을 완료합니다. 이후에는 이 작업으로 롤백할 수 없습니다. 상시 프록시는 유지합니다.":
+    {
+      en: "Stop reverse sync, clean up temporary resources and finalize. This migration can no longer roll back afterward. Permanent proxies remain.",
+      ja: "逆方向同期と一時リソースを整理して移行を確定します。以降、この移行でロールバックはできません。常設プロキシは維持します。",
+    },
+  "준비와 데이터 동기화는 자동으로 시작합니다. 컷오버 직전에 한 번 승인합니다.": {
+    en: "Preparation and data sync start automatically. Approve once before cutover.",
+    ja: "準備とデータ同期は自動で始まります。切り替え直前に一度だけ承認します。",
+  },
+  "변경분 동기화를 유지하고 있습니다. 컷오버를 승인하면 전환을 시작합니다.": {
+    en: "Change sync remains active. Approve cutover to start switching.",
+    ja: "差分同期を継続しています。切り替えを承認すると移行を進めます。",
+  },
+  "대상에서 운영 중입니다. 롤백하거나 전환 완료를 선택하십시오.": {
+    en: "The target is serving. Choose rollback or finalize migration.",
+    ja: "移行先で稼働中です。ロールバックまたは移行の確定を選択してください。",
+  },
+  "원본 환경으로 복귀했습니다. 다시 이전하려면 새 마이그레이션을 시작하십시오.": {
+    en: "Returned to the source. Start a new migration to migrate again.",
+    ja: "移行元へ戻りました。再び移行する場合は、新しい移行を開始してください。",
+  },
+  "변경분 동기화 유지 · 컷오버 승인 대기": {
+    en: "Change sync active · Awaiting cutover approval",
+    ja: "差分同期中 · 切り替え承認待ち",
+  },
+  "롤백 또는 전환 완료를 선택하십시오.": {
+    en: "Choose rollback or finalize migration.",
+    ja: "ロールバックまたは移行の確定を選択してください。",
+  },
+  "앱 연결과 이전 리소스를 자동으로 준비합니다.": {
+    en: "Automatically prepare application connections and migration resources.",
+    ja: "アプリ接続と移行リソースを自動で準備します。",
+  },
+  "초기 데이터를 복사하고 변경분을 계속 동기화합니다. 컷오버 승인 전까지 원본을 사용합니다.": {
+    en: "Copy initial data and keep changes synchronized. The source stays active until cutover approval.",
+    ja: "初期データをコピーし、差分を継続的に同期します。切り替えの承認までは移行元を使用します。",
+  },
+  "컷오버 후 롤백 또는 전환 완료를 선택합니다. 완료를 선택하면 임시 구성을 정리합니다.": {
+    en: "After cutover, choose rollback or finalize. Finalizing cleans up temporary configuration.",
+    ja: "切り替え後、ロールバックまたは移行の確定を選択します。確定すると一時構成を整理します。",
+  },
+  "시작하는 중": { en: "Starting", ja: "開始中" },
+  "앱을 등록하면 데이터 동기화까지 자동으로 진행합니다. 컷오버만 승인합니다.": {
+    en: "Register an app to prepare and synchronize data automatically. Approve only the cutover.",
+    ja: "アプリを登録すると準備とデータ同期が自動で進みます。切り替えだけを承認します。",
+  },
+  "검증을 통과한 앱은 준비와 데이터 동기화를 자동으로 시작할 수 있습니다.": {
+    en: "Verified apps can start preparation and data sync automatically.",
+    ja: "検証済みのアプリは準備とデータ同期を自動で開始できます。",
+  },
 };

@@ -217,7 +217,7 @@ export function TransitionDiagram({
   const arrow = "url(#" + marker + ")";
   const wf = data.workflow;
   const stage = data.stages.find((item) => item.index === wf.currentStage);
-  const finished = ["COMPLETED", "ABORTED"].includes(wf.status);
+  const finished = ["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(wf.status);
   const traffic = trafficFlow(data);
   const preparation = preparationFlow(data);
   const candidate = activeModule(data);

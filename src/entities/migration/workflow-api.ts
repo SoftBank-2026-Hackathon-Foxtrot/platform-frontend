@@ -9,6 +9,8 @@ export const workflowCommandSchema = z.enum([
   "HALT",
   "RESUME",
   "RECONCILE",
+  "ROLLBACK",
+  "FINALIZE",
   "ROLLBACK_RESOURCE",
   "ABORT",
 ]);
@@ -57,18 +59,22 @@ export const workflowSchema = z.object({
     "PLANNED",
     "RUNNING",
     "WAITING_APPROVAL",
+    "CUTOVER_COMPLETE",
     "HALTED",
     "ROLLING_BACK",
     "ABORTING",
     "COMPLETED",
     "ABORTED",
+    "ROLLED_BACK",
   ]),
   halt: z
     .object({ code: z.string(), message: z.string(), blockers: z.array(z.string()).default([]) })
     .nullable(),
   reconcileRequested: z.boolean(),
   rolledBack: z.array(resourceKindSchema),
-  rollback: z.object({ resource: resourceKindSchema, mode: z.string().optional() }).nullish(),
+  rollback: z
+    .object({ resource: resourceKindSchema.nullish(), mode: z.string().optional() })
+    .nullish(),
 });
 export type Workflow = z.infer<typeof workflowSchema>;
 export const workflowDetailSchema = z.object({
@@ -135,14 +141,16 @@ const eventsSchema = z.object({
   nextCursor: z.string().nullable(),
 });
 export const workflowStatus: Record<Workflow["status"], string> = {
-  PLANNED: "시작 승인 대기",
+  PLANNED: "준비 대기",
   RUNNING: "진행 중",
-  WAITING_APPROVAL: "승인 대기",
+  WAITING_APPROVAL: "컷오버 승인 대기",
+  CUTOVER_COMPLETE: "컷오버 완료 · 처리 선택",
   HALTED: "중단됨",
-  ROLLING_BACK: "리소스 복귀 중",
+  ROLLING_BACK: "원본 복귀 중",
   ABORTING: "취소 중",
   COMPLETED: "완료",
   ABORTED: "취소 완료",
+  ROLLED_BACK: "원본 복귀 완료",
 };
 export const workflowKeys = {
   all: (workspace: string) => ["workflows", workspace] as const,

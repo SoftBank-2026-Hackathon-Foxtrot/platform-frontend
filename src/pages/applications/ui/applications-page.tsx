@@ -33,7 +33,9 @@ export function ApplicationsPage() {
   });
   const workflows = useQuery({ ...workflowsOptions(workspace ?? ""), enabled: Boolean(workspace) });
   // The backend refuses app changes while any migration is unfinished; say so before it does.
-  const active = workflows.data?.find((w) => w.status !== "COMPLETED" && w.status !== "ABORTED");
+  const active = workflows.data?.find(
+    (w) => !["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(w.status),
+  );
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-8">
       <header className="space-y-1">

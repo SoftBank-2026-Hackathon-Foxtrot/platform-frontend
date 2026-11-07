@@ -96,6 +96,9 @@ export function StartMigration({ applicationId, environments, direction, disable
         create.mutate({ input, key: submission.current.key });
       }}
     >
+      <p className="text-sm text-muted-foreground">
+        {t("준비와 데이터 동기화는 자동으로 시작합니다. 컷오버 직전에 한 번 승인합니다.")}
+      </p>
       <div className="flex flex-wrap items-end gap-3">
         <EnvSelect
           label={t("원본")}
@@ -124,7 +127,7 @@ export function StartMigration({ applicationId, environments, direction, disable
           }
         >
           <Rocket />
-          {create.isPending ? t("계획을 만드는 중") : t("마이그레이션 계획 만들기")}
+          {create.isPending ? t("시작하는 중") : t("마이그레이션 시작")}
         </Button>
       </div>
       <div role="group" aria-label={t("대상 사양 설정")} className="flex flex-wrap gap-1">

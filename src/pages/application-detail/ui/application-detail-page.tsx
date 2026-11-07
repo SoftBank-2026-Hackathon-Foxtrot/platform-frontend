@@ -224,7 +224,9 @@ function Detail({ app, workspace }: { app: ManagedApplication; workspace: string
         <Card>
           <CardHeader>
             <CardTitle>{t("마이그레이션 시작")}</CardTitle>
-            <CardDescription>{t("검증을 통과한 앱만 계획을 만들 수 있습니다.")}</CardDescription>
+            <CardDescription>
+              {t("검증을 통과한 앱은 준비와 데이터 동기화를 자동으로 시작할 수 있습니다.")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {direction ? (

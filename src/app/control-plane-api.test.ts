@@ -57,12 +57,12 @@ const detail = {
     createdAt: app.createdAt,
     createdBy: "user",
     finishedAt: null,
-    status: "PLANNED" as const,
+    status: "RUNNING" as const,
     halt: null,
     reconcileRequested: false,
     rolledBack: [],
   },
-  allowedCommands: ["APPROVE", "ABORT"],
+  allowedCommands: ["HALT", "ABORT"],
   stages: [],
   resources: [],
   traffic: [],
@@ -149,6 +149,8 @@ test("워크플로 생성·명령은 공통 백엔드 경로와 expectedVersion�
     { applicationId: app.id, sourceEnv: "aws", targetEnv: "gcp" },
     "create",
   );
+  expect(result.workflow.status).toBe("RUNNING");
+  expect(result.allowedCommands).not.toContain("APPROVE");
   mock.onPost("/v1/workflows/wf-one/commands").reply((config) => {
     expect(JSON.parse(config.data)).toEqual({
       command: "ROLLBACK_RESOURCE",
@@ -181,6 +183,38 @@ test("선택한 대상 사양은 별도 배포 요청 없이 마이그레이션 
   await createWorkflow({ sourceEnv: "aws", targetEnv: "gcp", targetConfiguration }, "sized-plan");
   expect(mock.history.post.map((request) => request.url)).toEqual(["/v1/workflows"]);
 });
+test.each(["ROLLBACK", "FINALIZE"] as const)(
+  "컷오버 이후 %s 명령은 리소스 선택 없이 전체 작업에 보낸다",
+  async (command) => {
+    const cutover = {
+      ...detail,
+      workflow: { ...detail.workflow, status: "CUTOVER_COMPLETE", currentStage: 7 },
+      allowedCommands: ["ROLLBACK", "FINALIZE"],
+    };
+    mock.onPost("/v1/workflows").reply(201, cutover);
+    const result = await createWorkflow({ sourceEnv: "aws", targetEnv: "gcp" }, "create");
+    expect(result.allowedCommands).toEqual(["ROLLBACK", "FINALIZE"]);
+    mock.onPost("/v1/workflows/wf-one/commands").reply((config) => {
+      expect(JSON.parse(config.data)).toEqual({ command, expectedVersion: 4 });
+      expect(config.headers?.["Idempotency-Key"]).toBe("finish-request");
+      return [
+        200,
+        {
+          ...cutover,
+          workflow: {
+            ...cutover.workflow,
+            status: command === "ROLLBACK" ? "ROLLED_BACK" : "COMPLETED",
+            rollback: command === "ROLLBACK" ? { resource: null } : null,
+          },
+          allowedCommands: [],
+        },
+      ];
+    });
+    const response = await commandWorkflow(result.workflow, command, undefined, "finish-request");
+    expect(response.workflow.status).toBe(command === "ROLLBACK" ? "ROLLED_BACK" : "COMPLETED");
+    expect(response.allowedCommands).toEqual([]);
+  },
+);
 
 test("실제 세션과 workspace 목록을 읽고 로그아웃에 CSRF를 사용한다", async () => {
   mock.onGet("/v1/me").reply(200, {

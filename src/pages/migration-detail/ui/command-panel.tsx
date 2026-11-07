@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CircleCheck, CircleStop, Pause, Play, RotateCcw, ScanSearch } from "lucide-react";
 import {
   type ResourceKind,
-  STAGE_LABELS,
   type Workflow,
   type WorkflowCommand,
   commandWorkflow,
@@ -46,10 +45,11 @@ type Spec = {
 };
 const COMMANDS: Record<CommandName, Spec> = {
   APPROVE: {
-    label: "승인하고 진행",
+    label: "컷오버 승인",
     icon: CircleCheck,
     variant: "default",
-    confirm: "현재 단계를 승인하면 엔진이 다음 작업을 진행합니다.",
+    confirm:
+      "복사와 변경분 동기화가 준비되었습니다. 승인하면 객체 저장소, 앱 트래픽, Redis, DB를 순서대로 전환합니다.",
   },
   HALT: {
     label: "일시 정지",
@@ -70,6 +70,20 @@ const COMMANDS: Record<CommandName, Spec> = {
     confirm:
       "결과가 불명확한 작업을 실제 어댑터 상태와 대조합니다. 대조가 끝나면 재개할 수 있습니다.",
   },
+  ROLLBACK: {
+    label: "롤백",
+    icon: RotateCcw,
+    variant: "outline",
+    confirm:
+      "DB, Redis, 객체 저장소, 앱 트래픽 순서로 원본에 복귀합니다. 중간에 실패하면 멈추고 실패한 지점부터 다시 시도할 수 있습니다.",
+  },
+  FINALIZE: {
+    label: "전환 완료",
+    icon: CircleCheck,
+    variant: "default",
+    confirm:
+      "역방향 동기화와 임시 자원을 정리하고 전환을 완료합니다. 이후에는 이 작업으로 롤백할 수 없습니다. 상시 프록시는 유지합니다.",
+  },
   ROLLBACK_RESOURCE: {
     label: "리소스 되돌리기",
     icon: RotateCcw,
@@ -84,21 +98,10 @@ const COMMANDS: Record<CommandName, Spec> = {
     confirm: "이 마이그레이션을 취소하고 원본 환경 기준으로 정리합니다. 되돌릴 수 없습니다.",
   },
 };
-/**
- * What approving actually commits to at each approval stage. Every cutover keeps reverse sync
- * running, so resources can still go back; only FINALIZE stops reverse sync and removes the way back.
- */
-const APPROVE_CONFIRM: Record<string, string> = {
-  PREPARE:
-    "승인하면 대상 환경을 준비하고 데이터 동기화를 시작합니다. 원본은 그대로 운영되며, 언제든 취소할 수 있습니다.",
-  REDIS_CUTOVER:
-    "승인하면 Redis를 전환하고 이어서 데이터베이스를 전환합니다. 전환 뒤에도 원본으로 역방향 동기화가 계속되어, 문제가 생기면 리소스별로 되돌릴 수 있습니다.",
-  FINALIZE:
-    "승인하면 역방향 동기화를 멈추고 원본 쪽 경로를 정리합니다. 이후에는 원본으로 되돌릴 수 없습니다.",
-};
-const STAGE_ORDER = Object.keys(STAGE_LABELS);
 const ORDER: CommandName[] = [
   "APPROVE",
+  "ROLLBACK",
+  "FINALIZE",
   "RESUME",
   "HALT",
   "RECONCILE",
@@ -176,16 +179,7 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
           ) : (
             <ConfirmButton
               key={name}
-              spec={
-                name === "APPROVE"
-                  ? {
-                      ...COMMANDS.APPROVE,
-                      confirm:
-                        APPROVE_CONFIRM[STAGE_ORDER[workflow.currentStage] ?? ""] ??
-                        COMMANDS.APPROVE.confirm,
-                    }
-                  : COMMANDS[name]
-              }
+              spec={COMMANDS[name]}
               pending={mutation.isPending}
               onConfirm={() => send({ command: name })}
             />
