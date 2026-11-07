@@ -13,7 +13,7 @@ import {
 import type { TelemetryComponent } from "@/entities/telemetry";
 import { t, useLocale } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { ObservationDisclosure, ObservationSection } from "./observation-section";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { QueryNotice, Empty } from "./query-notice";
 import { ResourceObservation } from "./resource-observation";
@@ -26,7 +26,7 @@ function split(weights: Record<string, number> | null | undefined) {
     : t("미확인");
 }
 function NotOffered() {
-  return <Empty>{t("연결된 컨트롤 플레인이 이 관측 정보를 제공하지 않습니다.")}</Empty>;
+  return <Empty>{t("서버 미지원")}</Empty>;
 }
 export function MigrationObservations({
   workspace,
@@ -45,23 +45,19 @@ export function MigrationObservations({
   );
   return (
     <div className="space-y-5">
-      <p className="text-xs text-muted-foreground">
-        {t("복제·전환의 최신 관측입니다. 각 표본의 측정 시각을 확인하세요.")}
-      </p>
       <QueryNotice query={detail} subject={t("마이그레이션 관측")} />
-      {detail.data?.simulation && (
-        <p className="text-xs text-warning">{t("데모 · 예시 관측 데이터입니다.")}</p>
-      )}
+      {detail.data?.simulation && <p className="text-xs text-warning">{t("예시 데이터")}</p>}
       {detail.data &&
         (comp === "app" ? (
-          <>
+          <section aria-label={t("앱 상태")} className="space-y-5">
+            <h2 className="text-base font-semibold">{t("앱")}</h2>
             <Traffic data={detail.data} />
             <Workload data={detail.data} />
-          </>
+          </section>
         ) : resource ? (
           <ResourceObservation resource={resource} />
         ) : (
-          <Empty>{t("이 리소스의 관측값이 없습니다.")}</Empty>
+          <Empty>{t("관측값 없음")}</Empty>
         ))}
       <Telemetry workspace={workspace} id={id} onTrace={onTrace} />
       <ObservationHistory workspace={workspace} id={id} />
@@ -73,16 +69,8 @@ function Traffic({ data }: { data: Detail }) {
   const configured = data.traffic.at(-1);
   const p = data.publicProbe;
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("트래픽 전환과 공용 경로 확인")}</CardTitle>
-        <CardDescription>
-          {t(
-            "LB 설정과 공용 probe의 실제 도착 위치를 구분합니다. probe 비율은 전체 사용자 트래픽 비율이 아닙니다.",
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2">
+      <ObservationSection title={t("트래픽 분배")}>
         <dl>
           <Metric label={t("요청 가중치")}>{split(configured?.requested)}</Metric>
           <Metric label={t("LB 확인 가중치")}>{split(configured?.effectivePercent)}</Metric>
@@ -92,61 +80,58 @@ function Traffic({ data }: { data: Detail }) {
           <Metric label={t("Traffic 작업 ID")}>{value(configured?.adapterOperationId)}</Metric>
           <Metric label={t("작업 상태")}>{value(configured?.operationStatus)}</Metric>
         </dl>
-        <div>
-          {p ? (
-            <>
-              <dl>
-                <Metric label={t("Probe 최신성")}>
-                  <State state={p.freshness} />
-                </Metric>
-                <Metric label={t("관측된 도착 비율")}>{split(p.observedPercent)}</Metric>
-                <Metric label={t("시도 / 위치 확인")}>
-                  {p.total} / {p.knownLocationSamples}
-                </Metric>
-                <Metric label={t("실패 / 시간 초과")}>
-                  {p.failed} / {p.timeouts}
-                </Metric>
-                <Metric label={t("위치 미확인 / 누락")}>
-                  {p.unknownLocation} / {p.missingSamples}
-                </Metric>
-                <Metric label={t("성공 p95 / 최대 간격")}>
-                  {value(p.p95Ms)} ms / {p.maxSampleGapSeconds} s
-                </Metric>
-              </dl>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {when(p.windowStart)} — {when(p.windowEnd)}
-                {!p.enoughSamples && t(" · 확인된 표본 30개 미만")}
+      </ObservationSection>
+      <ObservationSection title={t("프로브 결과")}>
+        {p ? (
+          <>
+            <dl>
+              <Metric label={t("Probe 최신성")}>
+                <State state={p.freshness} />
+              </Metric>
+              <Metric label={t("테스트 요청 도착 비율")}>{split(p.observedPercent)}</Metric>
+              <Metric label={t("시도 / 위치 확인")}>
+                {p.total} / {p.knownLocationSamples}
+              </Metric>
+              <Metric label={t("실패 / 시간 초과")}>
+                {p.failed} / {p.timeouts}
+              </Metric>
+              <Metric label={t("위치 미확인 / 누락")}>
+                {p.unknownLocation} / {p.missingSamples}
+              </Metric>
+              <Metric label={t("성공 p95 / 최대 간격")}>
+                {value(p.p95Ms)} ms / {p.maxSampleGapSeconds} s
+              </Metric>
+            </dl>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {when(p.windowStart)} — {when(p.windowEnd)}
+              {!p.enoughSamples && t(" · 확인된 표본 30개 미만")}
+            </p>
+            {p.failureIntervals.map((failure) => (
+              <p key={failure.firstFailureAt} className="mt-2 text-xs text-destructive">
+                {t("관측 실패 ")}
+                {when(failure.firstFailureAt)} — {when(failure.lastFailureAt)}
+                {t(" · 회복")} {when(failure.recoveredAt)}
               </p>
-              {p.failureIntervals.map((failure) => (
-                <p key={failure.firstFailureAt} className="mt-2 text-xs text-destructive">
-                  {t("관측 실패 ")}
-                  {when(failure.firstFailureAt)} — {when(failure.lastFailureAt)}
-                  {t(" · 회복")} {when(failure.recoveredAt)}
-                </p>
-              ))}
-            </>
-          ) : (
-            <p className="text-muted-foreground">{t("공용 probe가 아직 수집되지 않았습니다.")}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </>
+        ) : (
+          <p className="text-muted-foreground">{t("프로브 데이터 없음")}</p>
+        )}
+      </ObservationSection>
+    </div>
   );
 }
 function Workload({ data }: { data: Detail }) {
   useLocale();
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("앱 업무 확인과 연결 소진")}</CardTitle>
-        <CardDescription>
-          {data.hold.isLive ? t("현재 업무 지시") : t("보관된 업무 지시")} {data.hold.desired}
-          {t(" · 세대")} {data.hold.generation}
-          {t(" · 전체 정지 확인 ")}
-          {when(data.hold.heldSince)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <ObservationSection title={t("앱 상태")}>
+      <p className="text-xs text-muted-foreground">
+        {data.hold.isLive ? t("현재 업무 지시") : t("보관된 업무 지시")} {data.hold.desired}
+        {t(" · 세대")} {data.hold.generation}
+        {t(" · 전체 정지 확인 ")}
+        {when(data.hold.heldSince)}
+      </p>
+      <div className="space-y-5">
         <div className="flex flex-wrap gap-4">
           {data.businessProbes.map((probe) => (
             <div key={probe.env} className="space-y-1">
@@ -156,7 +141,7 @@ function Workload({ data }: { data: Detail }) {
                 <State state={probe.latest ? (probe.latest.passed ? "PASS" : "FAIL") : "UNKNOWN"} />
               </p>
               <p className="text-xs text-muted-foreground">
-                {probe.collectionState === "SKIPPED_HELD" ? t("HOLD 중 검사를 건너뜁니다. ") : ""}
+                {probe.collectionState === "SKIPPED_HELD" ? t("HOLD · 검사 생략 ") : ""}
                 {when(probe.latest?.finishedAt)} {probe.latest?.reason}
               </p>
             </div>
@@ -169,7 +154,7 @@ function Workload({ data }: { data: Detail }) {
               <TableHead>{t("상태")}</TableHead>
               <TableHead>{t("보고 / 기대")}</TableHead>
               <TableHead>{t("업무 in-flight")}</TableHead>
-              <TableHead>WebSocket</TableHead>
+              <TableHead>{t("잔여 WebSocket")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -190,13 +175,8 @@ function Workload({ data }: { data: Detail }) {
             ))}
           </TableBody>
         </Table>
-        <p className="text-xs text-muted-foreground">
-          {t(
-            "WebSocket은 기존 연결의 잔존 수입니다. 신규 HTTP 요청의 도착 위치와 별도로 확인합니다.",
-          )}
-        </p>
-      </CardContent>
-    </Card>
+      </div>
+    </ObservationSection>
   );
 }
 function ObservationHistory({ workspace, id }: { workspace: string; id: string }) {
@@ -204,15 +184,12 @@ function ObservationHistory({ workspace, id }: { workspace: string; id: string }
   const [since] = useState(() => new Date(Date.now() - 5 * 60000).toISOString());
   const history = useQuery(historyQuery(workspace, id, cursor, since));
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("최근 관측 표본")}</CardTitle>
-        <CardDescription>
-          {t("화면 진입 전 5분부터 수집된 표본입니다. 수집 실패도 남습니다.")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {history.error && <QueryNotice query={history} subject={t("관측값")} />}
+    <div>
+      {history.error && <QueryNotice query={history} subject={t("관측 이력")} />}
+      <ObservationDisclosure title={t("관측 이력 · 전체 리소스")}>
+        <p className="text-xs text-muted-foreground">
+          {t("조회 시작")} {when(since)}
+        </p>
         <Table>
           <TableHeader>
             <TableRow>
@@ -236,9 +213,9 @@ function ObservationHistory({ workspace, id }: { workspace: string; id: string }
             ))}
           </TableBody>
         </Table>
-        {history.isPending && <p>{t("표본을 불러오는 중입니다.")}</p>}
+        {history.isPending && <p>{t("조회 중…")}</p>}
         {history.data === null && <NotOffered />}
-        {history.data?.observations.length === 0 && <p>{t("이 구간에 표본이 없습니다.")}</p>}
+        {history.data?.observations.length === 0 && <p>{t("표본 없음")}</p>}
         <Button
           variant="outline"
           disabled={!history.data?.nextCursor}
@@ -246,8 +223,8 @@ function ObservationHistory({ workspace, id }: { workspace: string; id: string }
         >
           {t("다음 표본")}
         </Button>
-      </CardContent>
-    </Card>
+      </ObservationDisclosure>
+    </div>
   );
 }
 const metricNames: Record<string, string> = {
@@ -280,20 +257,10 @@ function Telemetry({
   useLocale();
   const query = useQuery(telemetryQuery(workspace, id));
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle>{t("OTEL 수집 상태와 작업 추적")}</CardTitle>
-        </div>
-        <CardDescription>
-          {t(
-            "Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께 확인하세요.",
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {query.isPending && <p role="status">{t("수집 결과를 불러오는 중입니다.")}</p>}
-        {query.error && <QueryNotice query={query} subject={t("관측값")} />}
+    <div>
+      {query.error && <QueryNotice query={query} subject={t("수집 데이터")} />}
+      <ObservationDisclosure title={t("수집 지표·트레이스 · 전체 리소스")}>
+        {query.isPending && <p role="status">{t("조회 중…")}</p>}
         {query.data === null && <NotOffered />}
         {query.data && (
           <>
@@ -331,7 +298,7 @@ function Telemetry({
                 </TableBody>
               </Table>
             ) : (
-              <p>{t("수집된 메트릭이 없습니다.")}</p>
+              <p>{t("지표 없음")}</p>
             )}
             {query.data.traces.length > 0 ? (
               <Table>
@@ -363,11 +330,11 @@ function Telemetry({
                 </TableBody>
               </Table>
             ) : (
-              <p>{t("수집된 작업 추적이 없습니다.")}</p>
+              <p>{t("트레이스 없음")}</p>
             )}
           </>
         )}
-      </CardContent>
-    </Card>
+      </ObservationDisclosure>
+    </div>
   );
 }

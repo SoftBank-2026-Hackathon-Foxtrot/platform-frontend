@@ -65,7 +65,7 @@ export function MonitoringPage(props: Props) {
         <Empty>
           {props.search.workflow
             ? t("마이그레이션을 찾을 수 없습니다")
-            : t("모니터링할 마이그레이션이 없습니다. 애플리케이션에서 마이그레이션을 등록하세요.")}
+            : t("등록된 마이그레이션 없음")}
           <Button asChild variant="link" className="ml-2">
             <Link to="/applications">{t("애플리케이션")}</Link>
           </Button>
@@ -208,9 +208,11 @@ function MonitoringContent({
             {health.missing.length > 0 &&
               ` · ${health.missing.map((module) => t(module.name)).join(", ")} ${t("수집 없음")}`}
           </Badge>
-          <Badge variant="outline" className="text-muted-foreground">
-            {search.at ? t("선택 시각 기준 30분") : t("최근 30분")}
-          </Badge>
+          {tab !== "obs" && (
+            <Badge variant="outline" className="text-muted-foreground">
+              {search.at ? t("선택 시각 기준 30분") : t("최근 30분")}
+            </Badge>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -230,9 +232,7 @@ function MonitoringContent({
           </Button>
         </div>
       </header>
-      {demo && (
-        <p className="text-xs text-muted-foreground">{t("데모 · 예시 관측 데이터입니다.")}</p>
-      )}
+      {demo && <p className="text-xs text-muted-foreground">{t("예시 데이터")}</p>}
       {collection.error && <QueryNotice query={collection} subject={t("OTEL 수집")} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <ToggleGroup
@@ -254,24 +254,28 @@ function MonitoringContent({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-          <span className="flex items-center gap-2">
-            <SeriesMark side="source" />
-            {t("기존")}
-            <span className="text-muted-foreground">
-              {source} · {source.toLowerCase() === "aws" ? components[search.comp].source : source}
+        {tab !== "obs" && (
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
+            <span className="flex items-center gap-2">
+              <SeriesMark side="source" />
+              {t("기존")}
+              <span className="text-muted-foreground">
+                {source} ·{" "}
+                {source.toLowerCase() === "aws" ? components[search.comp].source : source}
+              </span>
             </span>
-          </span>
-          <span className="flex items-center gap-2">
-            <SeriesMark side="target" />
-            {t("이전")}
-            <span className="text-muted-foreground">
-              {target} · {target.toLowerCase() === "gcp" ? components[search.comp].target : target}
+            <span className="flex items-center gap-2">
+              <SeriesMark side="target" />
+              {t("이전")}
+              <span className="text-muted-foreground">
+                {target} ·{" "}
+                {target.toLowerCase() === "gcp" ? components[search.comp].target : target}
+              </span>
             </span>
-          </span>
-        </div>
+          </div>
+        )}
       </div>
-      {search.side && (
+      {search.side && tab === "mx" && (
         <Button
           variant="outline"
           size="sm"
@@ -289,7 +293,7 @@ function MonitoringContent({
       >
         <TabsList aria-label={t("관측 신호")} className="h-auto max-w-full flex-wrap">
           <TabsTrigger value="obs" className="px-3">
-            {t("마이그레이션 관측")}
+            {t("상태")}
           </TabsTrigger>
           <TabsTrigger value="mx" className="px-3">
             {t("지표")}
@@ -321,9 +325,7 @@ function MonitoringContent({
         </TabsContent>
         <TabsContent value="mx" className="space-y-4">
           {workflow.status === "PLANNED" && (
-            <p className="text-xs text-muted-foreground">
-              {t("마이그레이션 미실행 · 이전 환경의 관측값은 아직 없습니다.")}
-            </p>
+            <p className="text-xs text-muted-foreground">{t("미실행 · 이전 환경 데이터 없음")}</p>
           )}
           <QueryNotice query={series} subject={t("시계열 지표")} />
           {seriesData && (

@@ -17,7 +17,7 @@ export function QueryNotice({
         <AlertTitle>{t("{0} 조회 실패", [subject])}</AlertTitle>
         <AlertDescription>
           {getApiErrorMessage(query.error)}
-          {query.data != null && t(" 이전 값이 표시되어 있다면 최신 상태를 보장하지 않습니다.")}
+          {query.data != null && <p>{t(" 이전 값 표시 중 · 최신 상태 미확인")}</p>}
           <Button variant="outline" onClick={() => void query.refetch()}>
             {t("다시 조회")}
           </Button>
@@ -36,9 +36,7 @@ export function QueryNotice({
     return (
       <Alert>
         <AlertTitle>{t("{0} 미제공", [subject])}</AlertTitle>
-        <AlertDescription>
-          {t("연결된 서버가 이 관측 데이터를 제공하지 않습니다.")}
-        </AlertDescription>
+        <AlertDescription>{t("서버 미지원")}</AlertDescription>
       </Alert>
     );
   return null;

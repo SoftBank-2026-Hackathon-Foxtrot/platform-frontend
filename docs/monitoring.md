@@ -1,10 +1,10 @@
 # 모니터링 대시보드
 
-`/monitoring`에서 workflow의 기존 환경과 이전 환경을 비교한다. 기준 자료는 [monitoring handoff](https://github.com/SuperSon7/migration-monitoring-dashboard-handoff) `29e896b`의 SPEC/NEEDS다. 마이그레이션 상세에는 진행·승인 요약을 남긴다. 복제·동기화 상세, 트래픽 probe, 앱 연결 소진, OTEL 최신 표본·작업 추적, 관측 이력은 모니터링의 `마이그레이션 관측` 탭으로 통합한다. 이 탭은 기존 상세·telemetry·observations API를 그대로 사용한다.
+`/monitoring`에서 workflow의 기존 환경과 이전 환경을 비교한다. 기준 자료는 [monitoring handoff](https://github.com/SuperSon7/migration-monitoring-dashboard-handoff) `29e896b`의 SPEC/NEEDS다. 마이그레이션 상세에는 진행·승인 요약을 남긴다. 복제·동기화 상세, 트래픽 probe, 앱 연결 소진, OTEL 최신 표본·작업 추적, 관측 이력은 모니터링의 `상태` 탭으로 통합한다. 이 탭은 기존 상세·telemetry·observations API를 그대로 사용한다.
 
 ## 화면과 탐색
 
-- 마이그레이션 관측: 선택한 리소스의 최신 복제·검증 상세와 전체 OTEL 표본·추적·관측 이력. 앱 선택 시 트래픽과 연결 소진을 표시한다.
+- 상태: 선택한 리소스의 동기화·경로·검증·전환 조건. 수집 원본과 관측 이력은 펼쳐서 확인한다. 조회 오류는 접힘 상태에서도 표시한다. 앱 선택 시 트래픽과 연결 소진을 표시한다.
 - 지표: 앱·DB·Redis·Object별 4개 차트, 같은 축의 두 계열, 공통 시각 커서.
 - 트레이스: 전체·오류·300ms 초과·이전 환경 필터, 오류 요청 기본 펼침, 스팬 워터폴.
 - 로그: 전체·ERROR·WARN 필터, 메시지/trace ID 검색, 연결 트레이스 열기.

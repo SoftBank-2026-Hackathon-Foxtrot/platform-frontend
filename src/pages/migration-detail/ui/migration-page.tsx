@@ -24,10 +24,10 @@ function ErrorNotice({ error, retry }: { error: Error; retry: () => void }) {
   useLocale();
   return (
     <Alert variant="destructive">
-      <AlertTitle>{t("관측값을 갱신하지 못했습니다")}</AlertTitle>
+      <AlertTitle>{t("갱신 실패")}</AlertTitle>
       <AlertDescription>
         {getApiErrorMessage(error)}
-        {t(" 이전 값이 표시되어 있다면 최신 상태를 보장하지 않습니다.")}
+        {t(" 이전 값 표시 중 · 최신 상태 미확인")}
         <Button variant="outline" onClick={retry}>
           {t("다시 조회")}
         </Button>
@@ -69,7 +69,7 @@ function Workflow({ workspace, id, view, onView }: { workspace: string; id: stri
   useMigrationReturn(workspace, id, view, Boolean(detail.data));
   return (
     <div className="space-y-2">
-      {detail.isPending && <p role="status">{t("관측값을 불러오는 중입니다.")}</p>}
+      {detail.isPending && <p role="status">{t("조회 중…")}</p>}
       {detail.error &&
         (isNotFound(detail.error) ? (
           <Card size="sm">
@@ -321,9 +321,7 @@ function Preparation({ data }: { data: Detail }) {
                 <Metric label={t("결과 기록")}>{when(report.data.observedAt)}</Metric>
               </dl>
             ) : (
-              <p className="text-muted-foreground">
-                {t("실제 실행 결과가 아직 보고되지 않았습니다.")}
-              </p>
+              <p className="text-muted-foreground">{t("실행 결과 대기")}</p>
             )}
           </CardContent>
         </Card>
@@ -399,7 +397,7 @@ function Operations({ data }: { data: Detail }) {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-muted-foreground">{t("아직 실행된 명령이 없습니다.")}</p>
+          <p className="text-muted-foreground">{t("명령 이력 없음")}</p>
         )}
       </CardContent>
     </Card>
@@ -419,8 +417,8 @@ function History({
       </CardHeader>
       <CardContent className="space-y-3">
         {events.error && <ErrorNotice error={events.error} retry={() => void events.refetch()} />}
-        {events.isPending && <p role="status">{t("이벤트를 불러오는 중입니다.")}</p>}
-        {events.data?.events.length === 0 && <p>{t("아직 이벤트가 없습니다.")}</p>}
+        {events.isPending && <p role="status">{t("조회 중…")}</p>}
+        {events.data?.events.length === 0 && <p>{t("이벤트 없음")}</p>}
         <ol className="space-y-3">
           {events.data?.events.map((event) => (
             <li

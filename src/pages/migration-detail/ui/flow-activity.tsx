@@ -37,7 +37,7 @@ export function FlowStory({ data }: { data: Detail }) {
           {paused
             ? t("엔진 정지 · 외부 작업은 계속될 수 있습니다.")
             : waiting
-              ? t("승인 대기 · 확인 후 다음 작업을 시작합니다.")
+              ? t("승인 대기")
               : null}
         </span>
       )}
