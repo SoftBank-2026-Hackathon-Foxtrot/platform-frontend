@@ -55,9 +55,14 @@ export function MigrationPage() {
             단계, 데이터 경로, 전환의 실제 영향을 한곳에서 확인합니다.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <a href={`${apiBaseUrl}/auth/github/start?returnTo=/`}>GitHub 로그인</a>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <a href="/security">이전 보안 · 화면 예시</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href={`${apiBaseUrl}/auth/github/start?returnTo=/`}>GitHub 로그인</a>
+          </Button>
+        </div>
       </header>
       {workflows.isPending && <p role="status">마이그레이션 목록을 불러오는 중입니다.</p>}
       {workflows.error && (
