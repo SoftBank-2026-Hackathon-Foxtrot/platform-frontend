@@ -1,0 +1,884 @@
+{
+  "preparation": {
+    "INFRA": {
+      "data": {
+        "workflowId": "wf-ebb1b183",
+        "stage": "APPLY",
+        "status": "SUCCEEDED",
+        "vmId": "fixture-target-vm",
+        "observedAt": "2026-11-07T02:30:44.867Z",
+        "observed": {
+          "observedAt": "2026-11-07T02:30:44.867Z"
+        },
+        "changes": {
+          "create": 4,
+          "update": 0,
+          "delete": 0,
+          "replace": 0
+        }
+      },
+      "observation": {
+        "resource": "INFRA",
+        "collectedAt": "2026-11-07T02:30:44.867Z",
+        "collectionError": null,
+        "lastSuccessAt": "2026-11-07T02:30:44.867Z",
+        "lastProgressAt": null,
+        "freshness": "FRESH"
+      }
+    },
+    "COMPUTE": {
+      "data": {
+        "workflowId": "wf-ebb1b183",
+        "stage": "SYNCING",
+        "status": "OK",
+        "vmId": "fixture-target-vm",
+        "observedAt": "2026-11-07T02:30:44.867Z",
+        "observed": {
+          "observedAt": "2026-11-07T02:30:44.867Z"
+        },
+        "imageId": "sha256:fixture",
+        "check": "target-web-probe-passed",
+        "operations": []
+      },
+      "observation": {
+        "resource": "COMPUTE",
+        "collectedAt": "2026-11-07T02:30:44.867Z",
+        "collectionError": null,
+        "lastSuccessAt": "2026-11-07T02:30:44.867Z",
+        "lastProgressAt": null,
+        "freshness": "FRESH"
+      }
+    }
+  },
+  "publicProbe": null,
+  "businessProbes": [
+    {
+      "env": "aws",
+      "latest": {
+        "probeId": "evidence:aws:113689",
+        "env": "aws",
+        "passed": true,
+        "reason": "",
+        "steps": {},
+        "cleaned": false,
+        "startedAt": "2026-11-07T02:30:44.867609Z",
+        "finishedAt": "2026-11-07T02:30:44.867609Z"
+      },
+      "freshness": "FRESH",
+      "collectionState": "ENABLED"
+    },
+    {
+      "env": "gcp",
+      "latest": {
+        "probeId": "evidence:gcp:6f7ea9",
+        "env": "gcp",
+        "passed": true,
+        "reason": "",
+        "steps": {},
+        "cleaned": false,
+        "startedAt": "2026-11-07T02:30:44.867609Z",
+        "finishedAt": "2026-11-07T02:30:44.867609Z"
+      },
+      "freshness": "FRESH",
+      "collectionState": "ENABLED"
+    }
+  ],
+  "commands": [
+    {
+      "resource": "OBJECT_STORAGE",
+      "action": "PREPARE",
+      "phase": "DONE",
+      "operationId": "op-999a20c5",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-999a20c5",
+        "migrationId": "mig-59896ec3",
+        "action": "PREPARE",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "REDIS",
+      "action": "PREPARE",
+      "phase": "DONE",
+      "operationId": "op-09e35473",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-09e35473",
+        "migrationId": "mig-c0c04f2f",
+        "action": "PREPARE",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "DATABASE",
+      "action": "PREPARE",
+      "phase": "DONE",
+      "operationId": "op-dd8784b6",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-dd8784b6",
+        "migrationId": "mig-d61cceef",
+        "action": "PREPARE",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "OBJECT_STORAGE",
+      "action": "START_SYNC",
+      "phase": "DONE",
+      "operationId": "op-b087c0e1",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-b087c0e1",
+        "migrationId": "mig-59896ec3",
+        "action": "START_SYNC",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "REDIS",
+      "action": "START_SYNC",
+      "phase": "DONE",
+      "operationId": "op-22477a96",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-22477a96",
+        "migrationId": "mig-c0c04f2f",
+        "action": "START_SYNC",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "DATABASE",
+      "action": "START_SYNC",
+      "phase": "DONE",
+      "operationId": "op-b0b9b9f7",
+      "status": "SUCCEEDED",
+      "transitionId": null,
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-b0b9b9f7",
+        "migrationId": "mig-d61cceef",
+        "action": "START_SYNC",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "OBJECT_STORAGE",
+      "action": "QUIESCE",
+      "phase": "DONE",
+      "operationId": "op-e54cd3d9",
+      "status": "SUCCEEDED",
+      "transitionId": "tx-wf-ebb1b183-object",
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-e54cd3d9",
+        "migrationId": "mig-59896ec3",
+        "action": "QUIESCE",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "OBJECT_STORAGE",
+      "action": "CUTOVER",
+      "phase": "DONE",
+      "operationId": "op-bff6d023",
+      "status": "SUCCEEDED",
+      "transitionId": "tx-wf-ebb1b183-object",
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-bff6d023",
+        "migrationId": "mig-59896ec3",
+        "action": "CUTOVER",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    },
+    {
+      "resource": "OBJECT_STORAGE",
+      "action": "RESUME",
+      "phase": "DONE",
+      "operationId": "op-be98f414",
+      "status": "SUCCEEDED",
+      "transitionId": "tx-wf-ebb1b183-object",
+      "attempt": 1,
+      "errorCode": null,
+      "observation": {
+        "operationId": "op-be98f414",
+        "migrationId": "mig-59896ec3",
+        "action": "RESUME",
+        "status": "SUCCEEDED",
+        "confirmedChanges": []
+      }
+    }
+  ],
+  "workflow": {
+    "id": "wf-ebb1b183",
+    "application": "LOCAL TEST FIXTURE",
+    "sourceEnv": "aws",
+    "targetEnv": "gcp",
+    "status": "RUNNING",
+    "currentStage": 3,
+    "approvedThrough": 0,
+    "version": 6,
+    "retryEpoch": 0,
+    "createdBy": "tester",
+    "createdAt": "2026-11-07T02:29:44.867609Z",
+    "finishedAt": null,
+    "halt": null,
+    "rollback": null,
+    "reconcileRequested": false,
+    "reconcileCount": 0,
+    "rolledBack": []
+  },
+  "allowedCommands": ["HALT"],
+  "stages": [
+    {
+      "index": 0,
+      "kind": "PREPARE",
+      "status": "PASSED",
+      "step": "",
+      "detail": "",
+      "startedAt": "2026-11-07T02:29:45.867609Z",
+      "finishedAt": "2026-11-07T02:29:52.867609Z"
+    },
+    {
+      "index": 1,
+      "kind": "SYNC",
+      "status": "PASSED",
+      "step": "",
+      "detail": "",
+      "startedAt": "2026-11-07T02:29:53.867609Z",
+      "finishedAt": "2026-11-07T02:30:00.867609Z"
+    },
+    {
+      "index": 2,
+      "kind": "OBJECT_CUTOVER",
+      "status": "PASSED",
+      "step": "VERIFY",
+      "detail": "",
+      "startedAt": "2026-11-07T02:30:01.867609Z",
+      "finishedAt": "2026-11-07T02:30:44.867609Z"
+    },
+    {
+      "index": 3,
+      "kind": "CANARY",
+      "status": "PENDING",
+      "step": "",
+      "detail": "",
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "index": 4,
+      "kind": "REDIS_CUTOVER",
+      "status": "PENDING",
+      "step": "",
+      "detail": "",
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "index": 5,
+      "kind": "DATABASE_CUTOVER",
+      "status": "PENDING",
+      "step": "",
+      "detail": "",
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "index": 6,
+      "kind": "TRAFFIC",
+      "status": "PENDING",
+      "step": "",
+      "detail": "",
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "index": 7,
+      "kind": "FINALIZE",
+      "status": "PENDING",
+      "step": "",
+      "detail": "",
+      "startedAt": null,
+      "finishedAt": null
+    }
+  ],
+  "resources": [
+    {
+      "progress": {
+        "completed": null,
+        "total": null,
+        "unit": "keys"
+      },
+      "checks": [
+        {
+          "code": "RESOURCE_HEALTH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:RESOURCE_HEALTH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "PASS",
+            "reasons": []
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "ROUTE_MATCH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:ROUTE_MATCH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["ROUTE_MISMATCH"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "WORKLOAD_RUNNING",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:WORKLOAD_RUNNING",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "BUSINESS_PROBE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:BUSINESS_PROBE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "FOLLOWUP_COMPLETE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:FOLLOWUP_COMPLETE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["NOT_YET"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "STABILITY_WINDOW",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:STABILITY_WINDOW",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["NOT_YET"]
+          },
+          "currentResult": "UNKNOWN"
+        }
+      ],
+      "rollback": {
+        "method": "DIRECT",
+        "reasons": []
+      },
+      "businessWriteAccess": "SOURCE_ONLY",
+      "details": {
+        "database": {
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "observationAvailable": true,
+          "proxyPaused": false,
+          "sourceWriterSessions": 2,
+          "targetWriterSessions": 0,
+          "targetReachable": true,
+          "accessEvidence": "LIVE",
+          "verification": null
+        }
+      },
+      "replication": null,
+      "routing": null,
+      "observation": {
+        "resource": "DATABASE",
+        "collectedAt": "2026-11-07T02:30:44.867Z",
+        "collectionError": null,
+        "lastSuccessAt": "2026-11-07T02:30:44.867Z",
+        "lastProgressAt": null,
+        "freshness": "FRESH"
+      },
+      "transitionId": null,
+      "activeOperationId": null,
+      "kind": "DATABASE",
+      "migrationId": "mig-d61cceef",
+      "lifecycle": "READY",
+      "health": "OK",
+      "route": "SOURCE",
+      "phase": "fake.ready",
+      "targetWritesPossible": false,
+      "readiness": {
+        "cutover": {
+          "result": "PASS",
+          "reasons": []
+        },
+        "resume": {
+          "result": "FAIL",
+          "reasons": ["NOT_YET"]
+        },
+        "rollback": {
+          "result": "FAIL",
+          "reasons": ["NOT_NOW"]
+        },
+        "advance": {
+          "result": "FAIL",
+          "reasons": ["RESOURCE_NOT_ACTIVE"]
+        }
+      },
+      "observedAt": "2026-11-07T02:30:44.867Z"
+    },
+    {
+      "progress": {
+        "completed": null,
+        "total": null,
+        "unit": "keys"
+      },
+      "checks": [
+        {
+          "code": "RESOURCE_HEALTH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:RESOURCE_HEALTH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "PASS",
+            "reasons": []
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "ROUTE_MATCH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:ROUTE_MATCH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["ROUTE_MISMATCH"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "WORKLOAD_RUNNING",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:WORKLOAD_RUNNING",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "BUSINESS_PROBE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:BUSINESS_PROBE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "FOLLOWUP_COMPLETE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:FOLLOWUP_COMPLETE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["NOT_YET"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "STABILITY_WINDOW",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:STABILITY_WINDOW",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": null,
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["NOT_YET"]
+          },
+          "currentResult": "UNKNOWN"
+        }
+      ],
+      "rollback": {
+        "method": "DIRECT",
+        "reasons": []
+      },
+      "businessWriteAccess": "SOURCE_ONLY",
+      "details": {
+        "redis": {
+          "dataRoute": "SOURCE",
+          "producerRoute": "SOURCE",
+          "consumerRoute": "SOURCE",
+          "sourceConsumerAccess": "BLOCKED",
+          "drainStatus": "NOT_STARTED",
+          "sync": {
+            "backlog": 4,
+            "observedAt": "2026-11-07T02:30:44.867Z",
+            "direction": "FORWARD",
+            "copied": 2314,
+            "oldestDirtyAgeMs": 40,
+            "epoch": "test-worker",
+            "verification": {
+              "method": "values",
+              "checkedCount": 2300,
+              "mismatchCount": 0,
+              "valid": true
+            }
+          },
+          "proxy": {
+            "paused": false,
+            "inflight_writes": 1,
+            "open_tx": 0,
+            "last_pause_ms": 12,
+            "observedAt": "2026-11-07T02:30:44.867Z"
+          }
+        }
+      },
+      "replication": null,
+      "routing": null,
+      "observation": {
+        "resource": "REDIS",
+        "collectedAt": "2026-11-07T02:30:44.867Z",
+        "collectionError": null,
+        "lastSuccessAt": "2026-11-07T02:30:44.867Z",
+        "lastProgressAt": null,
+        "freshness": "FRESH"
+      },
+      "transitionId": null,
+      "activeOperationId": null,
+      "kind": "REDIS",
+      "migrationId": "mig-c0c04f2f",
+      "lifecycle": "READY",
+      "health": "OK",
+      "route": "SOURCE",
+      "phase": "fake.ready",
+      "targetWritesPossible": false,
+      "readiness": {
+        "cutover": {
+          "result": "PASS",
+          "reasons": []
+        },
+        "resume": {
+          "result": "FAIL",
+          "reasons": ["NOT_YET"]
+        },
+        "rollback": {
+          "result": "FAIL",
+          "reasons": ["NOT_NOW"]
+        },
+        "advance": {
+          "result": "UNKNOWN",
+          "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+        }
+      },
+      "observedAt": "2026-11-07T02:30:44.867Z"
+    },
+    {
+      "progress": {
+        "completed": null,
+        "total": null,
+        "unit": "keys"
+      },
+      "checks": [
+        {
+          "code": "RESOURCE_HEALTH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:RESOURCE_HEALTH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "PASS",
+            "reasons": []
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "ROUTE_MATCH",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:ROUTE_MATCH",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "FAIL",
+            "reasons": ["ROUTE_MISMATCH"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "WORKLOAD_RUNNING",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:WORKLOAD_RUNNING",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "BUSINESS_PROBE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:BUSINESS_PROBE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "UNKNOWN",
+            "reasons": ["ORCHESTRATOR_EVIDENCE_REQUIRED"]
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "FOLLOWUP_COMPLETE",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:FOLLOWUP_COMPLETE",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "PASS",
+            "reasons": []
+          },
+          "currentResult": "UNKNOWN"
+        },
+        {
+          "code": "STABILITY_WINDOW",
+          "stage": "ADVANCE",
+          "required": true,
+          "evidenceRef": "evidence:STABILITY_WINDOW",
+          "observedAt": "2026-11-07T02:30:44.867Z",
+          "validUntil": "2026-11-07T02:30:44.867Z",
+          "transitionId": "tx-wf-ebb1b183-object",
+          "topologyRevision": 1,
+          "decision": {
+            "result": "PASS",
+            "reasons": []
+          },
+          "currentResult": "UNKNOWN"
+        }
+      ],
+      "rollback": {
+        "method": "DIRECT",
+        "reasons": []
+      },
+      "businessWriteAccess": "SOURCE_ONLY",
+      "details": {
+        "object": {
+          "appsLive": 12,
+          "lastSuccessfulSyncAt": "2026-11-07T02:30:44.867Z",
+          "initialCopyObservedAt": "2026-11-07T02:30:44.867Z",
+          "forwardObservedAt": "2026-11-07T02:30:44.867Z",
+          "apps": {
+            "generation": 1,
+            "live": 12,
+            "acked": 12,
+            "waiting": 0,
+            "recovering": false,
+            "observedAt": "2026-11-07T02:30:44.867Z"
+          },
+          "readiness": {},
+          "expectedApps": 12
+        }
+      },
+      "replication": {
+        "forward": {
+          "backlog": 0
+        },
+        "reverse": {
+          "backlog": 0
+        },
+        "initialCopy": {
+          "completed": 120,
+          "total": 120,
+          "bytes": 67108864,
+          "totalBytes": 67108864
+        }
+      },
+      "routing": null,
+      "observation": {
+        "resource": "OBJECT_STORAGE",
+        "collectedAt": "2026-11-07T02:30:44.867Z",
+        "collectionError": null,
+        "lastSuccessAt": "2026-11-07T02:30:44.867Z",
+        "lastProgressAt": null,
+        "freshness": "FRESH"
+      },
+      "transitionId": "tx-wf-ebb1b183-object",
+      "activeOperationId": null,
+      "kind": "OBJECT_STORAGE",
+      "migrationId": "mig-59896ec3",
+      "lifecycle": "ACTIVE",
+      "health": "OK",
+      "route": "MIXED",
+      "phase": "fake.active",
+      "targetWritesPossible": true,
+      "readiness": {
+        "cutover": {
+          "result": "FAIL",
+          "reasons": ["NOT_YET"]
+        },
+        "resume": {
+          "result": "FAIL",
+          "reasons": ["NOT_YET"]
+        },
+        "rollback": {
+          "result": "PASS",
+          "reasons": []
+        },
+        "advance": {
+          "result": "FAIL",
+          "reasons": ["ROUTE_MISMATCH"]
+        }
+      },
+      "observedAt": "2026-11-07T02:30:44.867Z"
+    }
+  ],
+  "traffic": [],
+  "hold": {
+    "isLive": true,
+    "observedAt": "2026-11-07T02:30:44.867609Z",
+    "requestedAt": null,
+    "releasedAt": null,
+    "desired": "RUN",
+    "generation": 0,
+    "heldSince": null,
+    "actors": [
+      {
+        "activeWebSockets": null,
+        "actorId": "goods-aws-api",
+        "state": "RUNNING",
+        "inFlight": 0,
+        "reported": 4,
+        "expected": 4,
+        "observedAt": "2026-11-07T02:30:44.867609Z"
+      },
+      {
+        "activeWebSockets": null,
+        "actorId": "goods-aws-worker",
+        "state": "RUNNING",
+        "inFlight": 0,
+        "reported": 2,
+        "expected": 2,
+        "observedAt": "2026-11-07T02:30:44.867609Z"
+      },
+      {
+        "activeWebSockets": null,
+        "actorId": "goods-gcp-api",
+        "state": "RUNNING",
+        "inFlight": 0,
+        "reported": 4,
+        "expected": 4,
+        "observedAt": "2026-11-07T02:30:44.867609Z"
+      },
+      {
+        "activeWebSockets": null,
+        "actorId": "goods-gcp-worker",
+        "state": "RUNNING",
+        "inFlight": 0,
+        "reported": 2,
+        "expected": 2,
+        "observedAt": "2026-11-07T02:30:44.867609Z"
+      }
+    ]
+  }
+}

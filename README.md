@@ -70,3 +70,7 @@ GitHub 로그인·앱 등록·마이그레이션 기능은 아직 구현하지 �
 `src/app/mocks`는 Axios Mock Adapter로 세션·workspace·앱·배포·마이그레이션 API를 모의 실행합니다. 데모 데이터만 브라우저의 `foxtrot-platform-demo-v1` 키에 저장합니다. 실제 GitHub·클라우드·DMS 요청과 비밀값 저장은 하지 않습니다. `VITE_API_MODE=real`에서는 모의 실행기를 연결하지 않습니다.
 
 모의 실행기는 등록값·중복 이름·revision·멱등 키·실행 충돌을 검사합니다. 리소스마다 전환 승인을 기다리고, 응답 유실은 `UNKNOWN`에서 멈춥니다. 역방향 경로가 없으면 전환 후 복귀를 차단합니다. 단위 검사는 이 상태 전이와 새 실행기에서의 데이터 복원을 확인합니다.
+
+## 마이그레이션 관측
+
+기본 화면에서 컨트롤 플레인의 workflow를 선택할 수 있습니다. 표시 항목·API 연결·검사는 [관측 화면](docs/migration-observability.md)을 참고하세요.
