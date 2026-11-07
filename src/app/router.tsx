@@ -16,6 +16,7 @@ import { LoginPage } from "@/pages/login";
 import { MigrationPage } from "@/pages/migration-detail";
 import { MonitoringPage, monitoringSearchSchema } from "@/pages/monitoring";
 import { MigrationsPage } from "@/pages/migrations";
+import { SecurityPage } from "@/pages/security";
 import { SettingsPage } from "@/pages/settings";
 import { getApiErrorMessage, isNotFound } from "@/shared/api";
 import { Button } from "@/shared/ui/button";
@@ -108,6 +109,11 @@ const migrationRoute = createRoute({
     return <MigrationPage key={id} id={id} />;
   },
 });
+const securityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/security",
+  component: SecurityPage,
+});
 const monitoringRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/monitoring",
@@ -142,6 +148,7 @@ export const router = createRouter({
     migrationRoute,
     monitoringRoute,
     settingsRoute,
+    securityRoute,
   ]),
 });
 declare module "@tanstack/react-router" {

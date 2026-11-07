@@ -313,6 +313,8 @@ export function createDemoBackend(storage: StorageLike, now = Date.now) {
       Object.assign(state, seed(time), { signedIn: true });
       return null;
     }
+    // The security preview never creates real workflows when its local approval is clicked.
+    if (path === "/v1/workflows" && method === "get") return [];
     if (path === `/v1/workspaces/${state.workspace.id}/repositories` && method === "get")
       return state.workspace.githubConnected ? repositories : [];
     if (path === `/v1/workspaces/${state.workspace.id}`) {

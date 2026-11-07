@@ -38,6 +38,7 @@ beforeEach(() => {
 });
 
 test("로그아웃 후 업무 조회와 이전 명령 재생을 거절한다", () => {
+  expect(api.handle("get", "/v1/workflows")).toEqual([200, []]);
   const m = start();
   api.handle(
     "post",
@@ -47,6 +48,7 @@ test("로그아웃 후 업무 조회와 이전 명령 재생을 거절한다", (
   );
   api.handle("post", "/auth/logout");
   expect(api.handle("get", "/v1/applications")[0]).toBe(401);
+  expect(api.handle("get", "/v1/workflows")[0]).toBe(401);
   expect(
     api.handle(
       "post",
