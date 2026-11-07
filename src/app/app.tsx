@@ -1,13 +1,13 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 
-import { OverviewPage } from "@/pages/overview";
+import { MigrationPage } from "@/pages/migration-detail";
 
 import { queryClient } from "./config/query-client";
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <OverviewPage />
+      <MigrationPage />
     </QueryClientProvider>
   );
 }
