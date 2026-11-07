@@ -7,6 +7,7 @@ export const reviewSchema = z.object({
   revision: z.number().int().nonnegative(),
   application: z.string(),
   mode: z.enum(["cloud", "fixture"]),
+  readOnly: z.boolean().default(true),
   phase: z.enum([
     "idle",
     "scanning",
@@ -55,6 +56,7 @@ export type Action = "scan" | "plan" | "apply" | "verify";
 export const busyReview = (review: Review) =>
   ["scanning", "applying", "verifying"].includes(review.phase);
 export const canContinue = (review: Review, now = Date.now()) =>
+  !review.readOnly &&
   review.uiCanContinue &&
   review.phase === "verified" &&
   review.appReady === true &&

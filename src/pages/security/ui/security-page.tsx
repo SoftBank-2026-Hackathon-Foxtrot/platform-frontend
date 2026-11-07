@@ -35,6 +35,7 @@ const titles: Record<Review["phase"], string> = {
   error: "처리 결과 확인 필요",
 };
 function nextAction(review: Review): { action: Action; label: string } {
+  if (review.readOnly) return { action: "scan", label: "권한 조회" };
   if (review.phase === "gap" && review.appReady) return { action: "plan", label: "변경안 확인" };
   if (review.phase === "plan") return { action: "apply", label: "변경안 보기" };
   if (["applied", "matched", "verified"].includes(review.phase))
@@ -102,6 +103,7 @@ export function SecurityPage() {
           <Badge variant="outline">
             {t(review.mode === "fixture" ? "예시 데이터" : "클라우드 조회")}
           </Badge>
+          {review.readOnly && <Badge variant="outline">{t("조회 전용")}</Badge>}
           {review.mode === "fixture" && <p>{t("실제 클라우드 변경 없음")}</p>}
         </div>
         <Button variant="ghost" size="sm" disabled={busy} onClick={() => run("scan")}>
@@ -143,7 +145,7 @@ export function SecurityPage() {
               className="aria-disabled:opacity-50"
               onClick={() => {
                 if (busy) return;
-                if (review.phase === "plan") {
+                if (!review.readOnly && review.phase === "plan") {
                   setSelected("object");
                   requestAnimationFrame(() => {
                     const title = document.getElementById("security-plan-title");
@@ -165,20 +167,22 @@ export function SecurityPage() {
             </Button>
           </div>
         </div>
-        <ol className="security-steps" aria-label={t("보안 검토 단계")}>
-          {["비교", "변경안", "재검사", "완료"].map((label, index) => (
-            <li
-              key={label}
-              className={index < step ? "is-complete" : index === step ? "is-current" : ""}
-              aria-current={index === step ? "step" : undefined}
-            >
-              <span className="security-step-number">
-                {index < step ? <Check size={12} aria-hidden="true" /> : index + 1}
-              </span>
-              {t(label)}
-            </li>
-          ))}
-        </ol>
+        {!review.readOnly && (
+          <ol className="security-steps" aria-label={t("보안 검토 단계")}>
+            {["비교", "변경안", "재검사", "완료"].map((label, index) => (
+              <li
+                key={label}
+                className={index < step ? "is-complete" : index === step ? "is-current" : ""}
+                aria-current={index === step ? "step" : undefined}
+              >
+                <span className="security-step-number">
+                  {index < step ? <Check size={12} aria-hidden="true" /> : index + 1}
+                </span>
+                {t(label)}
+              </li>
+            ))}
+          </ol>
+        )}
       </Card>
       <div role="status" aria-live="polite" className="sr-only">
         {t(titles[review.phase])}
@@ -247,23 +251,25 @@ export function SecurityPage() {
           )}
         </Card>
       </div>
-      <div className="security-continue">
-        <div>
-          <p className="text-sm font-medium">
-            {t(ready ? "재검사 완료" : "권한·앱 상태 재검사 필요")}
-          </p>
+      {!review.readOnly && (
+        <div className="security-continue">
+          <div>
+            <p className="text-sm font-medium">
+              {t(ready ? "재검사 완료" : "권한·앱 상태 재검사 필요")}
+            </p>
+          </div>
+          {ready ? (
+            <Button asChild>
+              <Link to="/migrations">
+                {t("마이그레이션 목록")}
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          ) : (
+            <Button disabled>{t("마이그레이션 목록")}</Button>
+          )}
         </div>
-        {ready ? (
-          <Button asChild>
-            <Link to="/migrations">
-              {t("마이그레이션 목록")}
-              <ArrowRight aria-hidden="true" />
-            </Link>
-          </Button>
-        ) : (
-          <Button disabled>{t("마이그레이션 목록")}</Button>
-        )}
-      </div>
+      )}
       <p className="security-scope-note">{t("검사 범위: AWS 지정 정책 · GCP 버킷 직접 권한")}</p>
     </div>
   );

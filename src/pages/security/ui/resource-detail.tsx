@@ -72,7 +72,7 @@ export function ResourceDetail({
           </div>
         ) : (
           <>
-            {review.plan && (
+            {review.plan && !review.readOnly && (
               <section className="security-plan" aria-labelledby="security-plan-title">
                 <h3
                   id="security-plan-title"
