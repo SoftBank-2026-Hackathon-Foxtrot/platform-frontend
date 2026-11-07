@@ -1641,4 +1641,8 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Replicate changes",
     ja: "変更データを複製",
   },
+  "복제 실행 미확인": {
+    en: "Replication activity unconfirmed",
+    ja: "複製の実行は未確認",
+  },
 };

@@ -8,6 +8,28 @@ import { proxyActivity } from "./module-detail-model";
 import { setLocale } from "@/shared/lib/i18n";
 
 describe("transient module detail nodes", () => {
+  it("animates reported copy paths through expanded worker nodes and freezes uncertain observations", () => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    data.workflow.status = "RUNNING";
+    data.workflow.currentStage = 2;
+    data.stages.find((s) => s.index === 2)!.status = "RUNNING";
+    const object = data.resources.find((r) => r.kind === "OBJECT_STORAGE")!;
+    object.lifecycle = "ACTIVE";
+    object.observation.freshness = "FRESH";
+    object.replication = { forward: { state: "RUNNING" } };
+    const render = (suspended = false) =>
+      renderToStaticMarkup(createElement(TransitionDiagram, { data, suspended }));
+    expect(render().match(/data-replication-packet=/g)).toHaveLength(8);
+    object.replication.reverse = { state: "RUNNING" };
+    expect(render().match(/data-replication-packet=/g)).toHaveLength(16);
+    expect(render(true)).not.toContain("data-replication-packet=");
+    object.observation.freshness = "STALE";
+    expect(render()).not.toContain("data-replication-packet=");
+    object.observation.freshness = "FRESH";
+    object.replication = undefined;
+    expect(render()).not.toContain("data-replication-packet=");
+    expect(render()).toContain("복제 실행 미확인");
+  });
   it.each(["en", "ja"] as const)("translates module responsibilities in %s", (locale) => {
     const data = detailSchema.parse(structuredClone(fixture));
     data.workflow.status = "RUNNING";

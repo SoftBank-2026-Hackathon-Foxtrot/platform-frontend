@@ -75,7 +75,7 @@ const CSS = `
 .migration-stack .copy-link { fill:none; stroke:var(--muted-foreground); stroke-width:1.2; stroke-dasharray:3 6; opacity:.3; }
 .migration-stack .copy-link.active { stroke:var(--info); stroke-width:2; opacity:1; }
 .migration-stack .copy-link.moving { stroke-dasharray:7 7; animation:copy-dashes 1s linear infinite; }
-.migration-stack .copy-packet { fill:var(--info); offset-distance:0%; animation:request-travel 2s linear infinite; }
+.migration-stack .copy-packet { fill:var(--info); filter:drop-shadow(0 0 3px var(--info)); offset-distance:0%; animation:request-travel 2s linear infinite; }
 .migration-stack .copy-label { font-size:11px; font-weight:600; }
 .migration-stack .module-detail-node { animation:module-detail-reveal .2s ease-out; }
 @keyframes module-detail-reveal { from { opacity:0; } to { opacity:1; } }
@@ -184,6 +184,13 @@ export function TransitionDiagram({
   const expandedTop = expanded >= 0 ? rows[expanded]! : 0;
   const expandedResource = data.resources.find((item) => item.kind === expandedItem?.kind);
   const detailFlow = resourceFlow(data, expandedResource);
+  const detailCopyLabel =
+    !detailFlow.copying &&
+    !detailFlow.stale &&
+    !detailFlow.failed &&
+    expandedResource?.lifecycle !== "COMPLETED"
+      ? "복제 실행 미확인"
+      : detailFlow.label;
   const proxy = proxyActivity(data, expandedResource, suspended);
   const proxyLabel = proxy.stale
     ? t("관측 갱신 대기")
@@ -249,7 +256,7 @@ export function TransitionDiagram({
                   {t("저장소 간 변경 데이터를 복제합니다.")}
                 </p>
                 <p className="mt-1 text-info">
-                  {t(suspended ? "관측 갱신 대기" : detailFlow.label)}
+                  {t(suspended ? "관측 갱신 대기" : detailCopyLabel)}
                 </p>
                 <p className="mt-1 text-[10px] text-muted-foreground">{copyDirection}</p>
                 <p className="mt-1 text-[10px] text-muted-foreground">
@@ -406,6 +413,7 @@ export function TransitionDiagram({
                           key={item.kind}
                           data-copy-link={item.kind}
                           data-module-detail-edges={item.kind}
+                          data-copy-moving={flow.moving}
                         >
                           <path
                             className="edge control"
@@ -451,17 +459,39 @@ export function TransitionDiagram({
                               ? `M750 ${top + 44} H710 V${top + 98} H646`
                               : `M646 ${top + 98} H710 V${top + 44} H750`,
                           ].map((path, line) => (
-                            <path
-                              key={line}
-                              d={path}
-                              className={
-                                "copy-link " +
-                                (flow.copying && !flow.stale ? "active " : "") +
-                                (flow.moving ? "moving" : "")
-                              }
-                              markerEnd={flow.copying ? arrow : undefined}
-                              markerStart={flow.forward && flow.reverse ? arrow : undefined}
-                            />
+                            <g key={line}>
+                              <path
+                                d={path}
+                                className={
+                                  "copy-link " +
+                                  (flow.copying && !flow.stale ? "active " : "") +
+                                  (flow.moving ? "moving" : "")
+                                }
+                                markerEnd={flow.copying ? arrow : undefined}
+                                markerStart={flow.forward && flow.reverse ? arrow : undefined}
+                              />
+                              {flow.moving &&
+                                (flow.forward && flow.reverse ? [false, true] : [false]).flatMap(
+                                  (reverse) =>
+                                    [0, 1, 2, 3].map((packet) => (
+                                      <rect
+                                        key={`${reverse}-${packet}`}
+                                        data-replication-packet={item.kind}
+                                        className="copy-packet"
+                                        width="8"
+                                        height="5"
+                                        x="-4"
+                                        y="-2.5"
+                                        rx="1"
+                                        style={{
+                                          offsetPath: `path("${path}")`,
+                                          animationDelay: `${-packet * 0.5 - line * 0.25}s`,
+                                          animationDirection: reverse ? "reverse" : "normal",
+                                        }}
+                                      />
+                                    )),
+                                )}
+                            </g>
                           ))}
                           <text className="edge-label" x="540" y={top + 145} textAnchor="middle">
                             {transferMetric(resource)}
@@ -555,7 +585,13 @@ export function TransitionDiagram({
                       icon="server"
                       name={expandedItem.kind === "REDIS" ? "Sync Worker" : "데이터 복제"}
                       description={t("변경 데이터 복제")}
-                      sub={suspended || detailFlow.stale ? t("관측 갱신 대기") : copyDirection}
+                      sub={
+                        suspended || detailFlow.stale
+                          ? t("관측 갱신 대기")
+                          : detailFlow.copying
+                            ? copyDirection
+                            : t(detailCopyLabel)
+                      }
                       motion={!suspended && detailFlow.moving ? "copying" : undefined}
                       stale={detailFlow.stale}
                     />
