@@ -10,7 +10,7 @@ import {
   resourceFlow,
   trafficFlow,
 } from "./flow-model";
-import { STACK_ICONS } from "./stack-icons";
+import { STACK_ICONS } from "@/shared/lib/stack-icons";
 import { activeModule, proxyActivity, runningStreams, STREAM_NAMES } from "./module-detail-model";
 import "./flow-visuals.css";
 

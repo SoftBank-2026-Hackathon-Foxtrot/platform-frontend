@@ -3,7 +3,12 @@ import type { ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CloudIcon, LogOut, Moon, Sun } from "lucide-react";
-import { RiArrowLeftRightFill, RiHomeFill, RiSettings3Fill } from "react-icons/ri";
+import {
+  RiArrowLeftRightFill,
+  RiHomeFill,
+  RiSettings3Fill,
+  RiShieldCheckFill,
+} from "react-icons/ri";
 import { type Session, logout } from "@/entities/session";
 import { setTheme, useTheme } from "@/shared/lib/theme";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
@@ -28,6 +33,7 @@ import {
 const navigation = [
   { to: "/applications", title: "애플리케이션", icon: RiHomeFill },
   { to: "/migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
+  { to: "/security", title: "보안·거버넌스", icon: RiShieldCheckFill },
   { to: "/settings", title: "설정", icon: RiSettings3Fill },
 ] as const;
 function PlatformSidebar({ pathname, session }: { pathname: string; session: Session }) {
@@ -114,6 +120,12 @@ export function PlatformShell({ session, children }: { session: Session; childre
   const detail = pathname.split("/")[2];
   return (
     <SidebarProvider className="h-dvh min-h-0 overflow-hidden">
+      <a
+        href="#platform-content"
+        className="sr-only z-50 rounded-md bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        {t("본문으로 이동")}
+      </a>
       <PlatformSidebar pathname={pathname} session={session} />
       <SidebarInset aria-label={t(current.title)} className="min-h-0 min-w-0 overflow-y-auto">
         <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background/90 px-4 backdrop-blur">
@@ -154,7 +166,13 @@ export function PlatformShell({ session, children }: { session: Session; childre
           </Button>
           <LanguageSwitcher />
         </header>
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        <div
+          id="platform-content"
+          tabIndex={-1}
+          className="flex min-h-0 flex-1 flex-col scroll-mt-12"
+        >
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
