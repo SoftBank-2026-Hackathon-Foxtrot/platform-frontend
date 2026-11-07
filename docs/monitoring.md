@@ -110,4 +110,6 @@ VITE_API_MODE=demo vp dev
 
 ## 공용 앱 시스템 메트릭
 
-시스템 화면의 배포 목록은 인증된 `/system-metrics/deployments` 응답만 사용합니다. `access: shared`는 서버에 등록된 공용 앱이며 `공용 앱`으로 표시합니다. 개인 배포는 `내 배포`입니다. 공용 `environmentId`의 `shared:` 접두사를 URL·조회 인자·캐시 키에 그대로 유지합니다. 이 표시는 배포 관리 권한을 부여하지 않습니다. 수집이 30초 이상 중단된 대상은 선택 목록에 표시하지 않습니다.
+시스템 화면의 배포 목록은 인증된 `/system-metrics/deployments` 응답만 사용합니다. `access: shared`는 서버에 등록된 공용 앱이며 `공용 앱`으로 표시합니다. 개인 배포는 `내 배포`입니다. 공용 `environmentId`의 `shared:` 접두사를 URL·조회 인자·캐시 키에 그대로 유지합니다. 이 표시는 배포 관리 권한을 부여하지 않습니다. `include_inactive=true`로 등록된 배포를 수집 여부와 무관하게 표시합니다. `collection`은 `REPORTING`, `NOT_REPORTING`, `UNKNOWN`으로 구분합니다. 직접 진입할 때 수집 중인 배포를 우선 선택하고, URL에 명시한 배포는 유지합니다. 인스턴스가 없으면 앱 지표 미도착을 표시하며 서버 전체 지표로 대체하지 않습니다.
+
+일반 마이그레이션 모니터링 진입은 `/v1/workflows`로 계획·진행·종료된 마이그레이션을 선택합니다. 수집 중인 대상만 반환하는 `/v1/telemetry/workflows`를 탐색 목록으로 사용하지 않습니다. 선택 목록의 진행 상태와 OTEL 수집 상태는 별도 표시입니다. 마이그레이션 화면에서 넘어온 `workflow`와 복귀 정보는 그대로 유지합니다.

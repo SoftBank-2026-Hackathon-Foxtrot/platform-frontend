@@ -37,6 +37,7 @@ const deploymentsSchema = z.object({
       cloud: z.string(),
       status: z.string(),
       access: z.enum(["personal", "shared"]).default("personal"),
+      collection: z.enum(["REPORTING", "NOT_REPORTING", "UNKNOWN"]).optional(),
     }),
   ),
 });
@@ -48,7 +49,7 @@ export function deploymentsOptions(workspace: string, app: string) {
         (
           await apiClient.get(
             `/v1/applications/${encodeURIComponent(app)}/system-metrics/deployments`,
-            { signal },
+            { signal, params: { include_inactive: true } },
           )
         ).data,
       ),

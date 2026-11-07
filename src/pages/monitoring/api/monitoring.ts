@@ -211,13 +211,11 @@ export function scopeOptions(workspace: string, workflow: string) {
   });
 }
 
-export function liveWorkflowsOptions(workspace: string) {
+export function monitoringWorkflowsOptions(workspace: string) {
   return queryOptions({
-    queryKey: ["monitoring-live-workflows", workspace],
+    queryKey: ["monitoring-workflows", workspace],
     queryFn: async ({ signal }) =>
-      z
-        .array(workflowSchema)
-        .parse((await apiClient.get("/v1/telemetry/workflows", { signal })).data),
+      z.array(workflowSchema).parse((await apiClient.get("/v1/workflows", { signal })).data),
     refetchInterval: 15000,
   });
 }
