@@ -87,7 +87,7 @@ function Workflow({ workspace, id }: { workspace: string; id: string }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TransitionDiagram data={detail.data} />
+              <TransitionDiagram data={detail.data} suspended={Boolean(detail.error)} />
             </CardContent>
           </Card>
           {Object.keys(detail.data.preparation).length > 0 && <Preparation data={detail.data} />}

@@ -1,0 +1,145 @@
+.migration-stack .flow-ratio {
+  transition:
+    width 0.7s ease,
+    x 0.7s ease;
+}
+.migration-stack .traffic-source {
+  --edge-color: var(--muted-foreground);
+}
+.migration-stack .traffic-target {
+  --edge-color: var(--info);
+}
+.migration-stack .traffic-path {
+  fill: none;
+  stroke: var(--edge-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    stroke-width 0.7s ease,
+    opacity 0.7s ease;
+}
+.migration-stack .traffic-path.pending {
+  stroke-dasharray: 5 5;
+  opacity: 0.4;
+}
+.migration-stack .traffic-packet {
+  fill: var(--edge-color);
+  offset-distance: 0%;
+  animation: request-travel 3s linear infinite;
+}
+.migration-stack .group[data-preparing="true"] {
+  overflow: hidden;
+  border-style: dashed;
+}
+.migration-stack .group[data-preparing="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    color-mix(in oklch, var(--info) 9%, transparent) 45%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: environment-scan 3s ease-in-out infinite;
+}
+.migration-stack .node[data-motion="preparing"] .tile {
+  outline: 2px dashed var(--info);
+  outline-offset: 4px;
+  animation: tile-build 1.8s ease-in-out infinite;
+}
+.migration-stack .node[data-motion="copying"] .tile {
+  outline: 1px solid var(--info);
+  outline-offset: 3px;
+}
+.migration-stack .node[data-motion="copying"] .tile::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid var(--info);
+  border-radius: 12px;
+  animation: copy-ring 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.migration-stack .node[data-state="active"] {
+  transition:
+    border-color 0.5s ease,
+    background 0.5s ease;
+}
+.migration-stack .node[data-changing="true"] {
+  animation: route-confirm 1.2s ease-out;
+}
+.migration-stack .node[data-stale="true"] {
+  opacity: 0.55;
+}
+.migration-stack[data-suspended="true"] *,
+.migration-stack[data-suspended="true"] *::after {
+  animation: none !important;
+}
+.migration-stack[data-suspended="true"] .traffic-packet,
+.migration-stack[data-suspended="true"] .copy-packet {
+  display: none;
+}
+.migration-stack .flow-pulse {
+  animation: activity-pulse 1.8s ease-in-out infinite;
+}
+.migration-stack .flow-spin {
+  animation: flow-spin 1.8s linear infinite;
+}
+@keyframes request-travel {
+  to {
+    offset-distance: 100%;
+  }
+}
+@keyframes flow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes activity-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes environment-scan {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes tile-build {
+  50% {
+    opacity: 0.45;
+    outline-offset: 6px;
+  }
+}
+@keyframes copy-ring {
+  to {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+@keyframes route-confirm {
+  0% {
+    filter: drop-shadow(0 0 6px var(--info));
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .migration-stack *,
+  .migration-stack *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .migration-stack .traffic-packet,
+  .migration-stack .copy-packet {
+    display: none;
+  }
+  .migration-stack .group[data-preparing="true"]::after {
+    display: none;
+  }
+}

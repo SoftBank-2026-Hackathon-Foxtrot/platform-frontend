@@ -1393,7 +1393,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "{0} application",
     ja: "{0} アプリケーション",
   },
-
   "플랫폼 API 연결 실패": {
     en: "Platform API connection failed",
     ja: "プラットフォーム API 接続失敗",
@@ -1410,4 +1409,153 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "This operation was removed, or you are connected to a different platform server.",
     ja: "この操作は削除されたか、別のプラットフォームサーバーに接続しています。",
   },
+  "관측 대기": {
+    en: "Awaiting observation",
+    ja: "観測待ち",
+  },
+  "관측 갱신 대기": {
+    en: "Awaiting fresh observation",
+    ja: "最新の観測待ち",
+  },
+  "데이터 복제 중": {
+    en: "Replicating data",
+    ja: "データ複製中",
+  },
+  "복제 작업 완료": {
+    en: "Replication completed",
+    ja: "複製完了",
+  },
+  "동기화 대기": {
+    en: "Awaiting sync",
+    ja: "同期待ち",
+  },
+  "상세 결과 미제공": {
+    en: "Detailed result not provided",
+    ja: "詳細結果の提供なし",
+  },
+  "앱 연결과 이전 리소스를 준비합니다. 보고된 작업부터 준비 상태가 바뀝니다.": {
+    en: "Preparing app connectivity and migration resources. Status follows reported results.",
+    ja: "アプリの接続と移行リソースを準備します。報告された結果に応じて状態が変わります。",
+  },
+  "서비스는 원본 데이터를 사용하면서 대상에 데이터를 복제합니다.": {
+    en: "The service uses source data while copying it to the target.",
+    ja: "サービスは移行元を使用しながら移行先にデータを複製します。",
+  },
+  "객체 접근 경로를 전환하고 양쪽 앱의 업무를 확인합니다.": {
+    en: "Switching object routes and checking business operations in both environments.",
+    ja: "オブジェクトの経路を切り替え、両環境の業務を確認します。",
+  },
+  "일부 요청을 대상 앱으로 보냅니다. DB와 Redis는 아직 원본을 사용합니다.": {
+    en: "Some requests reach the target app. Database and Redis still use the source.",
+    ja: "一部のリクエストを移行先アプリへ送ります。DB と Redis は移行元を使用します。",
+  },
+  "Redis 경로를 전환합니다. 검증 후 DB 전환까지 이어집니다.": {
+    en: "Switching Redis routes. Database cutover follows verification.",
+    ja: "Redis の経路を切り替えます。検証後に DB の切替へ進みます。",
+  },
+  "앱 업무를 정지하고 DB 경로를 바꾼 뒤 업무를 재개합니다.": {
+    en: "Holding app work, switching database routes, then resuming work.",
+    ja: "アプリ業務を停止し、DB の経路を切り替えてから業務を再開します。",
+  },
+  "데이터 경로 전환 후 대상 앱의 트래픽 비율을 단계적으로 늘립니다.": {
+    en: "Increasing target app traffic step by step after switching data routes.",
+    ja: "データ経路の切替後、移行先アプリへの配信比率を段階的に増やします。",
+  },
+  "최종 검증 후 이전용 임시 구성을 정리하고 복귀 경로를 닫습니다.": {
+    en: "After final verification, remove temporary migration configuration and close rollback paths.",
+    ja: "最終検証後、移行用の一時構成を整理し、復帰経路を閉じます。",
+  },
+  "엔진 정지 · 외부 작업은 계속될 수 있습니다.": {
+    en: "Engine halted · External operations may continue.",
+    ja: "エンジン停止 · 外部の処理は続く場合があります。",
+  },
+  "승인 대기 · 확인 후 다음 작업을 시작합니다.": {
+    en: "Awaiting approval · Review before continuing.",
+    ja: "承認待ち · 確認後に次の処理を開始します。",
+  },
+  "작업이 종료되었습니다. 마지막 관측 상태입니다.": {
+    en: "Operation ended. Showing the last observed state.",
+    ja: "処理は終了しました。最後に観測した状態です。",
+  },
+  "앱 업무 정지 중": {
+    en: "App work is held",
+    ja: "アプリ業務停止中",
+  },
+  "LB 확인 비율": {
+    en: "Confirmed LB split",
+    ja: "LB 確認済み比率",
+  },
+  "전환 요청 · LB 확인 대기": {
+    en: "Change requested · Awaiting LB confirmation",
+    ja: "切替要求済み · LB 確認待ち",
+  },
+  "트래픽 비율 미확인": {
+    en: "Traffic split unknown",
+    ja: "配信比率未確認",
+  },
+  "트래픽 분배: {0} {1}, {2} {3}": {
+    en: "Traffic split: {0} {1}, {2} {3}",
+    ja: "配信比率: {0} {1}、{2} {3}",
+  },
+  "다음 요청: {0} {1}% · {2} {3}%": {
+    en: "Requested next: {0} {1}% · {2} {3}%",
+    ja: "次の要求: {0} {1}% · {2} {3}%",
+  },
+  "인프라 작업": {
+    en: "Infrastructure operation",
+    ja: "インフラ処理",
+  },
+  "앱 배포 작업": {
+    en: "App deployment",
+    ja: "アプリのデプロイ",
+  },
+  "이전 리소스 준비": {
+    en: "Migration resource preparation",
+    ja: "移行リソースの準備",
+  },
+  "{0}/{1} 리소스 확인": {
+    en: "{0}/{1} resources confirmed",
+    ja: "{0}/{1} リソース確認",
+  },
+  "객체 라우팅": {
+    en: "Object routing",
+    ja: "オブジェクト経路",
+  },
+  객체: {
+    en: "objects",
+    ja: "オブジェクト",
+  },
+  "진행량 미보고": {
+    en: "Progress not reported",
+    ja: "進捗量未報告",
+  },
+  "처리 {0}건 · 전체 수량 미보고": {
+    en: "{0} processed · Total not reported",
+    ja: "{0} 件処理 · 総数未報告",
+  },
+  "역방향 복제": {
+    en: "Reverse replication",
+    ja: "逆方向複製",
+  },
+  "흐름은 확인된 설정의 시각화이며 실제 요청 수가 아닙니다.": {
+    en: "Flow illustrates confirmed configuration, not actual request counts.",
+    ja: "流れは確認済み設定の模式表示で、実際のリクエスト数ではありません。",
+  },
+  "{0}/{1} 프로세스": {
+    en: "{0}/{1} processes",
+    ja: "{0}/{1} プロセス",
+  },
+  "저장소 사이의 파란 선: 데이터 복제 · 점선: 제어": {
+    en: "Blue storage links: data replication · Dashed: control",
+    ja: "ストレージ間の青線: データ複製 · 破線: 制御",
+  },
+  "리소스 오류": {
+    en: "Resource error",
+    ja: "リソースエラー",
+  },
+  "관측 갱신 실패 · 마지막 상태 표시": {
+    en: "Observation refresh failed · Showing the last state",
+    ja: "観測の更新失敗 · 最後の状態を表示",
+  },
+  "양방향 복제": { en: "Bidirectional replication", ja: "双方向複製" },
 };
