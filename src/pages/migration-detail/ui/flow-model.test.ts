@@ -46,17 +46,21 @@ describe("migration visual evidence", () => {
       expect(resourceFlow(data, resource).moving).toBe(false);
     },
   );
-  it.each(["HALTED", "WAITING_APPROVAL", "COMPLETED", "ABORTED"] as const)(
-    "stops illustrative movement in %s",
-    (status) => {
-      const data = detail();
-      data.workflow.status = status;
-      const resource = data.resources[0]!;
-      resource.lifecycle = "SYNCING";
-      resource.observation.freshness = "FRESH";
-      expect(resourceFlow(data, resource).moving).toBe(false);
-    },
-  );
+  it.each([
+    "HALTED",
+    "WAITING_APPROVAL",
+    "CUTOVER_COMPLETE",
+    "COMPLETED",
+    "ABORTED",
+    "ROLLED_BACK",
+  ] as const)("stops illustrative movement in %s", (status) => {
+    const data = detail();
+    data.workflow.status = status;
+    const resource = data.resources[0]!;
+    resource.lifecycle = "SYNCING";
+    resource.observation.freshness = "FRESH";
+    expect(resourceFlow(data, resource).moving).toBe(false);
+  });
   it("uses only valid measured totals, including a zero denominator", () => {
     const resource = detail().resources[0]!;
     resource.progress = { completed: 250, total: 1000, unit: "rows" };

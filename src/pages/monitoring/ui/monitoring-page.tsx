@@ -47,8 +47,9 @@ export function MonitoringPage(props: Props) {
   const workflows = useQuery(workflowsOptions(session.workspaceId));
   const workflow = props.search.workflow
     ? workflows.data?.find((item) => item.id === props.search.workflow)
-    : (workflows.data?.find((item) => !["COMPLETED", "ABORTED"].includes(item.status)) ??
-      workflows.data?.[0]);
+    : (workflows.data?.find(
+        (item) => !["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(item.status),
+      ) ?? workflows.data?.[0]);
   return (
     <section
       aria-labelledby="monitoring-title"

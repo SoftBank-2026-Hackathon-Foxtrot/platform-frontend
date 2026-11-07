@@ -140,7 +140,7 @@ export function resourceFlow(data: Detail, resource: Resource | undefined) {
     moving:
       (isMoving(data) ||
         (streams.length > 0 &&
-          !["PLANNED", "COMPLETED", "ABORTED"].includes(data.workflow.status))) &&
+          !["PLANNED", "COMPLETED", "ABORTED", "ROLLED_BACK"].includes(data.workflow.status))) &&
       !stale &&
       !failed &&
       copying,
@@ -197,12 +197,12 @@ export function preparationFlow(data: Detail) {
 }
 
 export const STAGE_EXPLANATION: Record<string, string> = {
-  PREPARE: "앱 연결과 이전 리소스를 준비합니다. 보고된 작업부터 준비 상태가 바뀝니다.",
-  SYNC: "서비스는 원본 데이터를 사용하면서 대상에 데이터를 복제합니다.",
+  PREPARE: "앱 연결과 이전 리소스를 자동으로 준비합니다.",
+  SYNC: "초기 데이터를 복사하고 변경분을 계속 동기화합니다. 컷오버 승인 전까지 원본을 사용합니다.",
   OBJECT_CUTOVER: "객체 접근 경로를 전환하고 양쪽 앱의 업무를 확인합니다.",
   CANARY: "일부 요청을 대상 앱으로 보냅니다. DB와 Redis는 아직 원본을 사용합니다.",
   REDIS_CUTOVER: "Redis 경로를 전환합니다. 검증 후 DB 전환까지 이어집니다.",
   DATABASE_CUTOVER: "앱 업무를 정지하고 DB 경로를 바꾼 뒤 업무를 재개합니다.",
   TRAFFIC: "데이터 경로 전환 후 대상 앱의 트래픽 비율을 단계적으로 늘립니다.",
-  FINALIZE: "최종 검증 후 이전용 임시 구성을 정리하고 복귀 경로를 닫습니다.",
+  FINALIZE: "컷오버 후 롤백 또는 전환 완료를 선택합니다. 완료를 선택하면 임시 구성을 정리합니다.",
 };

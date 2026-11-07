@@ -8,7 +8,7 @@ export const STAGE_LABELS: Record<string, string> = {
   REDIS_CUTOVER: "Redis 전환",
   DATABASE_CUTOVER: "데이터베이스 전환",
   TRAFFIC: "트래픽 전환",
-  FINALIZE: "마무리",
+  FINALIZE: "전환 완료 처리",
 };
 const STATUS: Record<
   string,
@@ -17,14 +17,16 @@ const STATUS: Record<
     tone: "ok" | "run" | "wait" | "bad" | "idle";
   }
 > = {
-  PLANNED: { label: "승인 대기", tone: "wait" },
-  WAITING_APPROVAL: { label: "승인 대기", tone: "wait" },
+  PLANNED: { label: "준비 대기", tone: "wait" },
+  WAITING_APPROVAL: { label: "컷오버 승인 대기", tone: "wait" },
+  CUTOVER_COMPLETE: { label: "컷오버 완료 · 처리 선택", tone: "wait" },
   RUNNING: { label: "진행 중", tone: "run" },
   HALTED: { label: "멈춤", tone: "bad" },
   ROLLING_BACK: { label: "되돌리는 중", tone: "wait" },
   ABORTING: { label: "취소 중", tone: "wait" },
   COMPLETED: { label: "완료", tone: "ok" },
   ABORTED: { label: "취소됨", tone: "idle" },
+  ROLLED_BACK: { label: "원본 복귀 완료", tone: "ok" },
 };
 const TONES = {
   ok: "border-success/40 bg-success/15 text-success",

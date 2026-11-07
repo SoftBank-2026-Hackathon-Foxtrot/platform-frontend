@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronLeft, Info, RefreshCw } from "lucide-react";
 import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
+import { TargetSizingSummary } from "@/features/start-migration";
 import { getApiErrorMessage, isNotFound } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
@@ -132,14 +133,16 @@ function Workflow({ workspace, id, view, onView }: { workspace: string; id: stri
   );
 }
 const NEXT_STEP: Record<string, string> = {
-  PLANNED: "계획을 확인하고 승인하면 첫 단계가 시작됩니다.",
-  WAITING_APPROVAL: "되돌리기 어려운 단계입니다. 상태를 확인하고 승인하십시오.",
+  PLANNED: "준비와 데이터 동기화는 자동으로 시작합니다. 컷오버 직전에 한 번 승인합니다.",
+  WAITING_APPROVAL: "변경분 동기화를 유지하고 있습니다. 컷오버를 승인하면 전환을 시작합니다.",
+  CUTOVER_COMPLETE: "대상에서 운영 중입니다. 롤백하거나 전환 완료를 선택하십시오.",
   RUNNING: "엔진이 진행 중입니다. 문제가 보이면 일시 정지할 수 있습니다.",
   HALTED: "멈췄습니다. 원인을 확인하고 재개·대조·되돌리기·취소 중 하나를 고르십시오.",
   ROLLING_BACK: "리소스를 원본으로 되돌리는 중입니다.",
   ABORTING: "취소하고 정리하는 중입니다.",
   COMPLETED: "모든 단계가 끝났습니다.",
   ABORTED: "취소된 마이그레이션입니다.",
+  ROLLED_BACK: "원본 환경으로 복귀했습니다. 다시 이전하려면 새 마이그레이션을 시작하십시오.",
 };
 function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
   useLocale();
@@ -215,9 +218,13 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
+        {d.workflow.targetConfiguration && (
+          <TargetSizingSummary configuration={d.workflow.targetConfiguration} />
+        )}
         <StageStepper data={d} />
         {(d.workflow.status === "PLANNED" ||
           d.workflow.status === "WAITING_APPROVAL" ||
+          d.workflow.status === "CUTOVER_COMPLETE" ||
           d.workflow.status === "HALTED") && (
           <p className="text-xs text-muted-foreground">{t(NEXT_STEP[d.workflow.status])}</p>
         )}
@@ -236,15 +243,18 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
 }
 function StageStepper({ data: d }: { data: Detail }) {
   useLocale();
-  const finished = d.workflow.status === "COMPLETED";
+  const finished = ["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(d.workflow.status);
   return (
     <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
       {d.stages.map((item) => {
         const current = item.index === d.workflow.currentStage && !finished;
-        const passed = item.status === "PASSED" || (finished && item.status !== "FAILED");
+        const passed =
+          item.status === "PASSED" ||
+          (d.workflow.status === "COMPLETED" && item.status !== "FAILED");
         const failed = item.status === "FAILED" || (current && d.workflow.status === "HALTED");
         const waiting =
-          current && (d.workflow.status === "WAITING_APPROVAL" || d.workflow.status === "PLANNED");
+          current &&
+          ["WAITING_APPROVAL", "PLANNED", "CUTOVER_COMPLETE"].includes(d.workflow.status);
         const tone = failed
           ? "border-destructive bg-destructive text-white"
           : passed

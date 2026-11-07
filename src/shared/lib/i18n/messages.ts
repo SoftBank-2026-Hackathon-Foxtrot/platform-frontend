@@ -1,4 +1,58 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "대상 DB 사양": { en: "Target database sizing", ja: "移行先DBの仕様" },
+  "{0} vCPU · 메모리 {1} GiB": {
+    en: "{0} vCPU · {1} GiB memory",
+    ja: "{0} vCPU · メモリ {1} GiB",
+  },
+  "대상 사양 설정": { en: "Target sizing", ja: "移行先の仕様設定" },
+  "현재 사양 유지": { en: "Keep current sizing", ja: "現在の仕様を維持" },
+  "사양 변경": { en: "Change sizing", ja: "仕様を変更" },
+  "대상 사양을 불러오는 중입니다.": {
+    en: "Loading target sizing.",
+    ja: "移行先の仕様を読み込み中です。",
+  },
+  "대상 사양 조회 실패": {
+    en: "Could not load target sizing",
+    ja: "移行先の仕様を取得できませんでした",
+  },
+  "이 대상의 사양을 변경할 수 없습니다.": {
+    en: "Sizing cannot be changed for this target.",
+    ja: "この移行先の仕様は変更できません。",
+  },
+  "마이그레이션 대상과 연결된 배포 정보가 필요합니다.": {
+    en: "A deployment linked to the migration target is required.",
+    ja: "移行先に関連付けられたデプロイ情報が必要です。",
+  },
+  "사양 값과 선택한 대상을 확인하세요.": {
+    en: "Check the sizing values and selected target.",
+    ja: "仕様の値と選択した移行先を確認してください。",
+  },
+  "대상 사양": { en: "Target sizing", ja: "移行先の仕様" },
+  "사양 적용과 앱 준비 확인이 끝나면 복제를 시작합니다. 계획 생성 후에는 사양을 변경할 수 없습니다.":
+    {
+      en: "Replication starts after sizing is applied and the app is ready. Sizing is fixed when the plan is created.",
+      ja: "仕様の適用とアプリの準備確認後に複製を開始します。計画作成後は仕様を変更できません。",
+    },
+  "앱 CPU": { en: "App CPU", ja: "アプリのCPU" },
+  "앱 메모리 (MiB)": { en: "App memory (MiB)", ja: "アプリのメモリ (MiB)" },
+  "앱과 워커가 공유하는 할당량입니다.": {
+    en: "Allocation shared by the app and workers.",
+    ja: "アプリとワーカーが共有する割り当てです。",
+  },
+  "컨테이너마다 적용하는 할당량입니다.": {
+    en: "Allocation for each container.",
+    ja: "各コンテナへの割り当てです。",
+  },
+  "DB 저장 공간 (GiB)": { en: "DB storage (GiB)", ja: "DBストレージ (GiB)" },
+  "DB 저장 공간 상한 (GiB)": { en: "DB storage limit (GiB)", ja: "DBストレージ上限 (GiB)" },
+  "DB 고가용성": { en: "DB high availability", ja: "DBの高可用性" },
+  "Redis 인스턴스": { en: "Redis instance", ja: "Redisインスタンス" },
+  "Redis 노드 수": { en: "Redis node count", ja: "Redisノード数" },
+  "Redis 메모리 (GiB)": { en: "Redis memory (GiB)", ja: "Redisメモリ (GiB)" },
+  "Redis 고가용성": { en: "Redis high availability", ja: "Redisの高可用性" },
+  사용: { en: "Enabled", ja: "有効" },
+  미사용: { en: "Disabled", ja: "無効" },
+  "확정한 대상 사양": { en: "Selected target sizing", ja: "確定した移行先の仕様" },
   "조회 전용": { en: "Read only", ja: "読み取り専用" },
   "조회 전용으로 연결되어 있습니다.": {
     en: "Connected in read-only mode.",
@@ -2376,4 +2430,211 @@ export const messages: Record<string, { en: string; ja: string }> = {
   확인: { en: "Confirmed", ja: "確認済み" },
   기준: { en: "Source", ja: "基準" },
   결과: { en: "Result", ja: "結果" },
+
+  "AI 도우미": { en: "AI assistant", ja: "AIアシスタント" },
+  "AI API 또는 선택한 배포 정보가 없습니다. 서버 반영 상태와 배포 목록을 확인하세요.": {
+    en: "The AI API or selected deployment is unavailable. Check the server version and deployment list.",
+    ja: "AI APIまたは選択したデプロイがありません。サーバーの反映状況とデプロイ一覧を確認してください。",
+  },
+  "AI 모델 설정 필요": { en: "AI model setup required", ja: "AIモデルの設定が必要です" },
+  "AI 설정을 확인하는 중입니다.": { en: "Checking AI configuration…", ja: "AI設定を確認中…" },
+  "AI 요청 실패": { en: "AI request failed", ja: "AIリクエストに失敗しました" },
+  "AI 정보를 불러오지 못했습니다": {
+    en: "Could not load AI information",
+    ja: "AI情報を取得できませんでした",
+  },
+  "CPU 사용률 P95": { en: "CPU utilization P95", ja: "CPU使用率 P95" },
+  "CPU·메모리와 요청 성능을 조회하고 근거와 함께 해석합니다.": {
+    en: "Read CPU, memory and request performance, with evidence-based interpretation.",
+    ja: "CPU・メモリ・リクエスト性能を取得し、根拠とともに分析します。",
+  },
+  "CPU는 분 단위 집계의 P95이며, 메모리는 관측한 최대값입니다.": {
+    en: "CPU is P95 of minute aggregates. Memory is the observed high-water value.",
+    ja: "CPUは分単位の集計値のP95、メモリは観測した最大値です。",
+  },
+  "DB 호출 P95": { en: "DB call P95", ja: "DB呼び出し P95" },
+  "Redis 호출 P95": { en: "Redis call P95", ja: "Redis呼び出し P95" },
+  "관련 요청 추적 {0}개": {
+    en: "{0} related request traces",
+    ja: "関連リクエストのトレース {0}件",
+  },
+  "관측 메모리 최대값": { en: "Observed memory peak", ja: "観測メモリ最大値" },
+  "관측 자료 부족": { en: "Insufficient observations", ja: "観測データ不足" },
+  근거: { en: "Evidence", ja: "根拠" },
+  "내 앱의 배포 정보와 사용량을 확인합니다.": {
+    en: "Review deployment details and usage for your applications.",
+    ja: "自分のアプリのデプロイ情報と使用量を確認します。",
+  },
+  "누락 지표: {0}": { en: "Missing metrics: {0}", ja: "不足している指標：{0}" },
+  "답변 근거 {0}개": { en: "{0} answer sources", ja: "回答の根拠 {0}件" },
+  "대화 기록": { en: "Conversation history", ja: "会話履歴" },
+  "대화 다시 조회": { en: "Reload conversation", ja: "会話を再取得" },
+  "마지막 배포 적용 기록을 근거로 답합니다. 실시간 상태와 다를 수 있습니다.": {
+    en: "Answers use the last applied deployment record. Live state may differ.",
+    ja: "最終適用時のデプロイ記録に基づいて回答します。現在の状態とは異なる場合があります。",
+  },
+  "배포 목록을 불러오는 중입니다.": { en: "Loading deployments…", ja: "デプロイ一覧を取得中…" },
+  "배포 변경이 진행 중이거나 결과가 불명확하여 분석과 추천을 중지했습니다.": {
+    en: "Analysis and recommendations are blocked while deployment changes are unsettled.",
+    ja: "デプロイの変更中、または結果が不明なため、分析と推奨を停止しています。",
+  },
+  "배포 상태 확인 필요": { en: "Confirm deployment state", ja: "デプロイ状態の確認が必要です" },
+  "배포 요청 보기": { en: "View deployment request", ja: "デプロイリクエストを表示" },
+  "복사하지 못했습니다.": { en: "Could not copy.", ja: "コピーできませんでした。" },
+  "본인 앱의 배포 적용이 완료된 뒤 이 목록에서 선택할 수 있습니다.": {
+    en: "Your application appears here after a deployment has been applied successfully.",
+    ja: "自分のアプリのデプロイ適用が完了すると、この一覧で選択できます。",
+  },
+  "분석 기간": { en: "Analysis period", ja: "分析期間" },
+  "분석할 기간을 선택하고 지표 분석을 실행하세요.": {
+    en: "Choose a period and run metric analysis.",
+    ja: "期間を選択して指標分析を実行してください。",
+  },
+  "분석할 앱 배포": { en: "Application deployment to analyse", ja: "分析対象のアプリデプロイ" },
+  "분석할 앱 배포가 없습니다.": {
+    en: "No application deployments to analyse.",
+    ja: "分析できるアプリデプロイがありません。",
+  },
+  "사양 추천": { en: "Sizing recommendations", ja: "リソース構成の推奨" },
+  "새 대화": { en: "New conversation", ja: "新しい会話" },
+  "서버 오류율": { en: "Server error rate", ja: "サーバーエラー率" },
+  "서버에 AI 모델 인증 정보가 설정되지 않았습니다. 관리자에게 설정을 요청하세요.": {
+    en: "AI credentials are not configured on the server. Ask an administrator to configure them.",
+    ja: "サーバーにAIモデルの認証情報が設定されていません。管理者に設定を依頼してください。",
+  },
+  "선택한 앱의 사양과 리소스 구성을 물어보세요.": {
+    en: "Ask about the selected application’s sizing and resources.",
+    ja: "選択したアプリのリソース構成について質問してください。",
+  },
+  "온프렘 사용량 기반 사양 추천은 아직 지원하지 않습니다.": {
+    en: "Usage-based sizing for on-premises deployments is not supported yet.",
+    ja: "オンプレミスの使用量に基づくリソース推奨は、まだ対応していません。",
+  },
+  "요청 복사": { en: "Copy request", ja: "リクエストをコピー" },
+  "운영 지표 분석": { en: "Operational metric analysis", ja: "運用指標の分析" },
+  "응답 시간 P95": { en: "Response time P95", ja: "応答時間 P95" },
+  "응답 완료": { en: "Response ready", ja: "応答完了" },
+  "인프라 변경안": { en: "Infrastructure changes", ja: "インフラ変更案" },
+  "인프라 채팅": { en: "Infrastructure chat", ja: "インフラチャット" },
+  "일부 지표 누락": { en: "Some metrics missing", ja: "一部の指標が不足" },
+  "자료 없음": { en: "No data", ja: "データなし" },
+  "적용 시각 없음": { en: "Apply time unavailable", ja: "適用時刻なし" },
+  "지표 종류 확보율 {0}%": { en: "{0}% of metric types available", ja: "指標種類の取得率 {0}%" },
+  질문: { en: "Question", ja: "質問" },
+  "초당 요청 수": { en: "Requests per second", ja: "秒あたりリクエスト数" },
+  "최근 15분": { en: "Last 15 minutes", ja: "直近15分" },
+  "최근 1시간": { en: "Last hour", ja: "直近1時間" },
+  "최근 1시간의 CPU·메모리 사용량으로 대상 사양을 추천합니다.": {
+    en: "Recommend target sizing from CPU and memory usage over the last hour.",
+    ja: "直近1時間のCPU・メモリ使用量から、移行先のリソース構成を推奨します。",
+  },
+  "최근 24시간": { en: "Last 24 hours", ja: "直近24時間" },
+  "최근 대화 10개를 참고합니다.": {
+    en: "Uses the last 10 conversation turns.",
+    ja: "直近10件の会話を参照します。",
+  },
+  "추천 결과를 확인한 뒤 별도로 배포할 수 있습니다.": {
+    en: "Review recommendations before deploying separately.",
+    ja: "推奨結果を確認してから、別途デプロイできます。",
+  },
+  "추천 대상 클라우드": { en: "Target cloud for sizing", ja: "推奨対象のクラウド" },
+  "추천만 생성했습니다. 실제 배포는 실행하지 않았습니다.": {
+    en: "Only a recommendation was generated. No deployment was executed.",
+    ja: "推奨のみを生成しました。デプロイは実行していません。",
+  },
+  코어: { en: "cores", ja: "コア" },
+  "플랫폼 관리 서비스는 조회 대상에서 제외됩니다.": {
+    en: "Shared platform management services are excluded.",
+    ja: "プラットフォームの管理サービスは対象外です。",
+  },
+  "허용 사양 초과": { en: "Exceeds allowed capacity", ja: "許可された構成の上限超過" },
+  "현재 앱과 DB는 어떤 사양으로 배포되어 있나요?": {
+    en: "What resources are allocated to this application and database?",
+    ja: "現在のアプリとDBは、どのような構成でデプロイされていますか？",
+  },
+  "답변 생성 중…": { en: "Generating answer…", ja: "回答を生成中…" },
+  "질문 보내기": { en: "Send question", ja: "質問を送信" },
+  "분석 중…": { en: "Analysing…", ja: "分析中…" },
+  "지표 분석": { en: "Analyse metrics", ja: "指標を分析" },
+  "추천 생성 중…": { en: "Generating recommendation…", ja: "推奨を生成中…" },
+  "추천 받기": { en: "Get recommendation", ja: "推奨を取得" },
+  "CPU·메모리 지표와 관측 시간이 충분하지 않아 추천을 만들지 않았습니다.": {
+    en: "CPU, memory or observation coverage is insufficient. No recommendation was generated.",
+    ja: "CPU・メモリ指標または観測時間が不足しているため、推奨を生成しませんでした。",
+  },
+  "현재 허용 사양으로 관측 사용량을 수용할 수 없습니다.": {
+    en: "The currently allowed configurations cannot support the observed usage.",
+    ja: "現在許可されたリソース構成では、観測使用量を処理できません。",
+  },
+  "준비 대기": { en: "Awaiting preparation", ja: "準備待ち" },
+  "컷오버 승인": { en: "Approve cutover", ja: "切り替えを承認" },
+  "컷오버 승인 대기": { en: "Awaiting cutover approval", ja: "切り替え承認待ち" },
+  "컷오버 완료 · 처리 선택": {
+    en: "Cutover complete · Choose next action",
+    ja: "切り替え済み · 次の操作を選択",
+  },
+  "원본 복귀 완료": { en: "Rollback complete", ja: "移行元への復帰完了" },
+  "전환 완료 처리": { en: "Finalize migration", ja: "移行を確定" },
+  "전환 완료": { en: "Finalize migration", ja: "移行を確定" },
+  롤백: { en: "Roll back", ja: "ロールバック" },
+  "복사와 변경분 동기화가 준비되었습니다. 승인하면 객체 저장소, 앱 트래픽, Redis, DB를 순서대로 전환합니다.":
+    {
+      en: "Initial copy and change sync are ready. Approval starts the object storage, application traffic, Redis and database cutovers.",
+      ja: "初期コピーと差分同期の準備ができました。承認すると、オブジェクトストレージ、アプリのトラフィック、Redis、DBの切り替えを順に進めます。",
+    },
+  "DB, Redis, 객체 저장소, 앱 트래픽 순서로 원본에 복귀합니다. 중간에 실패하면 멈추고 실패한 지점부터 다시 시도할 수 있습니다.":
+    {
+      en: "Return the database, Redis, object storage and application traffic to the source in order. A failure stops the rollback and allows retrying from that point.",
+      ja: "DB、Redis、オブジェクトストレージ、アプリのトラフィックの順に移行元へ戻します。途中で失敗した場合は停止し、その位置から再試行できます。",
+    },
+  "역방향 동기화와 임시 자원을 정리하고 전환을 완료합니다. 이후에는 이 작업으로 롤백할 수 없습니다. 상시 프록시는 유지합니다.":
+    {
+      en: "Stop reverse sync, clean up temporary resources and finalize. This migration can no longer roll back afterward. Permanent proxies remain.",
+      ja: "逆方向同期と一時リソースを整理して移行を確定します。以降、この移行でロールバックはできません。常設プロキシは維持します。",
+    },
+  "준비와 데이터 동기화는 자동으로 시작합니다. 컷오버 직전에 한 번 승인합니다.": {
+    en: "Preparation and data sync start automatically. Approve once before cutover.",
+    ja: "準備とデータ同期は自動で始まります。切り替え直前に一度だけ承認します。",
+  },
+  "변경분 동기화를 유지하고 있습니다. 컷오버를 승인하면 전환을 시작합니다.": {
+    en: "Change sync remains active. Approve cutover to start switching.",
+    ja: "差分同期を継続しています。切り替えを承認すると移行を進めます。",
+  },
+  "대상에서 운영 중입니다. 롤백하거나 전환 완료를 선택하십시오.": {
+    en: "The target is serving. Choose rollback or finalize migration.",
+    ja: "移行先で稼働中です。ロールバックまたは移行の確定を選択してください。",
+  },
+  "원본 환경으로 복귀했습니다. 다시 이전하려면 새 마이그레이션을 시작하십시오.": {
+    en: "Returned to the source. Start a new migration to migrate again.",
+    ja: "移行元へ戻りました。再び移行する場合は、新しい移行を開始してください。",
+  },
+  "변경분 동기화 유지 · 컷오버 승인 대기": {
+    en: "Change sync active · Awaiting cutover approval",
+    ja: "差分同期中 · 切り替え承認待ち",
+  },
+  "롤백 또는 전환 완료를 선택하십시오.": {
+    en: "Choose rollback or finalize migration.",
+    ja: "ロールバックまたは移行の確定を選択してください。",
+  },
+  "앱 연결과 이전 리소스를 자동으로 준비합니다.": {
+    en: "Automatically prepare application connections and migration resources.",
+    ja: "アプリ接続と移行リソースを自動で準備します。",
+  },
+  "초기 데이터를 복사하고 변경분을 계속 동기화합니다. 컷오버 승인 전까지 원본을 사용합니다.": {
+    en: "Copy initial data and keep changes synchronized. The source stays active until cutover approval.",
+    ja: "初期データをコピーし、差分を継続的に同期します。切り替えの承認までは移行元を使用します。",
+  },
+  "컷오버 후 롤백 또는 전환 완료를 선택합니다. 완료를 선택하면 임시 구성을 정리합니다.": {
+    en: "After cutover, choose rollback or finalize. Finalizing cleans up temporary configuration.",
+    ja: "切り替え後、ロールバックまたは移行の確定を選択します。確定すると一時構成を整理します。",
+  },
+  "시작하는 중": { en: "Starting", ja: "開始中" },
+  "앱을 등록하면 데이터 동기화까지 자동으로 진행합니다. 컷오버만 승인합니다.": {
+    en: "Register an app to prepare and synchronize data automatically. Approve only the cutover.",
+    ja: "アプリを登録すると準備とデータ同期が自動で進みます。切り替えだけを承認します。",
+  },
+  "검증을 통과한 앱은 준비와 데이터 동기화를 자동으로 시작할 수 있습니다.": {
+    en: "Verified apps can start preparation and data sync automatically.",
+    ja: "検証済みのアプリは準備とデータ同期を自動で開始できます。",
+  },
 };

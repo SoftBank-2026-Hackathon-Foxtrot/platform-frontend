@@ -27,7 +27,7 @@ export function LoginPage({ error, returnTo }: { error?: string; returnTo?: stri
           </span>
           <CardTitle className="text-xl">{t("Foxtrot 플랫폼 콘솔")}</CardTitle>
           <CardDescription>
-            {t("앱을 등록하고 클라우드 이전을 단계마다 승인하며 전환 과정을 확인합니다.")}
+            {t("앱을 등록하면 데이터 동기화까지 자동으로 진행합니다. 컷오버만 승인합니다.")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

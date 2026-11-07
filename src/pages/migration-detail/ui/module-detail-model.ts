@@ -67,7 +67,7 @@ export function runningStreams(data: Detail, resource: Resource | undefined) {
     ["ERROR", "FAILED"].includes(resource.health ?? "")
   )
     return [];
-  if (["PLANNED", "COMPLETED", "ABORTED"].includes(data.workflow.status)) return [];
+  if (["PLANNED", "COMPLETED", "ABORTED", "ROLLED_BACK"].includes(data.workflow.status)) return [];
   return resource.streams.filter(
     (stream) =>
       stream.state === "RUNNING" && stream.freshness === "FRESH" && Boolean(stream.observedAt),

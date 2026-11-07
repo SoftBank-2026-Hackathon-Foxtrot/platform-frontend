@@ -12,8 +12,9 @@ export function FlowStory({ data }: { data: Detail }) {
   useLocale();
   const stage = data.stages.find((item) => item.index === data.workflow.currentStage);
   const paused = data.workflow.status === "HALTED";
-  const waiting = ["PLANNED", "WAITING_APPROVAL"].includes(data.workflow.status);
-  const done = ["COMPLETED", "ABORTED"].includes(data.workflow.status);
+  const waiting = data.workflow.status === "WAITING_APPROVAL";
+  const cutoverComplete = data.workflow.status === "CUTOVER_COMPLETE";
+  const done = ["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(data.workflow.status);
   const recovering = data.workflow.status === "ROLLING_BACK";
   return (
     <div
@@ -29,17 +30,26 @@ export function FlowStory({ data }: { data: Detail }) {
       )}
       <span className="font-semibold">
         {recovering
-          ? t("{0} 복귀", [data.workflow.rollback?.resource ?? ""])
-          : t(stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "단계 미확인")}
+          ? data.workflow.rollback?.resource
+            ? t("{0} 복귀", [data.workflow.rollback.resource])
+            : t("원본 복귀 중")
+          : data.workflow.status === "ROLLED_BACK"
+            ? t("원본 복귀 완료")
+            : cutoverComplete
+              ? t("컷오버 완료 · 처리 선택")
+              : t(stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "단계 미확인")}
       </span>
       {(paused || waiting) && (
         <span className="text-muted-foreground">
           {paused
             ? t("엔진 정지 · 외부 작업은 계속될 수 있습니다.")
             : waiting
-              ? t("승인 대기")
+              ? t("변경분 동기화 유지 · 컷오버 승인 대기")
               : null}
         </span>
+      )}
+      {cutoverComplete && (
+        <span className="text-muted-foreground">{t("롤백 또는 전환 완료를 선택하십시오.")}</span>
       )}
       {data.hold.desired === "HOLD" && (
         <Badge variant="outline" className="border-warning text-warning">

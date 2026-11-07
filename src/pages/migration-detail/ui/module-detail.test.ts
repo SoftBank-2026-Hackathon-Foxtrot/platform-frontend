@@ -1,13 +1,38 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vite-plus/test";
 import fixture from "../api/control-plane.fixture.json";
 import { detailSchema } from "../api/migrations";
 import { TransitionDiagram } from "./transition-diagram";
+import { CommandPanel } from "./command-panel";
 import { proxyActivity, activeModule, runningStreams } from "./module-detail-model";
 import { setLocale } from "@/shared/lib/i18n";
 
 describe("transient module detail nodes", () => {
+  it("shows one cutover approval and then rollback or finalize choices", () => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    const queryClient = new QueryClient();
+    const render = (allowedCommands: string[]) =>
+      renderToStaticMarkup(
+        createElement(QueryClientProvider, {
+          client: queryClient,
+          children: createElement(CommandPanel, { workflow: data.workflow, allowedCommands }),
+        }),
+      );
+    try {
+      data.workflow.status = "WAITING_APPROVAL";
+      expect(render(["APPROVE", "ABORT"])).toContain("컷오버 승인");
+      data.workflow.status = "CUTOVER_COMPLETE";
+      const complete = render(["ROLLBACK", "FINALIZE"]);
+      expect(complete).toContain("롤백");
+      expect(complete).toContain("전환 완료");
+      expect(complete).not.toContain("컷오버 승인");
+      expect(complete).not.toContain("리소스 되돌리기");
+    } finally {
+      queryClient.clear();
+    }
+  });
   it("opens the requested rollback resource even when the current forward stage has passed", () => {
     const data = detailSchema.parse(structuredClone(fixture));
     data.workflow.status = "ROLLING_BACK";
@@ -39,28 +64,33 @@ describe("transient module detail nodes", () => {
     redis.health = "ERROR";
     expect(runningStreams(data, redis)).toEqual([]);
   });
-  it("retains explicitly reported background streams while awaiting approval", () => {
-    const data = detailSchema.parse(structuredClone(fixture));
-    data.workflow.status = "WAITING_APPROVAL";
-    const db = data.resources.find((r) => r.kind === "DATABASE")!;
-    db.observation.freshness = "FRESH";
-    db.streams = [
-      {
-        channel: "CDC",
-        state: "RUNNING",
-        direction: "FORWARD",
-        freshness: "FRESH",
-        observedAt: "2026-11-07T12:00:00Z",
-        lagMs: 7,
-      },
-    ];
-    expect(runningStreams(data, db)).toHaveLength(1);
-    data.workflow.status = "COMPLETED";
-    expect(runningStreams(data, db)).toEqual([]);
-    data.workflow.status = "RUNNING";
-    db.streams[0]!.observedAt = null;
-    expect(runningStreams(data, db)).toEqual([]);
-  });
+  it.each(["WAITING_APPROVAL", "CUTOVER_COMPLETE"] as const)(
+    "retains observed background streams in %s",
+    (status) => {
+      const data = detailSchema.parse(structuredClone(fixture));
+      data.workflow.status = status;
+      const db = data.resources.find((r) => r.kind === "DATABASE")!;
+      db.observation.freshness = "FRESH";
+      db.streams = [
+        {
+          channel: "CDC",
+          state: "RUNNING",
+          direction: "FORWARD",
+          freshness: "FRESH",
+          observedAt: "2026-11-07T12:00:00Z",
+          lagMs: 7,
+        },
+      ];
+      expect(runningStreams(data, db)).toHaveLength(1);
+      data.workflow.status = "COMPLETED";
+      expect(runningStreams(data, db)).toEqual([]);
+      data.workflow.status = "ROLLED_BACK";
+      expect(runningStreams(data, db)).toEqual([]);
+      data.workflow.status = "RUNNING";
+      db.streams[0]!.observedAt = null;
+      expect(runningStreams(data, db)).toEqual([]);
+    },
+  );
   it("animates reported copy paths through expanded worker nodes and freezes uncertain observations", () => {
     const data = detailSchema.parse(structuredClone(fixture));
     data.workflow.status = "RUNNING";
@@ -145,7 +175,7 @@ describe("transient module detail nodes", () => {
     expect(completed).not.toContain("data-module-detail=");
     expect(completed.match(/class="tile"/g)).toHaveLength(11);
   });
-  it.each(["WAITING_APPROVAL", "HALTED", "COMPLETED"] as const)(
+  it.each(["WAITING_APPROVAL", "CUTOVER_COMPLETE", "HALTED", "COMPLETED", "ROLLED_BACK"] as const)(
     "does not expand %s workflows",
     (status) => {
       const data = detailSchema.parse(structuredClone(fixture));
