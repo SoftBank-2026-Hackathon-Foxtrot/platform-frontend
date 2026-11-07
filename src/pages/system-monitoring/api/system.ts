@@ -16,31 +16,62 @@ export const seriesSchema = z.object({
     }),
   ),
 });
-const hostsSchema = z.object({
+const instancesSchema = z.object({
   state,
-  hosts: z.array(z.object({ name: z.string(), lastSeen: z.number(), stale: z.boolean() })),
+  instances: z.array(
+    z.object({
+      id: z.string(),
+      role: z.string(),
+      networkScope: z.enum(["container", "app-instance"]),
+      lastSeen: z.number(),
+      stale: z.boolean(),
+    }),
+  ),
 });
+const deploymentsSchema = z.object({
+  environments: z.array(
+    z.object({
+      environmentId: z.string(),
+      deploymentId: z.string(),
+      cloud: z.string(),
+      status: z.string(),
+    }),
+  ),
+});
+export function deploymentsOptions(workspace: string, app: string) {
+  return queryOptions({
+    queryKey: ["system-deployments", workspace, app],
+    queryFn: async ({ signal }) =>
+      deploymentsSchema.parse(
+        (await apiClient.get(`/v1/applications/${encodeURIComponent(app)}/deployments`, { signal }))
+          .data,
+      ),
+    enabled: Boolean(app),
+    refetchInterval: 15000,
+  });
+}
 export type Series = z.infer<typeof seriesSchema>;
 export const systemKey = (workspace: string, app: string) => ["system-metrics", workspace, app];
-export function hostsOptions(workspace: string, app: string, environment: string) {
+export function instancesOptions(workspace: string, app: string, deployment: string) {
   return queryOptions({
-    queryKey: [...systemKey(workspace, app), "hosts", environment],
+    queryKey: [...systemKey(workspace, app), "instances", deployment],
     queryFn: async ({ signal }) =>
-      hostsSchema.parse(
+      instancesSchema.parse(
         (
-          await apiClient.get(`/v1/applications/${encodeURIComponent(app)}/system-metrics/hosts`, {
-            signal,
-            params: { environment },
-          })
+          await apiClient.get(
+            `/v1/applications/${encodeURIComponent(app)}/system-metrics/instances`,
+            { signal, params: { deployment } },
+          )
         ).data,
       ),
-    refetchInterval: 15_000,
+    refetchInterval: 15000,
+    enabled: Boolean(app && deployment),
   });
 }
 export function seriesOptions(workspace: string, search: SystemSearch) {
   const params = {
-    environment: search.env,
-    host: search.host,
+    deployment: search.deployment,
+    instance: search.instance,
     category: search.category,
     minutes: search.minutes,
   };
@@ -56,6 +87,6 @@ export function seriesOptions(workspace: string, search: SystemSearch) {
         ).data,
       ),
     refetchInterval: 15_000,
-    enabled: Boolean(search.app && search.env && search.host),
+    enabled: Boolean(search.app && search.deployment && search.instance),
   });
 }

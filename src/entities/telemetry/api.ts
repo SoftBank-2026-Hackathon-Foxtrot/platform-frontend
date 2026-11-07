@@ -16,7 +16,7 @@ export const collectionSchema = z.object({
 });
 export type Collection = z.infer<typeof collectionSchema>;
 
-/** Optional, proposed monitoring APIs must never fall back to example data. */
+/** Monitoring APIs must never fall back to example data. */
 export async function readTelemetry<T>(
   path: string,
   schema: z.ZodType<T>,
@@ -31,10 +31,11 @@ export async function readTelemetry<T>(
   return [404, 405, 501].includes(response.status) ? null : schema.parse(response.data);
 }
 
-export function collectionOptions(workspace: string) {
+export function collectionOptions(workspace: string, workflow: string) {
   return queryOptions({
-    queryKey: ["telemetry-collection", workspace],
-    queryFn: ({ signal }) => readTelemetry("/v1/telemetry/collection", collectionSchema, signal),
+    queryKey: ["telemetry-collection", workspace, workflow],
+    queryFn: ({ signal }) =>
+      readTelemetry("/v1/telemetry/collection", collectionSchema, signal, { workflow }),
     staleTime: 15_000,
     refetchInterval: 30_000,
   });

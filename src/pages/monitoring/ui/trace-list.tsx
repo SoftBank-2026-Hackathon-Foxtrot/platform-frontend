@@ -98,7 +98,11 @@ export function TraceList({
                         <span className="min-w-0 break-all">
                           {trace.name}
                           <span className="block text-[10px] text-muted-foreground md:hidden">
-                            {trace.side === "source" ? source : target}
+                            {trace.side === "source"
+                              ? source
+                              : trace.side === "target"
+                                ? target
+                                : t("공통")}
                           </span>
                         </span>
                       </Button>
@@ -106,7 +110,11 @@ export function TraceList({
                     <TableCell className="hidden md:table-cell">
                       <span className="flex items-center gap-2 text-xs">
                         <SeriesMark side={trace.side} />
-                        {trace.side === "source" ? source : target}
+                        {trace.side === "source"
+                          ? source
+                          : trace.side === "target"
+                            ? target
+                            : t("공통")}
                       </span>
                     </TableCell>
                     <TableCell>

@@ -17,7 +17,7 @@ const payload = {
   comp: "redis",
   from: range.from,
   step: 60,
-  metrics: [{ key: "latency_p95", unit: "ms", source: [0, 1], target: [null, 2] }],
+  metrics: [{ key: "dirty_age", unit: "ms", source: [0, 1], target: [null, 2] }],
 };
 describe("monitoring API boundary", () => {
   it("rejects malformed or unaligned observations and preserves absence", () => {
@@ -71,7 +71,9 @@ describe("monitoring API boundary", () => {
   it("keeps failures as errors and rejects a trace from another identity", async () => {
     const get = vi.spyOn(apiClient, "get").mockRejectedValue(new Error("forbidden"));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    await expect(client.fetchQuery(logsOptions("alice", "w1", range))).rejects.toThrow("forbidden");
+    await expect(client.fetchInfiniteQuery(logsOptions("alice", "w1", range))).rejects.toThrow(
+      "forbidden",
+    );
     get.mockResolvedValue({ status: 200, data: { traceId: "other", spans: [] } });
     await expect(client.fetchQuery(traceOptions("alice", "w1", "expected"))).rejects.toThrow(
       "Unexpected trace identity",

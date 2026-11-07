@@ -1,24 +1,31 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { componentSchema, readTelemetry, type TelemetryComponent } from "@/entities/telemetry";
 
 const timestamp = z.iso.datetime({ offset: true });
 const sample = z.number().finite().nonnegative().nullable();
+const state = z.enum(["OK", "NOT_CONFIGURED", "UNAVAILABLE"]).default("OK");
 const units: Record<string, string> = {
-  throughput: "req/s",
-  error_rate: "%",
-  latency_p95: "ms",
-  cpu: "%",
-  queries: "qps",
-  connections: "",
-  commands: "ops/s",
-  hit_rate: "%",
-  memory: "%",
-  requests: "req/s",
-  transfer: "MB/s",
+  inflight: "",
+  activewebsockets: "",
+  probe_failed: "",
+  probe_p95: "ms",
+  writers: "",
+  prepared: "",
+  forward_lag: "s",
+  reverse_lag: "s",
+  backlog: "",
+  copied: "",
+  dirty_age: "ms",
+  writes: "",
+  completed: "",
+  total: "",
+  forward_backlog: "",
+  reverse_backlog: "",
 };
 export const seriesSchema = z
   .object({
+    state,
     comp: componentSchema,
     step: z.number().int().positive(),
     from: timestamp,
@@ -27,10 +34,17 @@ export const seriesSchema = z
         .object({
           key: z.string(),
           unit: z.string(),
+          scope: z.enum(["environment", "workflow"]).default("environment"),
+          shared: z.array(sample).optional(),
           source: z.array(sample),
           target: z.array(sample),
         })
-        .refine((metric) => metric.source.length === metric.target.length, "Unaligned series")
+        .refine(
+          (metric) =>
+            metric.source.length === metric.target.length &&
+            (!metric.shared || metric.shared.length === metric.source.length),
+          "Unaligned series",
+        )
         .refine(
           (metric) => !(metric.key in units) || metric.unit === units[metric.key],
           "Unexpected metric unit",
@@ -48,15 +62,16 @@ export const traceSchema = z.object({
   at: timestamp,
   name: z.string(),
   service: z.string(),
-  side: z.enum(["source", "target"]),
+  side: z.enum(["source", "target", "shared"]),
   durationMs: z.number().finite().nonnegative(),
   status: z.enum(["ok", "error"]),
   statusCode: z.string().nullable(),
   components: z.array(componentSchema),
 });
-export const tracesSchema = z.object({ traces: z.array(traceSchema) });
+export const tracesSchema = z.object({ state, traces: z.array(traceSchema) });
 export type Trace = z.infer<typeof traceSchema>;
 export const traceDetailSchema = z.object({
+  state,
   traceId: z.string(),
   spans: z.array(
     z.object({
@@ -70,12 +85,14 @@ export const traceDetailSchema = z.object({
   ),
 });
 export const logsSchema = z.object({
+  state,
+  nextCursor: z.string().nullable().default(null),
   logs: z.array(
     z.object({
       id: z.string(),
       at: timestamp,
       level: z.enum(["INFO", "WARN", "ERROR"]),
-      side: z.enum(["source", "target"]),
+      side: z.enum(["source", "target", "shared"]),
       service: z.string(),
       message: z.string(),
       traceId: z.string().nullable(),
@@ -145,13 +162,49 @@ export function logsOptions(
   range: TimeRange,
   traceId?: string,
 ) {
-  return queryOptions({
+  return infiniteQueryOptions({
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page: z.infer<typeof logsSchema> | null) => page?.nextCursor ?? undefined,
     queryKey: ["monitoring", workspace, workflow, "logs", range, traceId],
-    queryFn: ({ signal }) =>
+    queryFn: ({ signal, pageParam }) =>
       readTelemetry(`${pathFor(workflow)}/logs`, logsSchema, signal, {
         ...range,
+        ...(pageParam ? { cursor: pageParam } : {}),
         ...(traceId ? { traceId } : {}),
       }),
     staleTime: 30_000,
+  });
+}
+
+export const scopeSchema = z.object({
+  workflowId: z.string(),
+  applicationId: z.string(),
+  workloadScope: z.string(),
+  sourceEnvironment: z.string(),
+  targetEnvironment: z.string(),
+  actors: z.record(z.string(), z.array(z.string())),
+  resources: z.array(
+    z.object({
+      kind: z.string(),
+      migrationId: z.string().nullable(),
+      bindingRef: z.string().nullable(),
+      source: z.record(z.string(), z.union([z.string(), z.number()])),
+      target: z.record(z.string(), z.union([z.string(), z.number()])),
+    }),
+  ),
+});
+export function scopeOptions(workspace: string, workflow: string) {
+  return queryOptions({
+    queryKey: ["monitoring", workspace, workflow, "scope"],
+    queryFn: async ({ signal }) => {
+      const data = await readTelemetry(
+        `${pathFor(workflow)}/monitoring-scope`,
+        scopeSchema,
+        signal,
+      );
+      if (data && data.workflowId !== workflow) throw new Error("Unexpected workflow identity");
+      return data;
+    },
+    staleTime: 15000,
   });
 }

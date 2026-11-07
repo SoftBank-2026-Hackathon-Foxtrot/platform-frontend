@@ -102,14 +102,19 @@ export function LogList({
                     <span className="break-all">
                       {log.service}
                       <span className="block text-muted-foreground">
-                        {log.side === "source" ? source : target}
+                        {log.side === "source"
+                          ? source
+                          : log.side === "target"
+                            ? target
+                            : t("공통")}
                       </span>
                     </span>
                   </span>
                 </TableCell>
                 <TableCell className="align-top font-mono text-xs whitespace-normal">
                   <span className="mb-1 block break-all text-muted-foreground lg:hidden">
-                    {log.service} · {log.side === "source" ? source : target}
+                    {log.service} ·{" "}
+                    {log.side === "source" ? source : log.side === "target" ? target : t("공통")}
                   </span>
                   <span className="break-all">{log.message}</span>
                 </TableCell>
