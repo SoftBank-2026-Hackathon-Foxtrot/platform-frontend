@@ -1,10 +1,11 @@
 import { LOCALES, setLocale, t, useLocale } from "@/shared/lib/i18n";
 import type { ReactNode } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CloudIcon, LogOut, Moon, Sun } from "lucide-react";
-import { RiArrowLeftRightFill, RiHomeFill, RiSettings3Fill } from "react-icons/ri";
+import { RiArrowLeftRightFill, RiHomeFill, RiPulseFill, RiSettings3Fill } from "react-icons/ri";
 import { type Session, logout } from "@/entities/session";
+import { collectionOptions, collectionHealth } from "@/entities/telemetry";
 import { setTheme, useTheme } from "@/shared/lib/theme";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
 import { Button } from "@/shared/ui/button";
@@ -28,12 +29,15 @@ import {
 const navigation = [
   { to: "/applications", title: "애플리케이션", icon: RiHomeFill },
   { to: "/migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
+  { to: "/monitoring", title: "모니터링", icon: RiPulseFill },
   { to: "/settings", title: "설정", icon: RiSettings3Fill },
 ] as const;
 function PlatformSidebar({ pathname, session }: { pathname: string; session: Session }) {
   useLocale();
   const { setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
+  const collection = useQuery(collectionOptions(session.workspaceId));
+  const health = collectionHealth(collection.error ? null : collection.data);
   const signOut = useMutation({
     mutationFn: logout,
     onSuccess: async () => {
@@ -70,9 +74,26 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
                       tooltip={t(item.title)}
                       aria-current={active ? "page" : undefined}
                     >
-                      <Link to={item.to} onClick={() => setOpenMobile(false)}>
+                      <Link
+                        to={item.to}
+                        search={item.to === "/monitoring" ? { comp: "app" } : undefined}
+                        onClick={() => setOpenMobile(false)}
+                      >
                         <item.icon aria-hidden="true" />
                         <span>{t(item.title)}</span>
+                        {item.to === "/monitoring" && (
+                          <span
+                            role="img"
+                            aria-label={
+                              health.state === "healthy"
+                                ? t("OTEL 수집 정상")
+                                : health.state === "warning"
+                                  ? t("OTEL 수집 끊김")
+                                  : t("OTEL 수집 미확인")
+                            }
+                            className={`ml-auto size-1.5 shrink-0 rounded-full ${health.state === "healthy" ? "bg-success" : health.state === "warning" ? "bg-warning" : "bg-muted-foreground"}`}
+                          />
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -114,8 +135,19 @@ export function PlatformShell({ session, children }: { session: Session; childre
   const detail = pathname.split("/")[2];
   return (
     <SidebarProvider className="h-dvh min-h-0 overflow-hidden">
+      <a
+        href="#platform-content"
+        className="sr-only fixed top-2 left-2 z-50 rounded-md bg-background px-4 py-2 text-sm focus:not-sr-only"
+      >
+        {t("본문으로 이동")}
+      </a>
       <PlatformSidebar pathname={pathname} session={session} />
-      <SidebarInset aria-label={t(current.title)} className="min-h-0 min-w-0 overflow-y-auto">
+      <SidebarInset
+        id="platform-content"
+        tabIndex={-1}
+        aria-label={t(current.title)}
+        className="min-h-0 min-w-0 overflow-y-auto"
+      >
         <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background/90 px-4 backdrop-blur">
           <SidebarTrigger aria-label={t("사이드바 전환")} />
           <Separator orientation="vertical" className="mx-1 h-4 self-center!" />
@@ -123,7 +155,11 @@ export function PlatformShell({ session, children }: { session: Session; childre
             <BreadcrumbList className="flex-nowrap overflow-hidden">
               <BreadcrumbItem className="min-w-0">
                 {detail ? (
-                  <Link to={current.to} className="truncate">
+                  <Link
+                    to={current.to}
+                    search={current.to === "/monitoring" ? { comp: "app" } : undefined}
+                    className="truncate"
+                  >
                     {t(current.title)}
                   </Link>
                 ) : (
