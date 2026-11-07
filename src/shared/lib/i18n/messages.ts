@@ -1,4 +1,22 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "마이그레이션이 없습니다": { en: "No migrations", ja: "移行はありません" },
+  "마이그레이션 선택": { en: "Select migration", ja: "移行を選択" },
+  "등록된 앱 배포가 없습니다": {
+    en: "No registered app deployments",
+    ja: "登録済みのアプリデプロイはありません",
+  },
+  "선택한 배포를 찾을 수 없습니다": {
+    en: "Selected deployment not found",
+    ja: "選択したデプロイが見つかりません",
+  },
+  "앱 시스템 지표가 도착하지 않았습니다": {
+    en: "No app system metrics received",
+    ja: "アプリのシステムメトリクスが届いていません",
+  },
+  "앱의 수집 설정과 배포 버전을 확인하세요": {
+    en: "Check the app's telemetry settings and deployed version",
+    ja: "アプリの収集設定とデプロイ済みバージョンを確認してください",
+  },
   "공용 앱": { en: "Shared app", ja: "共有アプリ" },
   "내 배포": { en: "My deployment", ja: "自分のデプロイ" },
   옵저버빌리티: { en: "Observability", ja: "オブザーバビリティ" },

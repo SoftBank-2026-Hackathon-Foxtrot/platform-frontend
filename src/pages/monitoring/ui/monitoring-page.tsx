@@ -7,6 +7,7 @@ import {
   migrationReturn,
   workflowKeys,
   workflowOptions,
+  workflowStatus,
   type Workflow,
 } from "@/entities/migration";
 import { useSession } from "@/entities/session";
@@ -19,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group";
 import {
-  liveWorkflowsOptions,
+  monitoringWorkflowsOptions,
   logsOptions,
   scopeOptions,
   seriesOptions,
@@ -51,11 +52,11 @@ type Props = { search: MonitoringSearch; tab: MonitoringTab; onNavigate: Monitor
 export function MonitoringPage(props: Props) {
   useLocale();
   const session = useSession();
-  const workflows = useQuery(liveWorkflowsOptions(session.workspaceId));
-  const live = workflows.data ?? [];
+  const workflows = useQuery(monitoringWorkflowsOptions(session.workspaceId));
+  const available = workflows.data ?? [];
   const current = props.search.workflow
-    ? live.find((item) => item.id === props.search.workflow)
-    : live[0];
+    ? available.find((item) => item.id === props.search.workflow)
+    : available[0];
   const detailEnabled = Boolean(props.search.workflow && !current && !workflows.isPending);
   const detail = useQuery({
     ...workflowOptions(session.workspaceId, props.search.workflow ?? ""),
@@ -86,7 +87,7 @@ export function MonitoringPage(props: Props) {
         <Empty>
           {props.search.workflow
             ? t("마이그레이션을 찾을 수 없습니다")
-            : t("수집 중인 마이그레이션이 없습니다")}
+            : t("마이그레이션이 없습니다")}
           <Button asChild variant="link" className="ml-2">
             <Link to="/migrations">{t("마이그레이션 이력")}</Link>
           </Button>
@@ -97,8 +98,7 @@ export function MonitoringPage(props: Props) {
           key={workflow.id}
           {...props}
           workflow={workflow}
-          workflows={live}
-          live={Boolean(current)}
+          workflows={available}
           workspace={session.workspaceId}
           demo={session.demo}
         />
@@ -114,14 +114,13 @@ function MonitoringContent({
   workflows,
   workspace,
   demo,
-  live,
 }: Props & {
   workflow: Workflow;
   workflows: Workflow[];
   workspace: string;
   demo: boolean;
-  live: boolean;
 }) {
+  const listed = workflows.some((item) => item.id === workflow.id);
   const queryClient = useQueryClient();
   const observationKey = workflowKeys.detail(workspace, workflow.id);
   const observationFetching = useIsFetching({ queryKey: observationKey });
@@ -190,10 +189,10 @@ function MonitoringContent({
           <h1 id="monitoring-title" className="text-2xl font-semibold tracking-tight">
             {t("모니터링")}
           </h1>
-          {!live && workflows.length > 0 && <span className="break-all text-sm">{appName}</span>}
-          {workflows.length > 1 || (!live && workflows.length > 0) ? (
+          {!listed && workflows.length > 0 && <span className="break-all text-sm">{appName}</span>}
+          {workflows.length > 1 || (!listed && workflows.length > 0) ? (
             <Select
-              value={live ? workflow.id : ""}
+              value={listed ? workflow.id : ""}
               onValueChange={(id) =>
                 onNavigate({ workflow: id, comp: search.comp, from: search.from }, "mx")
               }
@@ -202,12 +201,13 @@ function MonitoringContent({
                 aria-label={t("모니터링할 마이그레이션")}
                 className="max-w-full sm:max-w-56"
               >
-                <SelectValue placeholder={t("수집 중인 마이그레이션")} />
+                <SelectValue placeholder={t("마이그레이션 선택")} />
               </SelectTrigger>
               <SelectContent>
                 {workflows.map((item) => (
                   <SelectItem key={item.id} value={item.id}>
-                    {item.applicationSnapshot?.name ?? item.application} · {item.id}
+                    {item.applicationSnapshot?.name ?? item.application} · {item.id} ·{" "}
+                    {t(workflowStatus[item.status])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -259,13 +259,9 @@ function MonitoringContent({
           </Button>
         </div>
       </header>
-      {!live && (
+      {["COMPLETED", "ABORTED"].includes(workflow.status) && (
         <p role="status" className="text-sm text-muted-foreground">
-          {t(
-            ["COMPLETED", "ABORTED"].includes(workflow.status)
-              ? "종료된 마이그레이션"
-              : "현재 수집 없음",
-          )}
+          {t("종료된 마이그레이션")}
         </p>
       )}
       {demo && <p className="text-xs text-muted-foreground">{t("예시 데이터")}</p>}

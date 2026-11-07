@@ -10,7 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { MonitoringNav } from "@/widgets/monitoring-nav";
 import { deploymentsOptions, instancesOptions, seriesOptions, systemKey } from "../api/system";
-import { categories, type SystemSearch } from "../model/system";
+import { categories, selectDeployment, type SystemSearch } from "../model/system";
 import { BackendState, MetricPanel, time } from "./metric-panel";
 type Props = {
   search: SystemSearch;
@@ -61,11 +61,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
     : applications.data?.seed[0];
   const deployments = useQuery(deploymentsOptions(session.workspaceId, app?.id ?? ""));
   const choices = deployments.data?.environments ?? [];
-  const selectedDeployment = search.deployment
-    ? choices.find((row) => row.environmentId === search.deployment)
-    : choices.find(
-        (row) => (!search.env || row.cloud === search.env) && row.status !== "DESTROYED",
-      );
+  const selectedDeployment = selectDeployment(choices, search);
   const deployment = selectedDeployment?.environmentId;
   const env = selectedDeployment?.cloud;
   const valid = Boolean(app && deployment);
@@ -201,17 +197,14 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
         <BackendState state={deployments.data.state} />
       ) : !valid ? (
         <p role="status">
-          {t(
-            search.deployment
-              ? "선택한 배포의 수집이 중단되었습니다"
-              : "수집 중인 앱 배포가 없습니다",
-          )}
+          {t(search.deployment ? "선택한 배포를 찾을 수 없습니다" : "등록된 앱 배포가 없습니다")}
         </p>
       ) : instances.data?.state !== "OK" && instances.data ? (
         <BackendState state={instances.data.state} />
       ) : !instance ? (
         <p role="status" className="py-8 text-sm text-muted-foreground">
-          {t("이 배포에서 수집 중인 인스턴스가 없습니다")}
+          {t("앱 시스템 지표가 도착하지 않았습니다")}
+          <span className="mt-1 block">{t("앱의 수집 설정과 배포 버전을 확인하세요")}</span>
         </p>
       ) : (
         <>

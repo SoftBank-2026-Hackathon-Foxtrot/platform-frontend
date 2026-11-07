@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/shared/api";
 import { describe, expect, it, vi } from "vite-plus/test";
-import { systemSearchSchema, chartPath } from "./system";
+import { systemSearchSchema, chartPath, selectDeployment } from "./system";
 import { seriesSchema, seriesOptions, deploymentsOptions } from "../api/system";
 describe("system monitoring", () => {
   it("preserves deployment, instance and category in URLs and isolates query caches", () => {
@@ -52,7 +52,7 @@ describe("system monitoring", () => {
   });
 });
 
-it("uses the live deployment API instead of the full deployment history", async () => {
+it("requests registered deployments even before their first sample", async () => {
   const get = vi
     .spyOn(apiClient, "get")
     .mockResolvedValue({ data: { state: "UNAVAILABLE", environments: [] } });
@@ -63,6 +63,7 @@ it("uses the live deployment API instead of the full deployment history", async 
   });
   expect(get).toHaveBeenCalledWith("/v1/applications/app%2Fid/system-metrics/deployments", {
     signal: expect.any(AbortSignal),
+    params: { include_inactive: true },
   });
   client.clear();
   get.mockRestore();
@@ -96,4 +97,25 @@ it("preserves shared deployment identifiers and separates their query cache", as
     client.clear();
     get.mockRestore();
   }
+});
+
+it("prefers reporting deployments without overriding an explicit selection or cloud", () => {
+  const waiting = {
+    environmentId: "aws",
+    cloud: "aws",
+    status: "READY",
+    collection: "NOT_REPORTING" as const,
+  };
+  const reporting = {
+    environmentId: "gcp",
+    cloud: "gcp",
+    status: "READY",
+    collection: "REPORTING" as const,
+  };
+  const choices = [waiting, reporting];
+  expect(selectDeployment(choices, {})).toEqual(reporting);
+  expect(selectDeployment(choices, { deployment: "aws" })).toEqual(waiting);
+  expect(selectDeployment(choices, { env: "aws" })).toEqual(waiting);
+  expect(selectDeployment(choices, { deployment: "missing" })).toBeUndefined();
+  expect(selectDeployment([{ ...reporting, status: "DESTROYED" }], {})).toBeUndefined();
 });

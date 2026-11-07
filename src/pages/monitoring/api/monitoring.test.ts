@@ -3,7 +3,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/shared/api";
 import { collectionHealth } from "@/entities/telemetry";
 import {
-  liveWorkflowsOptions,
+  monitoringWorkflowsOptions,
   logsOptions,
   seriesOptions,
   seriesSchema,
@@ -92,11 +92,28 @@ describe("monitoring API boundary", () => {
   });
 });
 
-it("loads live targets separately from migration history and scopes the cache", async () => {
-  const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: [] });
+it("loads planned and completed migrations for direct navigation", async () => {
+  const workflows = ["PLANNED", "COMPLETED"].map((status) => ({
+    id: status,
+    application: "goods",
+    sourceEnv: "aws",
+    targetEnv: "gcp",
+    version: 1,
+    currentStage: 0,
+    createdAt: range.from,
+    createdBy: "user",
+    finishedAt: null,
+    status,
+    halt: null,
+    reconcileRequested: false,
+    rolledBack: [],
+  }));
+  const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: workflows });
   const client = new QueryClient();
-  expect(await client.fetchQuery(liveWorkflowsOptions("one"))).toEqual([]);
-  expect(get).toHaveBeenCalledWith("/v1/telemetry/workflows", { signal: expect.any(AbortSignal) });
-  expect(liveWorkflowsOptions("one").queryKey).not.toEqual(liveWorkflowsOptions("two").queryKey);
+  expect(await client.fetchQuery(monitoringWorkflowsOptions("one"))).toEqual(workflows);
+  expect(get).toHaveBeenCalledWith("/v1/workflows", { signal: expect.any(AbortSignal) });
+  expect(monitoringWorkflowsOptions("one").queryKey).not.toEqual(
+    monitoringWorkflowsOptions("two").queryKey,
+  );
   client.clear();
 });

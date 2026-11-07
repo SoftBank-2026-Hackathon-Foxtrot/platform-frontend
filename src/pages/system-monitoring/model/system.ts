@@ -47,3 +47,18 @@ export function chartPath(
   }
   return path;
 }
+
+export function selectDeployment<
+  T extends {
+    environmentId: string;
+    cloud: string;
+    status: string;
+    collection?: "REPORTING" | "NOT_REPORTING" | "UNKNOWN";
+  },
+>(choices: T[], search: Pick<SystemSearch, "deployment" | "env">): T | undefined {
+  if (search.deployment) return choices.find((row) => row.environmentId === search.deployment);
+  const matching = choices.filter(
+    (row) => (!search.env || row.cloud === search.env) && row.status !== "DESTROYED",
+  );
+  return matching.find((row) => row.collection === "REPORTING") ?? matching[0];
+}
