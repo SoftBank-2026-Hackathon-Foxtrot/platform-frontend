@@ -14,6 +14,7 @@ export function FlowStory({ data }: { data: Detail }) {
   const paused = data.workflow.status === "HALTED";
   const waiting = ["PLANNED", "WAITING_APPROVAL"].includes(data.workflow.status);
   const done = ["COMPLETED", "ABORTED"].includes(data.workflow.status);
+  const recovering = data.workflow.status === "ROLLING_BACK";
   return (
     <div
       className="flow-story flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-xs"
@@ -27,7 +28,9 @@ export function FlowStory({ data }: { data: Detail }) {
         <Radio className={`size-4 text-info ${isMoving(data) ? "flow-pulse" : ""}`} />
       )}
       <span className="font-semibold">
-        {t(stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "단계 미확인")}
+        {recovering
+          ? t("{0} 복귀", [data.workflow.rollback?.resource ?? ""])
+          : t(stage ? (STAGE_LABELS[stage.kind] ?? stage.kind) : "단계 미확인")}
       </span>
       {(paused || waiting) && (
         <span className="text-muted-foreground">

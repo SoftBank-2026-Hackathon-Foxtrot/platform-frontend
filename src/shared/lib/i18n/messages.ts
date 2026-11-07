@@ -1645,4 +1645,68 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Replication activity unconfirmed",
     ja: "複製の実行は未確認",
   },
+  "초기 복사": {
+    en: "Initial copy",
+    ja: "初期コピー",
+  },
+  "CDC 변경분": {
+    en: "CDC changes",
+    ja: "CDC変更分",
+  },
+  "키 변경 알림": {
+    en: "Key notifications",
+    ja: "キー変更通知",
+  },
+  "객체 변경분": {
+    en: "Object changes",
+    ja: "オブジェクト変更分",
+  },
+  "{0} 복귀": {
+    en: "Restore {0}",
+    ja: "{0}を復帰",
+  },
+  "원본 복귀 중": {
+    en: "Restoring source",
+    ja: "移行元に復帰中",
+  },
+  "구독 중": {
+    en: "Subscribed",
+    ja: "購読中",
+  },
+  "변경 로그 전송": {
+    en: "Sending change log",
+    ja: "変更ログ転送",
+  },
+  "대기 {0}건": {
+    en: "{0} pending",
+    ja: "待機 {0}件",
+  },
+  "초기 데이터 복사": {
+    en: "Initial data copy",
+    ja: "初期データコピー",
+  },
+  "변경 키 읽기·반영": {
+    en: "Read and apply changed keys",
+    ja: "変更キーを取得・反映",
+  },
+  "변경 로그 적용": {
+    en: "Apply change log",
+    ja: "変更ログを適用",
+  },
+  "키 알림 발행": {
+    en: "Publish key notifications",
+    ja: "キー通知を発行",
+  },
+  "CDC 변경분 전송": {
+    en: "Send CDC changes",
+    ja: "CDC変更分を転送",
+  },
+  "변경분 전송": {
+    en: "Send changes",
+    ja: "変更分を転送",
+  },
+  "변경분 반영": {
+    en: "Apply changes",
+    ja: "変更分を反映",
+  },
 };

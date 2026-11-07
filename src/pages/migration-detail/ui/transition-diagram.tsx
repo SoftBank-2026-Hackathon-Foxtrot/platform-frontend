@@ -11,7 +11,7 @@ import {
   trafficFlow,
 } from "./flow-model";
 import { STACK_ICONS } from "./stack-icons";
-import { activeModule, proxyActivity } from "./module-detail-model";
+import { activeModule, proxyActivity, runningStreams, STREAM_NAMES } from "./module-detail-model";
 import "./flow-visuals.css";
 
 // stack-diagram tiles and orthogonal edges, arranged as paired source/target rows.
@@ -77,6 +77,7 @@ const CSS = `
 .migration-stack .copy-link.moving { stroke-dasharray:7 7; animation:copy-dashes 1s linear infinite; }
 .migration-stack .copy-packet { fill:var(--info); filter:drop-shadow(0 0 3px var(--info)); offset-distance:0%; animation:request-travel 2s linear infinite; }
 .migration-stack .copy-label { font-size:11px; font-weight:600; }
+.migration-stack .event-link {fill:none;stroke:var(--warning);stroke-width:1.4;stroke-dasharray:2 5;}
 .migration-stack .module-detail-node { animation:module-detail-reveal .2s ease-out; }
 @keyframes module-detail-reveal { from { opacity:0; } to { opacity:1; } }
 @keyframes copy-dashes { to { stroke-dashoffset:-28; } }
@@ -136,6 +137,20 @@ function StackNode({
   );
 }
 function transferMetric(resource: Resource | undefined) {
+  const stream = resource?.streams.find(
+    (item) => item.state === "RUNNING" && item.freshness === "FRESH" && item.observedAt,
+  );
+  if (stream) {
+    return (
+      [
+        stream.copied != null && stream.copied >= 0 ? t("처리 {0}건", [stream.copied]) : null,
+        stream.backlog != null && stream.backlog >= 0 ? `backlog ${stream.backlog}` : null,
+        stream.lagMs != null && stream.lagMs >= 0 ? `${stream.lagMs} ms` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || t("진행량 미보고")
+    );
+  }
   const progress = copyProgress(resource);
   const count = (n: number) =>
     new Intl.NumberFormat(localeTag(), { maximumFractionDigits: 1 }).format(n);
@@ -184,13 +199,20 @@ export function TransitionDiagram({
   const expandedTop = expanded >= 0 ? rows[expanded]! : 0;
   const expandedResource = data.resources.find((item) => item.kind === expandedItem?.kind);
   const detailFlow = resourceFlow(data, expandedResource);
+  const detailStreams = suspended ? [] : runningStreams(data, expandedResource);
+  const changeStream = detailStreams.find((stream) =>
+    ["CDC", "KEY_EVENTS"].includes(stream.channel),
+  );
+  const eventSide = changeStream?.direction === "REVERSE" ? 1 : 0;
   const detailCopyLabel =
-    !detailFlow.copying &&
-    !detailFlow.stale &&
-    !detailFlow.failed &&
-    expandedResource?.lifecycle !== "COMPLETED"
-      ? "복제 실행 미확인"
-      : detailFlow.label;
+    detailStreams.length > 0
+      ? detailStreams.map((stream) => t(STREAM_NAMES[stream.channel] ?? stream.channel)).join(" · ")
+      : !detailFlow.copying &&
+          !detailFlow.stale &&
+          !detailFlow.failed &&
+          expandedResource?.lifecycle !== "COMPLETED"
+        ? "복제 실행 미확인"
+        : detailFlow.label;
   const proxy = proxyActivity(data, expandedResource, suspended);
   const proxyLabel = proxy.stale
     ? t("관측 갱신 대기")
@@ -221,11 +243,17 @@ export function TransitionDiagram({
       <style>{CSS}</style>
       <div className="diagram-layout">
         <aside className="diagram-info" aria-label={t("전환 구성도")}>
+          {data.simulation && (
+            <span className="w-fit rounded border border-warning/40 px-1.5 py-0.5 font-mono text-[10px] text-warning">
+              MOCK
+            </span>
+          )}
           <FlowStory data={data} />
           {suspended && (
             <p className="text-xs text-warning">{t("관측 갱신 실패 · 마지막 상태 표시")}</p>
           )}
           <TrafficMeter data={data} />
+          {wf.status === "ROLLING_BACK" && <p className="text-xs text-info">{t("원본 복귀 중")}</p>}
           {stage?.kind === "PREPARE" && <PreparationActivity data={data} />}
           {expandedItem?.kind === "REDIS" && (
             <div className="space-y-3 border-t pt-3 text-xs" data-module-role-summary>
@@ -372,6 +400,10 @@ export function TransitionDiagram({
                   {RESOURCE_FLOW.map((item, index) => {
                     const resource = byKind.get(item.kind);
                     const observedFlow = resourceFlow(data, resource);
+                    const streams = suspended ? [] : runningStreams(data, resource);
+                    const streamLabel = streams
+                      .map((stream) => t(STREAM_NAMES[stream.channel] ?? stream.channel))
+                      .join(" · ");
                     const flow = { ...observedFlow, moving: observedFlow.moving && !suspended };
                     const sides = activeSides(resource);
                     const y = rows[index === 0 ? 0 : index === 1 ? 1 : 2]! + 28;
@@ -384,11 +416,11 @@ export function TransitionDiagram({
                     const location =
                       sides.source && sides.target
                         ? wf.sourceEnv + " + " + wf.targetEnv
-                        : sides.target
-                          ? wf.targetEnv
-                          : sides.source
-                            ? wf.sourceEnv
-                            : t("미확인");
+                          : sides.target
+                            ? wf.targetEnv
+                            : sides.source
+                              ? wf.sourceEnv
+                              : t("미확인");
                     if (index === expanded) {
                       const top = y - 28;
                       const sourceActive = proxy.destination === wf.sourceEnv;
@@ -406,6 +438,36 @@ export function TransitionDiagram({
                             d={`M636 292 H666 V${top + 18} H646`}
                             markerEnd={arrow}
                           />
+                          {changeStream && (
+                            <g data-change-subscription={changeStream.channel}>
+                              <path
+                                className="event-link"
+                                d={`M${eventSide === 0 ? 200 : 880} ${top + 56} V${top + 66}`}
+                                markerEnd={arrow}
+                              />
+                              <path
+                                className="event-link"
+                                d={
+                                  eventSide === 0
+                                    ? `M330 ${top + 116} H434`
+                                    : `M750 ${top + 116} H646`
+                                }
+                                markerEnd={arrow}
+                              />
+                              {[0, 1, 2].map((packet) => (
+                                <circle
+                                  key={packet}
+                                  className="copy-packet"
+                                  style={{
+                                    fill: "var(--warning)",
+                                    offsetPath: `path("${eventSide === 0 ? `M330 ${top + 116} H434` : `M750 ${top + 116} H646`}")`,
+                                    animationDelay: `${-packet * 0.65}s`,
+                                  }}
+                                  r="2.2"
+                                />
+                              ))}
+                            </g>
+                          )}
                           <path
                             className="edge"
                             style={{ stroke: sourceActive ? "var(--info)" : undefined }}
@@ -480,6 +542,7 @@ export function TransitionDiagram({
                             </g>
                           ))}
                           <text className="edge-label" x="540" y={top + 145} textAnchor="middle">
+                            {streamLabel ? streamLabel + " · " : ""}
                             {transferMetric(resource)}
                           </text>
                         </g>
@@ -527,7 +590,7 @@ export function TransitionDiagram({
                           y={y - 14}
                           textAnchor="middle"
                         >
-                          {t(suspended ? "관측 갱신 대기" : flow.label)}
+                          {streamLabel || t(suspended ? "관측 갱신 대기" : flow.label)}
                           {flow.reverse
                             ? " · " + t(flow.forward ? "양방향 복제" : "역방향 복제")
                             : ""}
@@ -544,6 +607,24 @@ export function TransitionDiagram({
                 </svg>
                 {expandedItem && (
                   <div className="module-detail-node" data-module-detail={expandedItem.kind}>
+                    {changeStream && (
+                      <StackNode
+                        cx={eventSide === 0 ? 200 : 880}
+                        top={expandedTop + 70}
+                        width={204}
+                        icon={changeStream.channel === "CDC" ? "postgresql" : "redis"}
+                        name={STREAM_NAMES[changeStream.channel] ?? changeStream.channel}
+                        description={t(
+                          changeStream.channel === "KEY_EVENTS" ? "구독 중" : "변경 로그 전송",
+                        )}
+                        sub={
+                          changeStream.backlog == null
+                            ? t("미보고")
+                            : t("대기 {0}건", [changeStream.backlog])
+                        }
+                        state="focus"
+                      />
+                    )}
                     <StackNode
                       cx={540}
                       top={expandedTop}
@@ -570,7 +651,15 @@ export function TransitionDiagram({
                       width={204}
                       icon="server"
                       name={expandedItem.kind === "REDIS" ? "Sync Worker" : "데이터 복제"}
-                      description={t("변경 데이터 복제")}
+                      description={t(
+                        detailStreams.some((stream) => stream.channel === "INITIAL_COPY")
+                          ? "초기 데이터 복사"
+                          : changeStream?.channel === "KEY_EVENTS"
+                            ? "변경 키 읽기·반영"
+                            : changeStream?.channel === "CDC"
+                              ? "변경 로그 적용"
+                              : "변경 데이터 복제",
+                      )}
                       sub={
                         suspended || detailFlow.stale
                           ? t("관측 갱신 대기")
@@ -647,6 +736,9 @@ export function TransitionDiagram({
                       />
                       {RESOURCE_FLOW.map((item, row) => {
                         const resource = byKind.get(item.kind);
+                        const liveStream = runningStreams(data, resource).find(
+                          (stream) => stream.channel !== "INITIAL_COPY",
+                        );
                         const observedFlow = resourceFlow(data, resource);
                         const flow = { ...observedFlow, moving: observedFlow.moving && !suspended };
                         const sides = activeSides(resource);
@@ -658,6 +750,19 @@ export function TransitionDiagram({
                             top={rows[row === 0 ? 0 : row === 1 ? 1 : 2]!}
                             icon={item.icon}
                             name={item.name}
+                            description={
+                              !suspended && liveStream
+                                ? t(
+                                    (liveStream.direction === "FORWARD" ? index === 0 : index === 1)
+                                      ? liveStream.channel === "KEY_EVENTS"
+                                        ? "키 알림 발행"
+                                        : liveStream.channel === "CDC"
+                                          ? "CDC 변경분 전송"
+                                          : "변경분 전송"
+                                      : "변경분 반영",
+                                  )
+                                : undefined
+                            }
                             sub={
                               t(active ? "사용 중" : resource?.route ? "대기" : "경로 미확인") +
                               " · " +

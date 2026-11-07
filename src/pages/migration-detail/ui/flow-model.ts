@@ -100,13 +100,19 @@ export function resourceFlow(data: Detail, resource: Resource | undefined) {
   const reverseState = resource.replication?.reverse?.state;
   const redisDirection = resource.details.redis?.sync?.direction;
   const terminal = ["COMPLETED", "CANCELLED"].includes(resource.lifecycle ?? "");
+  const streams = resource.streams.filter(
+    (stream) =>
+      stream.state === "RUNNING" && stream.freshness === "FRESH" && Boolean(stream.observedAt),
+  );
   const forward =
     !terminal &&
-    (ACTIVE.has(forwardState ?? "") ||
+    (streams.some((stream) => stream.direction === "FORWARD") ||
+      ACTIVE.has(forwardState ?? "") ||
       (!forwardState && resource.lifecycle === "SYNCING" && redisDirection !== "REVERSE"));
   const reverse =
     !terminal &&
-    (ACTIVE.has(reverseState ?? "") ||
+    (streams.some((stream) => stream.direction === "REVERSE") ||
+      ACTIVE.has(reverseState ?? "") ||
       (!reverseState && redisDirection === "REVERSE" && resource.lifecycle === "SYNCING"));
   const ready = resource.lifecycle === "READY";
   const copying = forward || reverse;
@@ -131,7 +137,13 @@ export function resourceFlow(data: Detail, resource: Resource | undefined) {
                   } as Record<string, string>
                 )[resource.lifecycle ?? ""] ?? "관측 대기");
   return {
-    moving: isMoving(data) && !stale && !failed && copying,
+    moving:
+      (isMoving(data) ||
+        (streams.length > 0 &&
+          !["PLANNED", "COMPLETED", "ABORTED"].includes(data.workflow.status))) &&
+      !stale &&
+      !failed &&
+      copying,
     forward,
     reverse,
     stale,

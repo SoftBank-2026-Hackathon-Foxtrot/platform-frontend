@@ -49,6 +49,7 @@ export const workflowSchema = z.object({
     .nullable(),
   reconcileRequested: z.boolean(),
   rolledBack: z.array(resourceKindSchema),
+  rollback: z.object({ resource: resourceKindSchema, mode: z.string().optional() }).nullish(),
 });
 export type Workflow = z.infer<typeof workflowSchema>;
 export const workflowDetailSchema = z.object({

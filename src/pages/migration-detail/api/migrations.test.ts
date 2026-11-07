@@ -31,6 +31,20 @@ it.each(["en", "ja"] as const)("renders diagram and resource text in %s", (local
 });
 
 describe("control-plane observation contract", () => {
+  it("treats null resource details as unreported telemetry", () => {
+    const payload: unknown = {
+      ...fixture,
+      resources: fixture.resources.map((resource) => ({ ...resource, details: null })),
+    };
+    const detail = detailSchema.parse(payload);
+    expect(detail.resources.every((resource) => Object.keys(resource.details).length === 0)).toBe(
+      true,
+    );
+    expect(detail.resources[0]?.details.database?.sourceWriterSessions).toBeUndefined();
+    expect(() =>
+      renderToStaticMarkup(createElement(TransitionDiagram, { data: detail })),
+    ).not.toThrow();
+  });
   it("accepts the actual backend projection and preserves unknown sockets", () => {
     const detail = detailSchema.parse(fixture);
     expect(detail.resources).toHaveLength(3);

@@ -4,10 +4,63 @@ import { describe, expect, it } from "vite-plus/test";
 import fixture from "../api/control-plane.fixture.json";
 import { detailSchema } from "../api/migrations";
 import { TransitionDiagram } from "./transition-diagram";
-import { proxyActivity } from "./module-detail-model";
+import { proxyActivity, activeModule, runningStreams } from "./module-detail-model";
 import { setLocale } from "@/shared/lib/i18n";
 
 describe("transient module detail nodes", () => {
+  it("opens the requested rollback resource even when the current forward stage has passed", () => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    data.workflow.status = "ROLLING_BACK";
+    data.workflow.currentStage = 7;
+    data.workflow.rollback = { resource: "REDIS", mode: "normal" };
+    expect(activeModule(data)).toBe("REDIS");
+    const redis = data.resources.find((r) => r.kind === "REDIS")!;
+    redis.observation.freshness = "FRESH";
+    redis.route = "TARGET";
+    redis.streams = [
+      {
+        channel: "KEY_EVENTS",
+        direction: "REVERSE",
+        state: "RUNNING",
+        freshness: "FRESH",
+        observedAt: "2026-11-07T12:00:00Z",
+        backlog: 2,
+      },
+    ];
+    expect(runningStreams(data, redis)).toHaveLength(1);
+    const markup = renderToStaticMarkup(createElement(TransitionDiagram, { data }));
+    expect(markup).toContain('data-module-detail="REDIS"');
+    expect(markup).toContain('data-change-subscription="KEY_EVENTS"');
+    expect(markup).toContain("원본 복귀 중");
+    expect(markup).toContain("gcp → aws");
+    redis.streams[0]!.freshness = "STALE";
+    expect(runningStreams(data, redis)).toEqual([]);
+    redis.streams[0]!.freshness = "FRESH";
+    redis.health = "ERROR";
+    expect(runningStreams(data, redis)).toEqual([]);
+  });
+  it("retains explicitly reported background streams while awaiting approval", () => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    data.workflow.status = "WAITING_APPROVAL";
+    const db = data.resources.find((r) => r.kind === "DATABASE")!;
+    db.observation.freshness = "FRESH";
+    db.streams = [
+      {
+        channel: "CDC",
+        state: "RUNNING",
+        direction: "FORWARD",
+        freshness: "FRESH",
+        observedAt: "2026-11-07T12:00:00Z",
+        lagMs: 7,
+      },
+    ];
+    expect(runningStreams(data, db)).toHaveLength(1);
+    data.workflow.status = "COMPLETED";
+    expect(runningStreams(data, db)).toEqual([]);
+    data.workflow.status = "RUNNING";
+    db.streams[0]!.observedAt = null;
+    expect(runningStreams(data, db)).toEqual([]);
+  });
   it("animates reported copy paths through expanded worker nodes and freezes uncertain observations", () => {
     const data = detailSchema.parse(structuredClone(fixture));
     data.workflow.status = "RUNNING";

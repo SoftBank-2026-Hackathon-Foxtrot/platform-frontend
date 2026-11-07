@@ -38,6 +38,7 @@ export const STEP_LABELS: Record<string, string> = {
 };
 
 export function activeModule(data: Detail) {
+  if (data.workflow.status === "ROLLING_BACK") return data.workflow.rollback?.resource ?? null;
   if (data.workflow.status !== "RUNNING") return null;
   const stage = data.stages.find((item) => item.index === data.workflow.currentStage);
   if (!stage || stage.status !== "RUNNING") return null;
@@ -51,4 +52,24 @@ export function activeModule(data: Detail) {
     default:
       return null;
   }
+}
+
+export const STREAM_NAMES: Record<string, string> = {
+  INITIAL_COPY: "초기 복사",
+  CDC: "CDC 변경분",
+  KEY_EVENTS: "키 변경 알림",
+  OBJECT_CHANGES: "객체 변경분",
+};
+export function runningStreams(data: Detail, resource: Resource | undefined) {
+  if (
+    !resource ||
+    !hasCurrentObservation(resource) ||
+    ["ERROR", "FAILED"].includes(resource.health ?? "")
+  )
+    return [];
+  if (["PLANNED", "COMPLETED", "ABORTED"].includes(data.workflow.status)) return [];
+  return resource.streams.filter(
+    (stream) =>
+      stream.state === "RUNNING" && stream.freshness === "FRESH" && Boolean(stream.observedAt),
+  );
 }

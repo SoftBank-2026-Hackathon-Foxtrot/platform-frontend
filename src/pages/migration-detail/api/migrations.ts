@@ -39,6 +39,20 @@ const operation = z.object({
 });
 const flow = z.object({ state: text, backlog: number, lagSeconds: number }).optional();
 const resourceSchema = z.object({
+  streams: z
+    .array(
+      z.object({
+        channel: z.string(),
+        state: z.string(),
+        direction: z.enum(["FORWARD", "REVERSE"]),
+        freshness: z.string(),
+        observedAt: text,
+        copied: number,
+        backlog: number,
+        lagMs: number,
+      }),
+    )
+    .default([]),
   kind: z.string(),
   migrationId: text,
   lifecycle: text,
@@ -162,7 +176,8 @@ const resourceSchema = z.object({
         })
         .optional(),
     })
-    .default({}),
+    .nullish()
+    .transform((details) => details ?? {}),
 });
 export type Resource = z.infer<typeof resourceSchema>;
 const preparation = z.object({
@@ -188,6 +203,7 @@ const preparation = z.object({
     .nullable(),
 });
 export const detailSchema = z.object({
+  simulation: z.boolean().default(false),
   workflow: workflowSchema,
   allowedCommands: z.array(z.string()).default([]),
   stages: z.array(
