@@ -1,0 +1,40 @@
+.monitoring {
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+}
+/* The shared light warning token is 3.75:1 on white; keep small text above 4.5:1. */
+:root:not(.dark) .monitoring .text-warning {
+  color: color-mix(in oklch, var(--warning) 85%, var(--foreground));
+}
+.monitoring ::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.monitoring button,
+.monitoring input {
+  touch-action: manipulation;
+}
+.monitoring [data-slot="button"],
+.monitoring [data-slot="tabs-trigger"],
+.monitoring [data-slot="toggle-group-item"] {
+  transition-property: color, background-color, border-color;
+}
+.monitoring-chart:active {
+  transform: none;
+}
+.monitoring input {
+  caret-color: var(--foreground);
+}
+.monitoring-chart svg {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .monitoring *,
+  .monitoring *::before,
+  .monitoring *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .monitoring [data-slot="button"]:active {
+    transform: none;
+  }
+}

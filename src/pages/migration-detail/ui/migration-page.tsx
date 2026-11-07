@@ -87,7 +87,7 @@ function Workflow({ workspace, id }: { workspace: string; id: string }) {
           {Object.keys(detail.data.preparation).length > 0 && <Preparation data={detail.data} />}
           <div className="grid items-start gap-4 lg:grid-cols-3">
             {detail.data.resources.map((resource) => (
-              <ResourceCard key={resource.kind} resource={resource} />
+              <ResourceCard key={resource.kind} resource={resource} workflowId={id} />
             ))}
           </div>
           <Traffic data={detail.data} />
@@ -588,7 +588,14 @@ function Telemetry({ workspace, id }: { workspace: string; id: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("OTEL 수집 상태와 작업 추적")}</CardTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle>{t("OTEL 수집 상태와 작업 추적")}</CardTitle>
+          <Button asChild variant="link" size="sm">
+            <Link to="/monitoring" search={{ workflow: id, comp: "app" }} hash="mx">
+              {t("지표 보기")}
+            </Link>
+          </Button>
+        </div>
         <CardDescription>
           {t(
             "Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께 확인하세요.",
