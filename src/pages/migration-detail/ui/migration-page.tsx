@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, ChevronLeft, RefreshCw } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, Info, RefreshCw } from "lucide-react";
 
 import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
 import {
   type Detail,
@@ -45,13 +46,7 @@ function split(weights: Record<string, number> | null | undefined) {
 export function MigrationPage({ id }: { id: string }) {
   const session = useQuery(sessionOptions());
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-8">
-      <Link
-        to="/migrations"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="size-4" /> 마이그레이션 목록
-      </Link>
+    <main className="mx-auto w-full max-w-7xl space-y-2 px-3 py-2 sm:px-4">
       {session.data && <Workflow key={id} workspace={session.data.workspaceId} id={id} />}
     </main>
   );
@@ -59,18 +54,17 @@ export function MigrationPage({ id }: { id: string }) {
 function Workflow({ workspace, id }: { workspace: string; id: string }) {
   const detail = useQuery(detailQuery(workspace, id));
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {detail.isPending && <p role="status">관측값을 불러오는 중입니다.</p>}
       {detail.error && <ErrorNotice error={detail.error} retry={() => void detail.refetch()} />}
       {detail.data && (
         <>
           <Summary data={detail.data} refresh={() => void detail.refetch()} />
-          <Card>
-            <CardHeader>
+          <Card size="sm" className="gap-2">
+            <CardHeader className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <CardTitle>전환 구성도</CardTitle>
-              <CardDescription>
-                리소스마다 지금 어느 환경을 쓰는지, 무엇을 복제 중인지, 현재 단계가 무엇을 바꾸는지
-                보여줍니다. 2초마다 갱신합니다.
+              <CardDescription className="text-xs">
+                리소스 사용 위치 · 복제 상태 · 현재 전환 단계 · 2초마다 갱신
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -106,53 +100,71 @@ const NEXT_STEP: Record<string, string> = {
 function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
   const stage = d.stages.find((item) => item.index === d.workflow.currentStage);
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1.5">
-            <CardTitle className="flex flex-wrap items-center gap-3 text-2xl">
-              {d.workflow.application}
-              <span className="flex items-center gap-2 text-lg font-normal text-muted-foreground">
-                {d.workflow.sourceEnv}
-                <ArrowRight className="size-4" />
-                {d.workflow.targetEnv}
-              </span>
-              <WorkflowStatusBadge status={d.workflow.status} />
-            </CardTitle>
-            <CardDescription>
-              {d.workflow.id} · 시작 {when(d.workflow.createdAt)}
-              {d.workflow.createdBy ? ` · ${d.workflow.createdBy}` : ""} · 버전 {d.workflow.version}
-            </CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" onClick={refresh}>
-            <RefreshCw />
-            새로고침
+    <Card size="sm" className="gap-2 py-2">
+      <CardHeader className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex shrink-0 items-center gap-2">
+          <Button asChild variant="ghost" size="icon-sm">
+            <Link to="/migrations" aria-label="마이그레이션 목록">
+              <ChevronLeft className="size-4" />
+            </Link>
+          </Button>
+          <CardTitle className="text-base">{d.workflow.application}</CardTitle>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            {d.workflow.sourceEnv}
+            <ArrowRight className="size-3" />
+            {d.workflow.targetEnv}
+          </span>
+          <WorkflowStatusBadge status={d.workflow.status} />
+        </div>
+        <div className="min-w-0 flex-1 basis-48 border-l pl-3" title={NEXT_STEP[d.workflow.status]}>
+          <p className="text-xs">
+            <span className="font-semibold">
+              {stage
+                ? `${stage.index + 1}. ${STAGE_LABELS[stage.kind] ?? stage.kind}`
+                : "단계 미확인"}
+            </span>
+            {stage?.detail && (
+              <span className="ml-2 break-words text-muted-foreground">{stage.detail}</span>
+            )}
+          </p>
+        </div>
+        <div className="ml-auto flex flex-wrap items-center gap-1">
+          <CommandPanel workflow={d.workflow} allowedCommands={d.allowedCommands} />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="작업 정보">
+                <Info className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {d.workflow.id} · 버전 {d.workflow.version}
+              </p>
+              <p>시작 {when(d.workflow.createdAt)}</p>
+              {d.workflow.createdBy && <p>실행자 {d.workflow.createdBy}</p>}
+            </TooltipContent>
+          </Tooltip>
+          <Button variant="ghost" size="icon-sm" onClick={refresh} aria-label="새로고침">
+            <RefreshCw className="size-4" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-2">
         <StageStepper data={d} />
-        <div className="space-y-3 rounded-xl border bg-muted/30 p-4">
-          <p className="font-medium">
-            {stage
-              ? `${stage.index + 1}. ${STAGE_LABELS[stage.kind] ?? stage.kind}`
-              : "단계 미확인"}
-            {stage?.detail && (
-              <span className="ml-2 text-sm font-normal text-muted-foreground">{stage.detail}</span>
-            )}
-          </p>
-          <p className="text-sm text-muted-foreground">{NEXT_STEP[d.workflow.status] ?? ""}</p>
-          {d.workflow.halt && (
-            <Alert variant="destructive">
-              <AlertTitle>{d.workflow.halt.code}</AlertTitle>
-              <AlertDescription>
-                {d.workflow.halt.message}
-                {d.workflow.halt.blockers.length > 0 && ` · ${d.workflow.halt.blockers.join(", ")}`}
-              </AlertDescription>
-            </Alert>
-          )}
-          <CommandPanel workflow={d.workflow} allowedCommands={d.allowedCommands} />
-        </div>
+        {(d.workflow.status === "PLANNED" ||
+          d.workflow.status === "WAITING_APPROVAL" ||
+          d.workflow.status === "HALTED") && (
+          <p className="text-xs text-muted-foreground">{NEXT_STEP[d.workflow.status]}</p>
+        )}
+        {d.workflow.halt && (
+          <Alert variant="destructive">
+            <AlertTitle>{d.workflow.halt.code}</AlertTitle>
+            <AlertDescription>
+              {d.workflow.halt.message}
+              {d.workflow.halt.blockers.length > 0 && ` · ${d.workflow.halt.blockers.join(", ")}`}
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
     </Card>
   );
@@ -160,7 +172,7 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
 function StageStepper({ data: d }: { data: Detail }) {
   const finished = d.workflow.status === "COMPLETED";
   return (
-    <ol className="grid grid-cols-4 gap-y-4 md:grid-cols-8">
+    <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
       {d.stages.map((item) => {
         const current = item.index === d.workflow.currentStage && !finished;
         const passed = item.status === "PASSED" || (finished && item.status !== "FAILED");
@@ -170,24 +182,22 @@ function StageStepper({ data: d }: { data: Detail }) {
         const tone = failed
           ? "border-destructive bg-destructive text-white"
           : passed
-            ? "border-success bg-success text-background"
+            ? "border-success/40 bg-success/15 text-success"
             : waiting
               ? "border-warning bg-warning/15 text-warning"
               : current
                 ? "border-info bg-info/15 text-info"
                 : "border-border bg-muted text-muted-foreground";
         return (
-          <li key={item.index} className="relative flex flex-col items-center gap-1.5 text-center">
-            {item.index > 0 && (
-              <span
-                className={`absolute top-4 right-1/2 h-0.5 w-full -translate-x-4 ${passed || current ? "bg-success/60" : "bg-border"}`}
-                aria-hidden
-              />
-            )}
+          <li
+            key={item.index}
+            aria-current={current ? "step" : undefined}
+            className="flex items-center gap-1.5 whitespace-nowrap md:flex-1"
+          >
             <span
-              className={`relative z-10 grid size-8 place-items-center rounded-full border-2 text-sm font-semibold ${tone} ${current && d.workflow.status === "RUNNING" ? "animate-pulse" : ""}`}
+              className={`grid size-5 shrink-0 place-items-center rounded-full border text-[10px] font-semibold ${tone} ${current && d.workflow.status === "RUNNING" ? "animate-pulse" : ""}`}
             >
-              {passed ? <Check className="size-4" /> : item.index + 1}
+              {passed ? <Check className="size-3" /> : item.index + 1}
             </span>
             <span className={`text-xs ${current ? "font-semibold" : "text-muted-foreground"}`}>
               {STAGE_LABELS[item.kind] ?? item.kind}
@@ -198,6 +208,7 @@ function StageStepper({ data: d }: { data: Detail }) {
     </ol>
   );
 }
+
 function Preparation({ data }: { data: Detail }) {
   return (
     <section aria-label="배포 준비" className="grid gap-4 md:grid-cols-2">

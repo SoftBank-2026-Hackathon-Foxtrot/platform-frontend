@@ -115,11 +115,7 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
   });
   const available = ORDER.filter((name) => allowedCommands.includes(name));
   if (!available.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        지금은 사람이 내릴 명령이 없습니다. 엔진이 진행 중이거나 끝난 상태입니다.
-      </p>
-    );
+    return <p className="text-xs text-muted-foreground">실행 가능한 명령 없음</p>;
   }
   const send = (next: Intent) => {
     // Retrying the same failed intent keeps its key, so the backend applies it once.
@@ -134,7 +130,7 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
     mutation.mutate({ ...next, key });
   };
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       <div className="flex flex-wrap gap-2">
         {available.map((name) =>
           name === "ROLLBACK_RESOURCE" ? (
@@ -184,7 +180,7 @@ function ConfirmButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant={spec.variant} disabled={pending}>
+        <Button size="sm" variant={spec.variant} disabled={pending}>
           <Icon />
           {spec.label}
         </Button>
@@ -230,7 +226,7 @@ function RollbackDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant={spec.variant} disabled={pending}>
+        <Button size="sm" variant={spec.variant} disabled={pending}>
           <RotateCcw />
           {spec.label}
         </Button>

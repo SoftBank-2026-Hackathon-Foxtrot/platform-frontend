@@ -5,3 +5,7 @@
 Collector/backend 미설정, 단절, 아직 없는 표본을 구별합니다. metric 수집 시각과 원본 관측 경과를 함께 표시합니다. 수치가 없다고 0으로 표시하지 않습니다. 작업 ID는 span correlation용이며 브라우저에 OTLP SDK나 service token을 넣지 않습니다. 실제 앱 SDK는 demo 저장소에 있습니다.
 
 `VITE_API_BASE_URL` 또는 `/api` 프록시를 CP에 연결합니다. 운영 수집 구성은 IaC `docs/migration-observability.md`를 따릅니다. 검사: `vp run check`, `vp run build`.
+
+## 상세 화면 배치
+
+상단은 앱·현재 단계·명령을 한 줄에 배치하고, 전체 단계는 그 아래 가로로 표시합니다. 좁은 화면에서는 줄을 바꿉니다. 작업 ID·시작 시각·실행자는 작업 정보 버튼에 마우스를 올리거나 키보드로 포커스하면 확인할 수 있습니다. 승인 대기 안내와 중단 원인은 본문에 유지합니다.
