@@ -21,6 +21,7 @@ const verification = z.object({
   extra: number,
 });
 const observation = z.object({
+  source: text,
   freshness: z.string(),
   collectedAt: text,
   lastSuccessAt: text,
@@ -361,6 +362,47 @@ export function historyQuery(id: string, cursor: string | null, since: string) {
           await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/observations`, {
             signal,
             params: { since, cursor, limit: 30 },
+          })
+        ).data,
+      ),
+  });
+}
+
+export const telemetrySchema = z.object({
+  source: z.literal("OTEL"),
+  metricsState: z.string(),
+  tracesState: z.string(),
+  metrics: z.array(
+    z.object({
+      name: z.string(),
+      value: z.number(),
+      at: z.number(),
+      freshness: z.string(),
+      resource: text,
+      direction: text,
+      actor: text,
+      service: text,
+    }),
+  ),
+  traces: z.array(
+    z.object({
+      traceID: z.string(),
+      rootServiceName: text,
+      rootTraceName: text,
+      startTimeUnixNano: text,
+      durationMs: number,
+    }),
+  ),
+});
+export function telemetryQuery(id: string) {
+  return queryOptions<z.infer<typeof telemetrySchema>>({
+    queryKey: [...baseKey, id, "telemetry"],
+    refetchInterval: (query) => (query.state.error ? false : 10000),
+    queryFn: async ({ signal }) =>
+      telemetrySchema.parse(
+        (
+          await apiClient.get<unknown>(`/v1/workflows/${encodeURIComponent(id)}/telemetry`, {
+            signal,
           })
         ).data,
       ),

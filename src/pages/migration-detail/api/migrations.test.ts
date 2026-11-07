@@ -5,7 +5,7 @@ import { QueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "@/shared/api";
 
-import { detailQuery, detailSchema } from "./migrations";
+import { detailQuery, detailSchema, telemetryQuery, telemetrySchema } from "./migrations";
 import fixture from "./control-plane.fixture.json";
 import { ResourceCard } from "../ui/resource-card";
 
@@ -45,5 +45,32 @@ describe("control-plane observation contract", () => {
     const html = renderToStaticMarkup(createElement(ResourceCard, { resource: object }));
     expect(html).toContain("미확인");
     expect(object.details.object?.reverseObservedAt).toBeUndefined();
+  });
+});
+
+it("keeps OTEL backend outages distinct from zero measurements and forwards cancellation", async () => {
+  const payload = {
+    source: "OTEL",
+    metricsState: "UNAVAILABLE",
+    tracesState: "NOT_CONFIGURED",
+    metrics: [],
+    traces: [],
+  };
+  expect(telemetrySchema.parse(payload).metrics).toEqual([]);
+  expect(() =>
+    telemetrySchema.parse({ ...payload, metrics: [{ name: "lag", value: "0" }] }),
+  ).toThrow();
+  const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: payload });
+  const options = telemetryQuery("workflow/otel");
+  if (typeof options.queryFn !== "function") throw new Error("Missing query function");
+  const controller = new AbortController();
+  await options.queryFn({
+    signal: controller.signal,
+    queryKey: options.queryKey,
+    meta: undefined,
+    client: new QueryClient(),
+  });
+  expect(get).toHaveBeenCalledWith("/v1/workflows/workflow%2Fotel/telemetry", {
+    signal: controller.signal,
   });
 });

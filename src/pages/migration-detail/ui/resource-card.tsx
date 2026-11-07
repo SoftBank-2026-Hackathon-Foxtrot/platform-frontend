@@ -175,7 +175,9 @@ export function ResourceCard({ resource: r }: { resource: Resource }) {
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>원 측정: {when(r.observedAt)}</p>
           <p>마지막 진전: {when(r.observation.lastProgressAt ?? object?.lastProgressAt)}</p>
-          <p>수집: {when(r.observation.collectedAt)}</p>
+          <p>
+            수집: {when(r.observation.collectedAt)} · {r.observation.source ?? "수집 대기"}
+          </p>
           {r.observation.collectionError && (
             <p className="text-destructive">{r.observation.collectionError}</p>
           )}

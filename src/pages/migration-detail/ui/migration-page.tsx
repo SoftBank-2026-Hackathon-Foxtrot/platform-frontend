@@ -14,6 +14,7 @@ import {
   detailQuery,
   eventsQuery,
   historyQuery,
+  telemetryQuery,
   workflowsQuery,
 } from "../api/migrations";
 import { Metric, ResourceCard, State, value, when } from "./resource-card";
@@ -107,6 +108,7 @@ function Workflow({ id }: { id: string }) {
           <Traffic data={detail.data} />
           <Workload data={detail.data} />
           <Operations data={detail.data} />
+          <Telemetry id={id} />
           <History id={id} />
         </>
       )}
@@ -155,7 +157,8 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
           ))}
         </ol>
         <p className="text-xs text-muted-foreground">
-          화면은 2초, 모듈은 5초 간격으로 갱신합니다. 미확인 값은 0으로 바꾸지 않습니다.
+          모듈이 OTEL로 상태를 발행하고 컨트롤 플레인이 수집합니다. 미확인 값은 0으로 바꾸지
+          않습니다.
         </p>
       </CardContent>
     </Card>
@@ -461,5 +464,105 @@ function History({ id }: { id: string }) {
         </CardContent>
       </Card>
     </section>
+  );
+}
+
+const metricNames: Record<string, string> = {
+  foxtrot_observation_age: "원본 관측 경과 (초)",
+  foxtrot_observation_available: "관측 가능 (1/0)",
+  foxtrot_migration_completed: "복사 완료",
+  foxtrot_migration_total: "복사 전체",
+  foxtrot_replication_backlog: "복제 backlog",
+  foxtrot_replication_lagseconds: "복제 지연 (초)",
+  foxtrot_redis_backlog: "Redis backlog",
+  foxtrot_redis_lag_ms: "Redis 지연 (ms)",
+  foxtrot_redis_oldestdirtyagems: "미반영 변경 경과 (ms)",
+  foxtrot_redis_proxy_inflight_writes: "프록시 처리 중 쓰기",
+  foxtrot_redis_proxy_open_tx: "프록시 열린 트랜잭션",
+  foxtrot_redis_proxy_last_pause_ms: "프록시 마지막 pause (ms)",
+  foxtrot_app_inflight: "앱 처리 중 요청",
+  foxtrot_app_activewebsockets: "활성 WebSocket",
+  foxtrot_probe_failed: "공용 검사 실패",
+  foxtrot_probe_p95ms: "공용 검사 p95 (ms)",
+};
+function Telemetry({ id }: { id: string }) {
+  const query = useQuery(telemetryQuery(id));
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>OTEL 수집 상태와 작업 추적</CardTitle>
+        <CardDescription>
+          Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께
+          확인하세요.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {query.isPending && <p role="status">수집 결과를 불러오는 중입니다.</p>}
+        {query.error && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}
+        {query.data && (
+          <>
+            <p className="flex flex-wrap gap-3">
+              메트릭 <State state={query.data.metricsState} /> 추적{" "}
+              <State state={query.data.tracesState} />
+            </p>
+            {query.data.metrics.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>대상</TableHead>
+                    <TableHead>수치</TableHead>
+                    <TableHead>값</TableHead>
+                    <TableHead>표본</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {query.data.metrics.map((m, index) => (
+                    <TableRow key={`${m.name}-${m.resource}-${m.actor}-${index}`}>
+                      <TableCell>
+                        {[m.resource, m.direction, m.actor].filter(Boolean).join(" / ") ||
+                          m.service}
+                      </TableCell>
+                      <TableCell>{metricNames[m.name] ?? m.name}</TableCell>
+                      <TableCell>
+                        {m.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell>
+                        <State state={m.freshness} /> {when(new Date(m.at * 1000).toISOString())}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p>수집된 메트릭이 없습니다.</p>
+            )}
+            {query.data.traces.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>작업 추적 ID</TableHead>
+                    <TableHead>시작 서비스 / 작업</TableHead>
+                    <TableHead>소요 (ms)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {query.data.traces.map((t) => (
+                    <TableRow key={t.traceID}>
+                      <TableCell className="font-mono text-xs">{t.traceID}</TableCell>
+                      <TableCell>
+                        {t.rootServiceName} / {t.rootTraceName}
+                      </TableCell>
+                      <TableCell>{value(t.durationMs)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p>수집된 작업 추적이 없습니다.</p>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

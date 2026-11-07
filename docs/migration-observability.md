@@ -1,13 +1,7 @@
-# 마이그레이션 관측 화면
+# OTEL 마이그레이션 화면
 
-`MigrationPage`는 컨트롤 플레인에 로그인한 사용자가 workflow를 선택해 관측하는 화면입니다. 모듈이나 Cloudflare에 직접 접근하지 않습니다. 서비스 토큰을 프론트엔드에 넣지 않습니다.
+각 모듈의 OTEL 로그를 Collector가 CP로 전달하고, CP는 기존 상세/이력 모델을 제공합니다. 리소스 카드에 수집 출처 OTEL을 표시합니다. `/v1/workflows/{id}/telemetry`는 Prometheus의 핵심 수치와 Tempo의 최근 trace ID/서비스/작업/소요 시간을 조회합니다. 프런트엔드는 공통 Axios + TanStack Query + Zod로 CP만 호출합니다.
 
-- 목록은 5초, 상세는 2초, 이벤트와 표본은 5초마다 조회합니다. 실패 시 자동 주기 조회를 중지하고 오류와 재조회 버튼을 표시합니다.
-- IaC·컴퓨트 준비 결과, DB/Redis/객체 경로·진전·검증, LB 설정과 공용 probe, 앱 업무 검사·WebSocket, 실제 명령 ID/시각과 이력을 표시합니다.
-- `UNKNOWN`/null은 미확인으로 표시합니다. 원래 근거 시각과 수집 시각을 구분하고 만료된 PASS는 현재 성공으로 표시하지 않습니다. `currentResult`는 컨트롤 플레인에서 받습니다.
-- 공용 probe 비율은 위치를 확인한 성공 표본의 비율입니다. 실패·timeout·미확인·누락과 측정 구간을 함께 봅니다. 전체 사용자 비율이 아닙니다.
-- 객체 복사량과 backlog는 해당 측정 시각이 있을 때만 표시합니다. 기대 앱 수와 live/acked를 구분합니다.
+Collector/backend 미설정, 단절, 아직 없는 표본을 구별합니다. metric 수집 시각과 원본 관측 경과를 함께 표시합니다. 수치가 없다고 0으로 표시하지 않습니다. 작업 ID는 span correlation용이며 브라우저에 OTLP SDK나 service token을 넣지 않습니다. 실제 앱 SDK는 demo 저장소에 있습니다.
 
-개발 서버의 `/api`는 `127.0.0.1:8000`으로 연결됩니다. 배포 시 같은 경로를 컨트롤 플레인으로 전달하거나 공개 `VITE_API_BASE_URL`을 설정합니다. GitHub OAuth callback과 쿠키 경로는 컨트롤 플레인의 설정을 따릅니다. 이 화면은 읽기 전용이며 migration 명령 실행은 추가하지 않았습니다.
-
-검사: `vp run check`, `vp run build`. `api/control-plane.fixture.json`은 로컬 테스트 더블을 연결한 실제 컨트롤 플레인의 `_detail()` 출력입니다. 실서비스 관측값이 아니며 테스트에만 import합니다. API 오류에 대한 fallback으로 사용하지 않습니다. 새 `table`은 shadcn CLI로 생성해 원본 검사에 등록했습니다.
+`VITE_API_BASE_URL` 또는 `/api` 프록시를 CP에 연결합니다. 운영 수집 구성은 IaC `docs/migration-observability.md`를 따릅니다. 검사: `vp run check`, `vp run build`.
