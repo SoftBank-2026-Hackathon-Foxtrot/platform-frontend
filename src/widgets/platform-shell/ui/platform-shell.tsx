@@ -2,7 +2,7 @@ import { LOCALES, setLocale, t, useLocale } from "@/shared/lib/i18n";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CloudIcon, LogOut, Moon, Sun } from "lucide-react";
+import { Bot, CloudIcon, LogOut, Moon, Sun } from "lucide-react";
 import {
   RiArrowLeftRightFill,
   RiHomeFill,
@@ -36,6 +36,7 @@ const navigation = [
   { to: "/applications", title: "애플리케이션", icon: RiHomeFill },
   { to: "/migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
   { to: "/monitoring", title: "모니터링", icon: RiPulseFill },
+  { to: "/ai", title: "AI 도우미", icon: Bot },
   { to: "/security", title: "보안·거버넌스", icon: RiShieldCheckFill },
   { to: "/settings", title: "설정", icon: RiSettings3Fill },
 ] as const;

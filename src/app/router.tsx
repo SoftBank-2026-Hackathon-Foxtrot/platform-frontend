@@ -11,6 +11,7 @@ import {
 import { z } from "zod";
 import { migrationViewSchema } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
+import { AIPage } from "@/pages/ai";
 import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
 import { LoginPage } from "@/pages/login";
@@ -125,6 +126,11 @@ const securityRoute = createRoute({
   path: "/security",
   component: SecurityPage,
 });
+const aiRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ai",
+  component: AIPage,
+});
 const monitoringRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/monitoring",
@@ -168,6 +174,7 @@ export const router = createRouter({
     monitoringRoute,
     settingsRoute,
     securityRoute,
+    aiRoute,
   ]),
 });
 declare module "@tanstack/react-router" {
