@@ -1,4 +1,28 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "{0} 관측 상세 보기": { en: "View {0} observation details", ja: "{0} の観測詳細を見る" },
+  "마이그레이션 관측": { en: "Migration observations", ja: "移行の観測" },
+  "복제·동기화 상세": { en: "Replication details", ja: "複製・同期の詳細" },
+  "관측 상세": { en: "Observation details", ja: "観測の詳細" },
+  "단계·명령 이력 접기": {
+    en: "Hide stage and command history",
+    ja: "ステージ・コマンド履歴を閉じる",
+  },
+  "단계·명령 이력 보기": { en: "Stage and command history", ja: "ステージ・コマンド履歴を見る" },
+  "최신 이벤트": { en: "Latest events", ja: "最新イベント" },
+  "복제·전환의 최신 관측입니다. 각 표본의 측정 시각을 확인하세요.": {
+    en: "Latest replication and cutover observations. Check the measurement time of each sample.",
+    ja: "複製・切り替えの最新の観測です。各サンプルの測定時刻を確認してください。",
+  },
+  "이 리소스의 관측값이 없습니다.": {
+    en: "No observations for this resource.",
+    ja: "このリソースの観測値はありません。",
+  },
+  관측값: { en: "Observations", ja: "観測値" },
+  "선택한 트레이스": { en: "Selected trace", ja: "選択したトレース" },
+  "{0} 계열 강조": { en: "Emphasizing {0}", ja: "{0} の系列を強調" },
+  "{0} 마이그레이션으로 돌아가기": { en: "Return to {0} migration", ja: "{0} の移行に戻る" },
+  "해당 마이그레이션 보기": { en: "View this migration", ja: "この移行を見る" },
+  "{0} · {1} 지표 보기": { en: "{0} · View {1} metrics", ja: "{0} · {1} のメトリクスを見る" },
   모니터링: { en: "Monitoring", ja: "モニタリング" },
   "지표 보기": { en: "View metrics", ja: "メトリクスを見る" },
   "OTEL 수집 정상": { en: "OTEL collection healthy", ja: "OTEL 収集正常" },

@@ -165,7 +165,7 @@ function Waterfall({
 }: {
   workspace: string;
   workflow: string;
-  trace: Trace;
+  trace: Pick<Trace, "traceId" | "durationMs">;
 }) {
   const query = useQuery(traceOptions(workspace, workflow, trace.traceId));
   const duration = Math.max(
@@ -205,5 +205,30 @@ function Waterfall({
         </div>
       ))}
     </>
+  );
+}
+
+export function SelectedTrace({
+  workspace,
+  workflow,
+  traceId,
+  onLogs,
+}: {
+  workspace: string;
+  workflow: string;
+  traceId: string;
+  onLogs: () => void;
+}) {
+  return (
+    <section aria-label={t("선택한 트레이스")} className="space-y-3 rounded-lg border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="min-w-0 break-all font-mono text-xs">{traceId}</h2>
+        <Button variant="link" onClick={onLogs}>
+          {t("이 트레이스의 로그")}
+          <ArrowRight />
+        </Button>
+      </div>
+      <Waterfall workspace={workspace} workflow={workflow} trace={{ traceId, durationMs: 0 }} />
+    </section>
   );
 }

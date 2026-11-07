@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vite-plus/test";
+import { describe, expect, it, vi } from "vite-plus/test";
 import fixture from "../api/control-plane.fixture.json";
 import { detailSchema } from "../api/migrations";
 import { TransitionDiagram } from "./transition-diagram";
@@ -158,3 +158,13 @@ describe("transient module detail nodes", () => {
     },
   );
 });
+
+vi.mock("./monitoring-entry", () => ({
+  MonitoringEntryLink: ({
+    children,
+    "aria-label": label,
+  }: {
+    children: import("react").ReactNode;
+    "aria-label"?: string;
+  }) => createElement("a", { "aria-label": label }, children),
+}));

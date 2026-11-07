@@ -11,6 +11,15 @@ import fixture from "./control-plane.fixture.json";
 import { ResourceCard } from "../ui/resource-card";
 import { TransitionDiagram } from "../ui/transition-diagram";
 
+vi.mock("../ui/monitoring-entry", () => ({
+  MonitoringEntryLink: ({
+    children,
+    "aria-label": label,
+  }: {
+    children: import("react").ReactNode;
+    "aria-label"?: string;
+  }) => createElement("a", { "aria-label": label }, children),
+}));
 afterEach(() => vi.restoreAllMocks());
 
 it.each(["en", "ja"] as const)("renders diagram and resource text in %s", (locale) => {
@@ -19,7 +28,9 @@ it.each(["en", "ja"] as const)("renders diagram and resource text in %s", (local
     const detail = detailSchema.parse(fixture);
     const diagram = renderToStaticMarkup(createElement(TransitionDiagram, { data: detail }));
     const resources = detail.resources
-      .map((resource) => renderToStaticMarkup(createElement(ResourceCard, { resource })))
+      .map((resource) =>
+        renderToStaticMarkup(createElement(ResourceCard, { resource, workflow: detail.workflow })),
+      )
       .join("");
     expect(diagram.match(/[가-힣][^<"]*/g)).toBeNull();
     expect(resources.match(/[가-힣][^<"]*/g)).toBeNull();
@@ -75,7 +86,9 @@ describe("control-plane observation contract", () => {
   it("does not display unmeasured object backlog as zero", () => {
     const detail = detailSchema.parse(fixture);
     const object = detail.resources.find((r) => r.kind === "OBJECT_STORAGE")!;
-    const html = renderToStaticMarkup(createElement(ResourceCard, { resource: object }));
+    const html = renderToStaticMarkup(
+      createElement(ResourceCard, { resource: object, workflow: detail.workflow }),
+    );
     expect(html).toContain("미확인");
     expect(object.details.object?.reverseObservedAt).toBeUndefined();
   });

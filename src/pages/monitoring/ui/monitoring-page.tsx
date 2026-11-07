@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, RefreshCw, X } from "lucide-react";
-import { workflowsOptions, type Workflow } from "@/entities/migration";
+import {
+  migrationReturn,
+  workflowKeys,
+  workflowsOptions,
+  type Workflow,
+} from "@/entities/migration";
 import { useSession } from "@/entities/session";
 import { collectionHealth, collectionOptions, type TelemetryComponent } from "@/entities/telemetry";
 import { t, useLocale } from "@/shared/lib/i18n";
@@ -25,7 +30,8 @@ import {
 import { LogList } from "./log-list";
 import { clockTime, MetricChart, SeriesMark } from "./metric-chart";
 import { Empty, QueryNotice } from "./query-notice";
-import { TraceList } from "./trace-list";
+import { MigrationObservations } from "./migration-observations";
+import { SelectedTrace, TraceList } from "./trace-list";
 import "./monitoring.css";
 
 export type MonitoringNavigate = (
@@ -47,6 +53,8 @@ export function MonitoringPage(props: Props) {
       aria-labelledby="monitoring-title"
       className="monitoring mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-8"
     >
+      <span id={props.tab} aria-hidden="true" className="block h-0 scroll-mt-12" />
+      <ReturnLink search={props.search} workflow={workflow} />
       {!workflow && (
         <h1 id="monitoring-title" className="text-2xl font-semibold tracking-tight">
           {t("모니터링")}
@@ -90,6 +98,9 @@ function MonitoringContent({
   workspace: string;
   demo: boolean;
 }) {
+  const queryClient = useQueryClient();
+  const observationKey = workflowKeys.detail(workspace, workflow.id);
+  const observationFetching = useIsFetching({ queryKey: observationKey });
   const [now, setNow] = useState(Date.now);
   const previousTab = useRef(tab);
   useEffect(() => {
@@ -107,11 +118,18 @@ function MonitoringContent({
   const range = timeRange(now, search.at);
   const narrowed = search.at ? drilldownRange(search.at) : undefined;
   const compFilter = search.at && search.scope !== "all" ? search.comp : undefined;
-  const series = useQuery(seriesOptions(workspace, workflow.id, search.comp, range));
-  const traces = useQuery(tracesOptions(workspace, workflow.id, narrowed ?? range, compFilter));
-  const logs = useQuery(
-    logsOptions(workspace, workflow.id, range, tab === "lg" ? search.trace : undefined),
-  );
+  const series = useQuery({
+    ...seriesOptions(workspace, workflow.id, search.comp, range),
+    enabled: tab === "mx",
+  });
+  const traces = useQuery({
+    ...tracesOptions(workspace, workflow.id, narrowed ?? range, compFilter),
+    enabled: tab === "tr",
+  });
+  const logs = useQuery({
+    ...logsOptions(workspace, workflow.id, range, search.trace),
+    enabled: tab === "lg",
+  });
   const seriesData = series.data;
   const collection = useQuery(collectionOptions(workspace));
   const health = collectionHealth(collection.error ? null : collection.data);
@@ -129,26 +147,17 @@ function MonitoringContent({
   };
   const openLogs = (trace: Trace) =>
     change({ workflow: workflow.id, q: trace.traceId, trace: trace.traceId }, "lg");
-  const busy = series.isFetching || traces.isFetching || logs.isFetching || collection.isFetching;
+  const busy =
+    collection.isFetching ||
+    (tab === "obs"
+      ? observationFetching > 0
+      : tab === "mx"
+        ? series.isFetching
+        : tab === "tr"
+          ? traces.isFetching
+          : logs.isFetching);
   return (
     <>
-      {search.workflow && (
-        <Button
-          asChild
-          variant="link"
-          className="h-auto max-w-full justify-start px-0 text-xs text-muted-foreground whitespace-normal"
-        >
-          <Link to="/migrations/$id" params={{ id: workflow.id }}>
-            <ArrowLeft />
-            <span className="break-all">
-              {t("마이그레이션 {0} · {1}에서 열림", [
-                workflow.id,
-                t(components[search.comp].label),
-              ])}
-            </span>
-          </Link>
-        </Button>
-      )}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
           <h1 id="monitoring-title" className="text-2xl font-semibold tracking-tight">
@@ -157,7 +166,9 @@ function MonitoringContent({
           {workflows.length > 1 ? (
             <Select
               value={workflow.id}
-              onValueChange={(id) => onNavigate({ workflow: id, comp: search.comp }, "mx")}
+              onValueChange={(id) =>
+                onNavigate({ workflow: id, comp: search.comp, from: search.from }, "mx")
+              }
             >
               <SelectTrigger
                 aria-label={t("모니터링할 마이그레이션")}
@@ -207,9 +218,11 @@ function MonitoringContent({
             disabled={busy}
             onClick={() => {
               setNow(Date.now());
-              void series.refetch();
-              void traces.refetch();
-              void logs.refetch();
+              if (tab === "obs")
+                void queryClient.refetchQueries({ queryKey: observationKey, type: "active" });
+              else if (tab === "mx") void series.refetch();
+              else if (tab === "tr") void traces.refetch();
+              else void logs.refetch();
               void collection.refetch();
             }}
           >
@@ -221,12 +234,63 @@ function MonitoringContent({
         <p className="text-xs text-muted-foreground">{t("데모 · 예시 관측 데이터입니다.")}</p>
       )}
       {collection.error && <QueryNotice query={collection} subject={t("OTEL 수집")} />}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ToggleGroup
+          type="single"
+          value={search.comp}
+          size="sm"
+          variant="outline"
+          aria-label={t("구성 요소")}
+          onValueChange={(value) => {
+            if (value) {
+              setHover(null);
+              change({ comp: value as TelemetryComponent, at: undefined, trace: undefined });
+            }
+          }}
+        >
+          {Object.entries(components).map(([key, item]) => (
+            <ToggleGroupItem key={key} value={key}>
+              {t(item.label)}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
+          <span className="flex items-center gap-2">
+            <SeriesMark side="source" />
+            {t("기존")}
+            <span className="text-muted-foreground">
+              {source} · {source.toLowerCase() === "aws" ? components[search.comp].source : source}
+            </span>
+          </span>
+          <span className="flex items-center gap-2">
+            <SeriesMark side="target" />
+            {t("이전")}
+            <span className="text-muted-foreground">
+              {target} · {target.toLowerCase() === "gcp" ? components[search.comp].target : target}
+            </span>
+          </span>
+        </div>
+      </div>
+      {search.side && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="max-w-full whitespace-normal"
+          onClick={() => change({ side: undefined })}
+        >
+          {t("{0} 계열 강조", [search.side === "source" ? source : target])}
+          <X />
+        </Button>
+      )}
       <Tabs
         value={tab}
         onValueChange={(value) => change({}, value as MonitoringTab)}
         className="gap-4"
       >
-        <TabsList aria-label={t("관측 신호")}>
+        <TabsList aria-label={t("관측 신호")} className="h-auto max-w-full flex-wrap">
+          <TabsTrigger value="obs" className="px-3">
+            {t("마이그레이션 관측")}
+          </TabsTrigger>
           <TabsTrigger value="mx" className="px-3">
             {t("지표")}
           </TabsTrigger>
@@ -247,46 +311,15 @@ function MonitoringContent({
             )}
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="obs">
+          <MigrationObservations
+            workspace={workspace}
+            id={workflow.id}
+            comp={search.comp}
+            onTrace={(trace, at) => change({ trace, at, scope: "all" }, "tr")}
+          />
+        </TabsContent>
         <TabsContent value="mx" className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <ToggleGroup
-              type="single"
-              value={search.comp}
-              size="sm"
-              variant="outline"
-              aria-label={t("구성 요소")}
-              onValueChange={(value) => {
-                if (value) {
-                  setHover(null);
-                  change({ comp: value as TelemetryComponent, at: undefined, trace: undefined });
-                }
-              }}
-            >
-              {Object.entries(components).map(([key, item]) => (
-                <ToggleGroupItem key={key} value={key}>
-                  {t(item.label)}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-              <span className="flex items-center gap-2">
-                <SeriesMark side="source" />
-                {t("기존")}
-                <span className="text-muted-foreground">
-                  {source} ·{" "}
-                  {source.toLowerCase() === "aws" ? components[search.comp].source : source}
-                </span>
-              </span>
-              <span className="flex items-center gap-2">
-                <SeriesMark side="target" />
-                {t("이전")}
-                <span className="text-muted-foreground">
-                  {target} ·{" "}
-                  {target.toLowerCase() === "gcp" ? components[search.comp].target : target}
-                </span>
-              </span>
-            </div>
-          </div>
           {workflow.status === "PLANNED" && (
             <p className="text-xs text-muted-foreground">
               {t("마이그레이션 미실행 · 이전 환경의 관측값은 아직 없습니다.")}
@@ -314,6 +347,7 @@ function MonitoringContent({
                     onOpen={openAt}
                     source={source}
                     target={target}
+                    emphasis={search.side}
                   />
                 );
               })}
@@ -379,6 +413,14 @@ function MonitoringContent({
               <X />
             </Button>
           )}
+          {search.trace && !visibleTraces.some((trace) => trace.traceId === search.trace) && (
+            <SelectedTrace
+              workspace={workspace}
+              workflow={workflow.id}
+              traceId={search.trace}
+              onLogs={() => change({ q: search.trace }, "lg")}
+            />
+          )}
           <QueryNotice query={traces} subject={t("트레이스")} />
           {traces.data && (
             <TraceList
@@ -424,5 +466,37 @@ function MonitoringContent({
         </TabsContent>
       </Tabs>
     </>
+  );
+}
+
+function ReturnLink({ search, workflow }: { search: MonitoringSearch; workflow?: Workflow }) {
+  const destination = search.from ? migrationReturn(search.from) : undefined;
+  const id = destination?.id ?? workflow?.id ?? search.workflow;
+  if (!id) return null;
+  return (
+    <div className="sticky top-12 z-10 -mx-4 border-b bg-background px-4 py-2 sm:-mx-8 sm:px-8">
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="h-auto min-h-10 max-w-full justify-start px-0 text-left whitespace-normal"
+      >
+        <Link
+          to="/migrations/$id"
+          params={{ id }}
+          search={destination?.search ?? {}}
+          hash={destination?.hash ?? ""}
+          hashScrollIntoView={false}
+          resetScroll={false}
+        >
+          <ArrowLeft aria-hidden="true" />
+          <span className="min-w-0 break-words">
+            {search.from
+              ? t("{0} 마이그레이션으로 돌아가기", [search.from.label])
+              : t("해당 마이그레이션 보기")}
+          </span>
+        </Link>
+      </Button>
+    </div>
   );
 }

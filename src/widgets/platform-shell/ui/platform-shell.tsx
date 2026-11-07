@@ -149,7 +149,12 @@ export function PlatformShell({ session, children }: { session: Session; childre
         {t("본문으로 이동")}
       </a>
       <PlatformSidebar pathname={pathname} session={session} />
-      <SidebarInset aria-label={t(current.title)} className="min-h-0 min-w-0 overflow-y-auto">
+      <SidebarInset
+        id="platform-content-scroll"
+        data-return-scroll
+        aria-label={t(current.title)}
+        className="min-h-0 min-w-0 overflow-y-auto"
+      >
         <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 bg-background/90 px-4 backdrop-blur">
           <SidebarTrigger aria-label={t("사이드바 전환")} />
           <Separator orientation="vertical" className="mx-1 h-4 self-center!" />

@@ -33,6 +33,7 @@ export function MetricChart({
   onOpen,
   source,
   target,
+  emphasis,
 }: {
   metric: Series["metrics"][number];
   definition: { title: string; unit: string; compare?: boolean };
@@ -43,6 +44,7 @@ export function MetricChart({
   onOpen: (at: string) => void;
   source: string;
   target: string;
+  emphasis?: "source" | "target";
 }) {
   const id = useId();
   const length = metric.source.length;
@@ -168,14 +170,16 @@ export function MetricChart({
                 d={seriesPath(metric.source, maximum)}
                 fill="none"
                 stroke="var(--aws)"
-                strokeWidth="2"
+                strokeWidth={emphasis === "source" ? 3 : 2}
+                strokeDasharray={emphasis === "target" ? "4 3" : undefined}
                 vectorEffect="non-scaling-stroke"
               />
               <path
                 d={seriesPath(metric.target, maximum)}
                 fill="none"
                 stroke="var(--gcp)"
-                strokeWidth="2"
+                strokeWidth={emphasis === "target" ? 3 : 2}
+                strokeDasharray={emphasis === "source" ? "4 3" : undefined}
                 vectorEffect="non-scaling-stroke"
               />
               {index !== null && (
