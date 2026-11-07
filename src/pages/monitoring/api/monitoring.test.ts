@@ -3,6 +3,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/shared/api";
 import { collectionHealth } from "@/entities/telemetry";
 import {
+  liveWorkflowsOptions,
   logsOptions,
   seriesOptions,
   seriesSchema,
@@ -89,4 +90,13 @@ describe("monitoring API boundary", () => {
       }).state,
     ).toBe("warning");
   });
+});
+
+it("loads live targets separately from migration history and scopes the cache", async () => {
+  const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: [] });
+  const client = new QueryClient();
+  expect(await client.fetchQuery(liveWorkflowsOptions("one"))).toEqual([]);
+  expect(get).toHaveBeenCalledWith("/v1/telemetry/workflows", { signal: expect.any(AbortSignal) });
+  expect(liveWorkflowsOptions("one").queryKey).not.toEqual(liveWorkflowsOptions("two").queryKey);
+  client.clear();
 });

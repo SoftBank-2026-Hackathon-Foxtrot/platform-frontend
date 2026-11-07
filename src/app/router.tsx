@@ -161,7 +161,7 @@ const systemRoute = createRoute({
     return (
       <SystemMonitoringPage
         search={search}
-        onNavigate={(next) => void navigate({ search: next, resetScroll: false })}
+        onNavigate={(next, replace) => void navigate({ search: next, replace, resetScroll: false })}
       />
     );
   },

@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vite-plus/test";
+import { QueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/shared/api";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { systemSearchSchema, chartPath } from "./system";
-import { seriesSchema, seriesOptions } from "../api/system";
+import { seriesSchema, seriesOptions, deploymentsOptions } from "../api/system";
 describe("system monitoring", () => {
   it("preserves deployment, instance and category in URLs and isolates query caches", () => {
     const search = systemSearchSchema.parse({
@@ -48,4 +50,20 @@ describe("system monitoring", () => {
     expect(points[1]![1]).toBeNull();
     expect(chartPath(points, 0, 60, 100, 15).match(/M/g)).toHaveLength(3);
   });
+});
+
+it("uses the live deployment API instead of the full deployment history", async () => {
+  const get = vi
+    .spyOn(apiClient, "get")
+    .mockResolvedValue({ data: { state: "UNAVAILABLE", environments: [] } });
+  const client = new QueryClient();
+  expect(await client.fetchQuery(deploymentsOptions("workspace", "app/id"))).toEqual({
+    state: "UNAVAILABLE",
+    environments: [],
+  });
+  expect(get).toHaveBeenCalledWith("/v1/applications/app%2Fid/system-metrics/deployments", {
+    signal: expect.any(AbortSignal),
+  });
+  client.clear();
+  get.mockRestore();
 });

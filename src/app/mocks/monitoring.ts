@@ -32,25 +32,27 @@ function demoTraces(now: number, scenario: string) {
 }
 export function monitoringDemoReply(path: string, now = Date.now()): [number, unknown] | undefined {
   const url = new URL(path, "http://demo.invalid");
-  if (url.pathname === "/v1/workflows")
+  if (["/v1/workflows", "/v1/telemetry/workflows"].includes(url.pathname))
     return [
       200,
-      scenarios.map((scenario) => ({
-        id: `wf-monitoring-${scenario}`,
-        application: `shop-api-${scenario}`,
-        sourceEnv: "aws",
-        targetEnv: "gcp",
-        version: 1,
-        currentStage: 0,
-        createdAt: new Date(now - 1_800_000).toISOString(),
-        createdBy: "demo",
-        finishedAt: null,
-        status: scenario === "idle" ? "PLANNED" : "RUNNING",
-        halt: null,
-        reconcileRequested: false,
-        rolledBack: [],
-        rollback: null,
-      })),
+      scenarios
+        .filter((scenario) => url.pathname === "/v1/workflows" || scenario !== "idle")
+        .map((scenario) => ({
+          id: `wf-monitoring-${scenario}`,
+          application: `shop-api-${scenario}`,
+          sourceEnv: "aws",
+          targetEnv: "gcp",
+          version: 1,
+          currentStage: 0,
+          createdAt: new Date(now - 1_800_000).toISOString(),
+          createdBy: "demo",
+          finishedAt: null,
+          status: scenario === "idle" ? "PLANNED" : "RUNNING",
+          halt: null,
+          reconcileRequested: false,
+          rolledBack: [],
+          rollback: null,
+        })),
     ];
   if (url.pathname === "/v1/telemetry/collection")
     return [

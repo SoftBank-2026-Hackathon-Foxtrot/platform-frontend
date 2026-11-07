@@ -34,7 +34,7 @@ import {
 const navigation = [
   { to: "/applications", title: "애플리케이션", icon: RiHomeFill },
   { to: "/migrations", title: "마이그레이션", icon: RiArrowLeftRightFill },
-  { to: "/monitoring", title: "모니터링", icon: RiPulseFill },
+  { to: "/monitoring", title: "옵저버빌리티", icon: RiPulseFill },
   { to: "/security", title: "보안·거버넌스", icon: RiShieldCheckFill },
   { to: "/settings", title: "설정", icon: RiSettings3Fill },
 ] as const;

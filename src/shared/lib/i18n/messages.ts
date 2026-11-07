@@ -1,4 +1,21 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  옵저버빌리티: { en: "Observability", ja: "オブザーバビリティ" },
+  "수집 중인 마이그레이션이 없습니다": {
+    en: "No migrations are reporting",
+    ja: "収集中の移行はありません",
+  },
+  "수집 중인 마이그레이션": { en: "Reporting migrations", ja: "収集中の移行" },
+  "마이그레이션 이력": { en: "Migration history", ja: "移行履歴" },
+  "종료된 마이그레이션": { en: "Finished migration", ja: "終了した移行" },
+  "현재 수집 없음": { en: "Not reporting", ja: "現在の収集なし" },
+  "선택한 배포의 수집이 중단되었습니다": {
+    en: "The selected deployment stopped reporting",
+    ja: "選択したデプロイの収集が停止しました",
+  },
+  "수집 중인 앱 배포가 없습니다": {
+    en: "No app deployments are reporting",
+    ja: "収集中のアプリデプロイはありません",
+  },
   "선택한 앱 배포의 컨테이너": {
     en: "Containers in the selected app deployment",
     ja: "選択したアプリデプロイのコンテナ",

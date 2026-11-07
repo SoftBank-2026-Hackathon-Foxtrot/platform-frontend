@@ -53,3 +53,5 @@ Reference: `migration-security-dashboard-handoff` images and SPEC at `d8ae63a`; 
 필터와 종류는 URL에 보존한다. 종류는 링크라 새 탭·뒤로 가기가 작동한다. 필터와 반복 탐색은 즉시 반응하며 장식 모션은 없다. 새로고침만 진행 피드백을 주고 reduced-motion을 존중한다. 차트 표 보기로 키보드/스크린리더에서 모든 측정값에 접근한다.
 
 Monitoring data uses emitted migration counters and gauges. Shared workflow measurements use one neutral series; source/target comparisons appear only when the emitter identifies each environment. System metrics retain separate categories and require the owned deployment and container instance; shared app-instance networking is labeled explicitly. Observation logs page forward without changing filters.
+
+Observability navigation uses the name 옵저버빌리티. Live selectors contain only reporting workflows/deployments/instances, not recent history. One workflow needs no selector. Explicit history links remain valid and show finished or collection-stopped status. Selection stays in the URL so a polling update cannot silently switch the inspected target.
