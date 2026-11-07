@@ -20,7 +20,7 @@ export const components: Record<
   TelemetryComponent,
   { label: string; source: string; target: string }
 > = {
-  app: { label: "앱", source: "EKS", target: "GKE" },
+  app: { label: "앱", source: "앱", target: "앱" },
   db: { label: "DB", source: "RDS", target: "Cloud SQL" },
   redis: { label: "Redis", source: "ElastiCache", target: "Memorystore" },
   obj: { label: "Object", source: "S3", target: "GCS" },
@@ -30,28 +30,28 @@ export const metricDefinitions: Record<
   { key: string; title: string; unit: string; compare?: boolean }[]
 > = {
   app: [
-    { key: "throughput", title: "처리량", unit: "req/s" },
-    { key: "error_rate", title: "오류율", unit: "%", compare: true },
-    { key: "latency_p95", title: "p95 지연", unit: "ms", compare: true },
-    { key: "cpu", title: "CPU", unit: "%" },
+    { key: "inflight", title: "처리 중 요청", unit: "" },
+    { key: "activewebsockets", title: "연결된 WebSocket", unit: "" },
+    { key: "probe_failed", title: "프로브 실패", unit: "" },
+    { key: "probe_p95", title: "프로브 p95", unit: "ms" },
   ],
   db: [
-    { key: "queries", title: "쿼리", unit: "qps" },
-    { key: "latency_p95", title: "쿼리 p95", unit: "ms", compare: true },
-    { key: "connections", title: "커넥션", unit: "" },
-    { key: "cpu", title: "CPU", unit: "%" },
+    { key: "writers", title: "쓰기 세션", unit: "" },
+    { key: "prepared", title: "준비된 트랜잭션", unit: "" },
+    { key: "forward_lag", title: "정방향 복제 지연", unit: "s" },
+    { key: "reverse_lag", title: "역방향 복제 지연", unit: "s" },
   ],
   redis: [
-    { key: "commands", title: "명령", unit: "ops/s" },
-    { key: "hit_rate", title: "히트율", unit: "%" },
-    { key: "latency_p95", title: "p95 지연", unit: "ms", compare: true },
-    { key: "memory", title: "메모리", unit: "%" },
+    { key: "backlog", title: "동기화 대기", unit: "" },
+    { key: "copied", title: "복사 완료", unit: "" },
+    { key: "dirty_age", title: "최장 대기", unit: "ms" },
+    { key: "writes", title: "처리 중 쓰기", unit: "" },
   ],
   obj: [
-    { key: "requests", title: "요청", unit: "req/s" },
-    { key: "error_rate", title: "오류율", unit: "%", compare: true },
-    { key: "latency_p95", title: "p95 지연", unit: "ms", compare: true },
-    { key: "transfer", title: "전송", unit: "MB/s" },
+    { key: "completed", title: "복사 완료", unit: "" },
+    { key: "total", title: "전체 객체", unit: "" },
+    { key: "forward_backlog", title: "정방향 대기", unit: "" },
+    { key: "reverse_backlog", title: "역방향 대기", unit: "" },
   ],
 };
 export function timeRange(now: number, at?: string): TimeRange {

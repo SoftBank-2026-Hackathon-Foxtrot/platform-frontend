@@ -32,6 +32,24 @@ export function QueryNotice({
         <Skeleton className="h-36 w-full" />
       </div>
     );
+  if (
+    query.data &&
+    typeof query.data === "object" &&
+    "state" in query.data &&
+    query.data.state !== "OK"
+  )
+    return (
+      <Alert>
+        <AlertTitle>
+          {t(query.data.state === "NOT_CONFIGURED" ? "수집 미설정" : "수집 서버 연결 실패")}
+        </AlertTitle>
+        <AlertDescription>
+          <Button variant="outline" onClick={() => void query.refetch()}>
+            {t("다시 조회")}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
   if (query.data === null)
     return (
       <Alert>

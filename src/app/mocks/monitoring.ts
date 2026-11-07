@@ -1,10 +1,10 @@
 /** Illustrative OTEL signals, installed only by VITE_API_MODE=demo. Never real fallback data. */
 const scenarios = ["issue", "live", "idle"] as const;
 const keys = {
-  app: ["throughput", "error_rate", "latency_p95", "cpu"],
-  db: ["queries", "latency_p95", "connections", "cpu"],
-  redis: ["commands", "hit_rate", "latency_p95", "memory"],
-  obj: ["requests", "error_rate", "latency_p95", "transfer"],
+  app: ["inflight", "activewebsockets", "probe_failed", "probe_p95"],
+  db: ["writers", "prepared", "forward_lag", "reverse_lag"],
+  redis: ["backlog", "copied", "dirty_age", "writes"],
+  obj: ["completed", "total", "forward_backlog", "reverse_backlog"],
 } as const;
 const bases = {
   app: [406, 0.17, 117, 47],
@@ -87,36 +87,43 @@ export function monitoringDemoReply(path: string, now = Date.now()): [number, un
           const base = bases[comp][metric]!;
           return {
             key,
-            unit: ["cpu", "memory", "hit_rate", "error_rate"].includes(key)
-              ? "%"
-              : key === "latency_p95"
-                ? "ms"
-                : ((
-                    {
-                      throughput: "req/s",
-                      queries: "qps",
-                      commands: "ops/s",
-                      requests: "req/s",
-                      transfer: "MB/s",
-                    } as Record<string, string>
-                  )[key] ?? ""),
+            unit: {
+              inflight: "",
+              activewebsockets: "",
+              probe_failed: "",
+              probe_p95: "ms",
+              writers: "",
+              prepared: "",
+              forward_lag: "s",
+              reverse_lag: "s",
+              backlog: "",
+              copied: "",
+              dirty_age: "ms",
+              writes: "",
+              completed: "",
+              total: "",
+              forward_backlog: "",
+              reverse_backlog: "",
+            }[key],
+            scope: comp === "redis" || comp === "obj" || metric >= 2 ? "workflow" : "environment",
+            shared: Array.from({ length }, (_, i) => Math.max(0, base + Math.sin(i) * base * 0.1)),
             source: Array.from({ length }, (_, i) =>
               Number((base * (1 + Math.sin(i * 1.7) * 0.035)).toFixed(2)),
             ),
             target: Array.from({ length }, (_, i) => {
               if (scenario === "idle" || (scenario === "issue" && comp === "obj" && i > length - 8))
                 return null;
-              if (key === "error_rate" && scenario === "live") return 0;
+              if (key === "probe_failed" && scenario === "live") return 0;
               const spike =
                 scenario === "issue" &&
                 i > length - 6 &&
-                ["latency_p95", "error_rate"].includes(key);
+                ["probe_p95", "probe_failed"].includes(key);
               const scale =
-                key === "latency_p95"
+                key === "probe_p95"
                   ? 1.12
-                  : key === "hit_rate"
+                  : key === "inflight"
                     ? 1
-                    : key === "error_rate"
+                    : key === "probe_failed"
                       ? 0.6
                       : metric === 0
                         ? 0.1
@@ -127,7 +134,7 @@ export function monitoringDemoReply(path: string, now = Date.now()): [number, un
                   (spike
                     ? base *
                       (i - length + 6) *
-                      (key === "error_rate" || comp === "redis" ? 3 : 0.35)
+                      (key === "probe_failed" || comp === "redis" ? 3 : 0.35)
                     : 0)
                 ).toFixed(2),
               );

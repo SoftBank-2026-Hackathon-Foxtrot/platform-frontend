@@ -8,7 +8,7 @@ import { t, useLocale } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { MonitoringNav } from "@/widgets/monitoring-nav";
-import { hostsOptions, seriesOptions, systemKey } from "../api/system";
+import { deploymentsOptions, instancesOptions, seriesOptions, systemKey } from "../api/system";
 import { categories, type SystemSearch } from "../model/system";
 import { BackendState, MetricPanel, time } from "./metric-panel";
 type Props = { search: SystemSearch; onNavigate: (search: SystemSearch) => void };
@@ -53,21 +53,31 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
   const app = search.app
     ? applications.data?.seed.find((row) => row.id === search.app)
     : applications.data?.seed[0];
-  const env = search.env ?? app?.environments[0]?.name;
-  const valid = Boolean(app && app.environments.some((row) => row.name === env));
-  const hosts = useQuery({
-    ...hostsOptions(session.workspaceId, app?.id ?? "", env ?? ""),
-    enabled: valid,
-  });
-  const host =
-    search.host ?? hosts.data?.hosts.find((row) => !row.stale)?.name ?? hosts.data?.hosts[0]?.name;
-  const selectedHost = hosts.data?.hosts.find((row) => row.name === host);
-  const resolved = { ...search, app: app?.id, env, host };
+  const deployments = useQuery(deploymentsOptions(session.workspaceId, app?.id ?? ""));
+  const choices = deployments.data?.environments ?? [];
+  const selectedDeployment = search.deployment
+    ? choices.find((row) => row.environmentId === search.deployment)
+    : choices.find(
+        (row) => (!search.env || row.cloud === search.env) && row.status !== "DESTROYED",
+      );
+  const deployment = selectedDeployment?.environmentId;
+  const env = selectedDeployment?.cloud;
+  const valid = Boolean(app && deployment);
+  const instances = useQuery(
+    instancesOptions(session.workspaceId, app?.id ?? "", deployment ?? ""),
+  );
+  const instance =
+    search.instance ??
+    instances.data?.instances.find((row) => !row.stale)?.id ??
+    instances.data?.instances[0]?.id;
+  const selectedInstance = instances.data?.instances.find((row) => row.id === instance);
+  const resolved = { ...search, app: app?.id, env, deployment, instance };
   const metrics = useQuery({
     ...seriesOptions(session.workspaceId, resolved),
-    enabled: valid && Boolean(host),
+    enabled: valid && Boolean(instance),
   });
-  const refreshing = applications.isFetching || hosts.isFetching || metrics.isFetching;
+  const refreshing =
+    applications.isFetching || deployments.isFetching || instances.isFetching || metrics.isFetching;
   return (
     <section
       aria-labelledby="system-title"
@@ -79,7 +89,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
           <h1 id="system-title" className="text-2xl font-semibold tracking-tight">
             {t("시스템 메트릭")}
           </h1>
-          <p className="text-sm text-muted-foreground">{t("앱 실행 서버 전체")}</p>
+          <p className="text-sm text-muted-foreground">{t("선택한 앱 배포의 컨테이너")}</p>
         </div>
         <Button asChild variant="ghost" size="sm">
           <Link to="/applications">
@@ -95,23 +105,36 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
             value={app?.id}
             choices={applications.data?.seed.map((row) => ({ value: row.id, label: row.id })) ?? []}
             onChange={(value) =>
-              onNavigate({ ...search, app: value, env: undefined, host: undefined })
+              onNavigate({
+                ...search,
+                app: value,
+                env: undefined,
+                deployment: undefined,
+                instance: undefined,
+              })
             }
           />
           <Choice
-            label={t("환경")}
-            value={env}
-            choices={app?.environments.map((row) => ({ value: row.name, label: row.name })) ?? []}
-            onChange={(value) => onNavigate({ ...resolved, env: value, host: undefined })}
+            label={t("배포")}
+            value={deployment}
+            choices={choices.map((row) => ({
+              value: row.environmentId,
+              label: `${row.cloud} · ${row.deploymentId}`,
+            }))}
+            onChange={(value) =>
+              onNavigate({ ...resolved, deployment: value, env: undefined, instance: undefined })
+            }
           />
           <Choice
-            label={t("서버")}
-            value={host}
-            choices={[
-              ...(hosts.data?.hosts.map((row) => ({ value: row.name, label: row.name })) ?? []),
-              ...(host && !selectedHost ? [{ value: host, label: host }] : []),
-            ]}
-            onChange={(value) => onNavigate({ ...resolved, host: value })}
+            label={t("실행 인스턴스")}
+            value={instance}
+            choices={
+              instances.data?.instances.map((row) => ({
+                value: row.id,
+                label: `${row.role} · ${row.id}`,
+              })) ?? []
+            }
+            onChange={(value) => onNavigate({ ...resolved, instance: value })}
           />
           <Choice
             label={t("조회 기간")}
@@ -132,6 +155,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
           disabled={refreshing}
           onClick={() => {
             void applications.refetch();
+            void deployments.refetch();
             void queryClient.invalidateQueries({
               queryKey: systemKey(session.workspaceId, app?.id ?? ""),
             });
@@ -144,19 +168,31 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
           {t("새로고침")}
         </Button>
       </div>
-      <ErrorNotice error={applications.error ?? hosts.error ?? metrics.error} />
-      {applications.isPending || (valid && hosts.isPending) ? (
+      {selectedDeployment && (
+        <p className="break-all text-xs text-muted-foreground">
+          {selectedDeployment.cloud} · {selectedDeployment.environmentId}
+          <br />
+          {selectedDeployment.deploymentId}
+        </p>
+      )}
+      <ErrorNotice
+        error={applications.error ?? deployments.error ?? instances.error ?? metrics.error}
+      />
+      {applications.isPending ||
+      (app && deployments.isPending) ||
+      (valid && instances.isPending) ? (
         <p role="status" className="py-8">
           {t("조회 중…")}
         </p>
       ) : (applications.error && !applications.data) ||
-        (hosts.error && !hosts.data) ? null : !valid ? (
-        <p role="status">{t("관측 가능한 앱·환경이 없습니다")}</p>
-      ) : hosts.data?.state !== "OK" && hosts.data ? (
-        <BackendState state={hosts.data.state} />
-      ) : !host ? (
+        (deployments.error && !deployments.data) ||
+        (instances.error && !instances.data) ? null : !valid ? (
+        <p role="status">{t("선택할 앱 배포가 없습니다")}</p>
+      ) : instances.data?.state !== "OK" && instances.data ? (
+        <BackendState state={instances.data.state} />
+      ) : !instance ? (
         <p role="status" className="py-8 text-sm text-muted-foreground">
-          {t("수집 중인 서버 없음")}
+          {t("이 배포에서 수집 중인 인스턴스가 없습니다")}
         </p>
       ) : (
         <>
@@ -184,17 +220,24 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
               {t(categories[search.category])} · {env}
             </h2>
             <p role="status" className="text-xs text-muted-foreground">
-              {selectedHost ? (
+              {selectedInstance ? (
                 <>
-                  {selectedHost.stale ? t("수집 중단") : t("마지막 수집")}{" "}
-                  {time(selectedHost.lastSeen)}
+                  {selectedInstance.stale ? t("수집 중단") : t("마지막 수집")}{" "}
+                  {time(selectedInstance.lastSeen)}
                 </>
               ) : (
-                t("서버 수집 미확인")
+                t("인스턴스 수집 미확인")
               )}
             </p>
           </div>
-          {(metrics.error || hosts.error) && metrics.data && (
+          {search.category === "network" && selectedInstance?.networkScope === "app-instance" && (
+            <p className="text-xs text-muted-foreground">
+              {t(
+                "네트워크는 같은 앱 실행 묶음의 API·워커·터널 합계입니다. API 인스턴스에서 수집합니다.",
+              )}
+            </p>
+          )}
+          {(metrics.error || instances.error) && metrics.data && (
             <p className="text-xs text-muted-foreground">
               {t("이전 값 표시 중 · 최신 상태 미확인")}
             </p>

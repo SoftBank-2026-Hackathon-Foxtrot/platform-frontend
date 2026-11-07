@@ -1,6 +1,6 @@
 import { MonitoringNav } from "@/widgets/monitoring-nav";
 import { useEffect, useRef, useState } from "react";
-import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsFetching, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, RefreshCw, X } from "lucide-react";
 import {
@@ -18,7 +18,13 @@ import { Label } from "@/shared/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group";
-import { logsOptions, seriesOptions, tracesOptions, type Trace } from "../api/monitoring";
+import {
+  logsOptions,
+  scopeOptions,
+  seriesOptions,
+  tracesOptions,
+  type Trace,
+} from "../api/monitoring";
 import {
   components,
   drilldownRange,
@@ -110,6 +116,7 @@ function MonitoringContent({
       document.querySelector<HTMLElement>(`.monitoring [role="tab"][data-state="active"]`)?.focus();
     previousTab.current = tab;
   }, [tab]);
+  const [logNow, setLogNow] = useState(Date.now());
   const [hover, setHover] = useState<number | null>(null);
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -128,19 +135,21 @@ function MonitoringContent({
     ...tracesOptions(workspace, workflow.id, narrowed ?? range, compFilter),
     enabled: tab === "tr",
   });
-  const logs = useQuery({
-    ...logsOptions(workspace, workflow.id, range, search.trace),
+  const logs = useInfiniteQuery({
+    ...logsOptions(workspace, workflow.id, timeRange(logNow, search.at), search.trace),
     enabled: tab === "lg",
   });
-  const seriesData = series.data;
-  const collection = useQuery(collectionOptions(workspace));
+  const logRows = logs.data?.pages.flatMap((page) => page?.logs ?? []) ?? [];
+  const observationScope = useQuery(scopeOptions(workspace, workflow.id));
+  const seriesData = series.data?.state === "OK" ? series.data : undefined;
+  const collection = useQuery(collectionOptions(workspace, workflow.id));
   const health = collectionHealth(collection.error ? null : collection.data);
   const source = workflow.sourceEnv;
   const target = workflow.targetEnv;
   const appName = workflow.applicationSnapshot?.name ?? workflow.application;
   const visibleTraces = filterTraces(traces.data?.traces ?? [], "all", narrowed, compFilter);
   const errors = visibleTraces.filter((trace) => trace.status === "error").length;
-  const logErrors = logs.data?.logs.filter((log) => log.level === "ERROR").length ?? 0;
+  const logErrors = logRows.filter((log) => log.level === "ERROR").length;
   const change = (patch: Partial<MonitoringSearch>, nextTab = tab, replace = false) =>
     onNavigate({ ...search, ...patch }, nextTab, replace);
   const openAt = (at: string) => {
@@ -207,8 +216,6 @@ function MonitoringContent({
             {health.state === "unknown"
               ? t("OTEL 수집 미확인")
               : t("OTEL 수집 {0} / {1}", [health.fresh, health.total])}
-            {health.missing.length > 0 &&
-              ` · ${health.missing.map((module) => t(module.name)).join(", ")} ${t("수집 없음")}`}
           </Badge>
           {tab !== "obs" && (
             <Badge variant="outline" className="text-muted-foreground">
@@ -222,6 +229,7 @@ function MonitoringContent({
             disabled={busy}
             onClick={() => {
               setNow(Date.now());
+              setLogNow(Date.now());
               if (tab === "obs")
                 void queryClient.refetchQueries({ queryKey: observationKey, type: "active" });
               else if (tab === "mx") void series.refetch();
@@ -235,6 +243,53 @@ function MonitoringContent({
         </div>
       </header>
       {demo && <p className="text-xs text-muted-foreground">{t("예시 데이터")}</p>}
+      <details className="rounded-lg border p-3 text-xs">
+        <summary className="cursor-pointer font-medium focus-visible:outline-2">
+          {t("관측 대상")} · {workflow.id}
+        </summary>
+        <div className="mt-3 space-y-3 break-words">
+          <QueryNotice query={observationScope} subject={t("관측 대상")} />
+          {observationScope.data && (
+            <>
+              <p>
+                {t("서버에 등록된 앱 구성")} · {observationScope.data.applicationId} ·{" "}
+                {observationScope.data.workloadScope}
+              </p>
+              <p>
+                {observationScope.data.sourceEnvironment} →{" "}
+                {observationScope.data.targetEnvironment}
+              </p>
+              <p className="break-all">
+                {t("앱 실행 주체")} ·{" "}
+                {Object.values(observationScope.data.actors).flat().join(", ") || "—"}
+              </p>
+              <p>
+                {t("마이그레이션 모듈의 작업 지표입니다. 앱 시스템 지표는 배포별로 조회합니다.")}
+              </p>
+              {observationScope.data.resources.map((resource) => (
+                <div key={resource.kind} className="space-y-1 border-t pt-2">
+                  <p>
+                    {resource.kind} · {resource.migrationId ?? t("미실행")}
+                  </p>
+                  <p className="break-all">
+                    {t("기존")} ·{" "}
+                    {Object.entries(resource.source)
+                      .map(([key, value]) => `${key}=${value}`)
+                      .join(" · ") || t("미확정")}
+                  </p>
+                  <p className="break-all">
+                    {t("이전")} ·{" "}
+                    {Object.entries(resource.target)
+                      .map(([key, value]) => `${key}=${value}`)
+                      .join(" · ") || t("미확정")}
+                  </p>
+                  {resource.bindingRef && <p className="break-all">{resource.bindingRef}</p>}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </details>
       {collection.error && <QueryNotice query={collection} subject={t("OTEL 수집")} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <ToggleGroup
@@ -338,6 +393,7 @@ function MonitoringContent({
                   unit: definition.unit,
                   source: [],
                   target: [],
+                  scope: "environment" as const,
                 };
                 return (
                   <MetricChart
@@ -426,7 +482,7 @@ function MonitoringContent({
             />
           )}
           <QueryNotice query={traces} subject={t("트레이스")} />
-          {traces.data && (
+          {traces.data?.state === "OK" && (
             <TraceList
               key={`${workflow.id}-${search.at ?? "all"}`}
               traces={visibleTraces}
@@ -453,10 +509,11 @@ function MonitoringContent({
               <X />
             </Button>
           )}
-          <QueryNotice query={logs} subject={t("로그")} />
-          {logs.data && (
+          <p className="text-xs text-muted-foreground">{t("관측 로그")}</p>
+          <QueryNotice query={{ ...logs, data: logs.data?.pages[0] }} subject={t("로그")} />
+          {logs.data?.pages[0]?.state === "OK" && (
             <LogList
-              logs={logs.data.logs}
+              logs={logRows}
               q={search.q ?? ""}
               traceId={search.trace}
               onSearch={(q) => change({ q: q || undefined, trace: undefined }, "lg", true)}
@@ -466,6 +523,15 @@ function MonitoringContent({
               source={source}
               target={target}
             />
+          )}
+          {logs.hasNextPage && (
+            <Button
+              variant="outline"
+              disabled={logs.isFetchingNextPage}
+              onClick={() => void logs.fetchNextPage()}
+            >
+              {t(logs.isFetchingNextPage ? "조회 중…" : "더 보기")}
+            </Button>
           )}
         </TabsContent>
       </Tabs>

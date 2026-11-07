@@ -46,8 +46,10 @@ Reference: `migration-security-dashboard-handoff` images and SPEC at `d8ae63a`; 
 
 ## 앱 서버 시스템 메트릭
 
-기존 모니터링의 Operate 화면을 확장한다. 상단에서 시스템과 마이그레이션을 구분하고, 시스템 화면은 앱 → 환경 → 서버 → CPU/메모리/디스크/네트워크 순서로 좁힌다. 앱의 요청·주문·채팅은 이번 화면에 포함하지 않는다. 서버 전체 기준을 제목 아래 한 줄로 표시한다.
+기존 모니터링의 Operate 화면을 확장한다. 상단에서 시스템과 마이그레이션을 구분하고, 시스템 화면은 앱 → 소유한 배포 → 실행 인스턴스 → CPU/메모리/디스크/네트워크 순서로 좁힌다. 앱의 요청·주문·채팅은 이번 화면에 포함하지 않는다. 선택한 배포 ID를 표시한다. CPU·메모리·I/O는 컨테이너, 관리형 실행 환경의 공유 네트워크는 앱 실행 묶음으로 구분한다.
 
 기존 색·Geist/한글 시스템 글꼴·shadcn·최대 6xl·24px 제목·14px 본문·12px 보조 글자·16px 차트 간격을 유지한다. 차트는 선택한 종류만 2열/모바일 1열로 보이며 수치와 시간은 tabular-nums다. 퍼센트 축은 0–100, bytes는 공통 배율로 표시한다. null은 선을 끊고 현재 결측값을 과거값이나 0으로 바꾸지 않는다. 마지막 수집 시각과 중단 상태를 표시한다.
 
 필터와 종류는 URL에 보존한다. 종류는 링크라 새 탭·뒤로 가기가 작동한다. 필터와 반복 탐색은 즉시 반응하며 장식 모션은 없다. 새로고침만 진행 피드백을 주고 reduced-motion을 존중한다. 차트 표 보기로 키보드/스크린리더에서 모든 측정값에 접근한다.
+
+Monitoring data uses emitted migration counters and gauges. Shared workflow measurements use one neutral series; source/target comparisons appear only when the emitter identifies each environment. System metrics retain separate categories and require the owned deployment and container instance; shared app-instance networking is labeled explicitly. Observation logs page forward without changing filters.

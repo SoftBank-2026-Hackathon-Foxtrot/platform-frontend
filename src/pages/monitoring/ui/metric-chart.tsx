@@ -15,11 +15,11 @@ export function clockTime(at: string) {
 function number(value: number | null) {
   return value === null ? "—" : value.toLocaleString(localeTag(), { maximumFractionDigits: 2 });
 }
-export function SeriesMark({ side }: { side: "source" | "target" }) {
+export function SeriesMark({ side }: { side: "source" | "target" | "shared" }) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-block h-0.5 w-3 shrink-0 ${side === "source" ? "bg-aws" : "bg-gcp"}`}
+      className={`inline-block h-0.5 w-3 shrink-0 ${side === "source" ? "bg-aws" : side === "target" ? "bg-gcp" : "bg-foreground"}`}
     />
   );
 }
@@ -47,16 +47,19 @@ export function MetricChart({
   emphasis?: "source" | "target";
 }) {
   const id = useId();
-  const length = metric.source.length;
+  const shared = metric.scope === "workflow";
+  const first = shared ? (metric.shared ?? []) : metric.source;
+  const label = shared ? t("마이그레이션 전체") : source;
+  const length = first.length;
   const selected = Math.min(index ?? length - 1, length - 1);
-  const a = metric.source[selected] ?? null;
+  const a = first[selected] ?? null;
   const b = metric.target[selected] ?? null;
   const at = new Date(Date.parse(from) + Math.max(0, selected) * step * 1000).toISOString();
   const last = new Date(Date.parse(from) + Math.max(0, length - 1) * step * 1000).toISOString();
   const diff = definition.compare ? difference(a, b) : null;
-  const maximum = niceMaximum([...metric.source, ...metric.target]);
+  const maximum = niceMaximum([...first, ...metric.target]);
   const hasSamples =
-    metric.source.some((value) => value !== null) || metric.target.some((value) => value !== null);
+    first.some((value) => value !== null) || metric.target.some((value) => value !== null);
   const x = (selected / Math.max(1, length - 1)) * 460;
   return (
     <Card className="gap-0 rounded-xl py-4 shadow-none">
@@ -74,15 +77,17 @@ export function MetricChart({
         </div>
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 tabular-nums">
           <span className="flex items-baseline gap-1.5">
-            <SeriesMark side="source" />
+            <SeriesMark side={shared ? "shared" : "source"} />
             <strong className="text-2xl font-semibold">{number(a)}</strong>
-            <span className="text-xs text-muted-foreground">{source}</span>
+            <span className="text-xs text-muted-foreground">{label}</span>
           </span>
-          <span className="flex items-baseline gap-1.5">
-            <SeriesMark side="target" />
-            <strong className="text-2xl font-semibold">{number(b)}</strong>
-            <span className="text-xs text-muted-foreground">{target}</span>
-          </span>
+          {!shared && (
+            <span className="flex items-baseline gap-1.5">
+              <SeriesMark side="target" />
+              <strong className="text-2xl font-semibold">{number(b)}</strong>
+              <span className="text-xs text-muted-foreground">{target}</span>
+            </span>
+          )}
           {diff && (
             <span
               className={`ml-auto text-xs ${diff.warning ? "text-warning" : "text-muted-foreground"}`}
@@ -167,15 +172,15 @@ export function MetricChart({
                 />
               ))}
               <path
-                d={seriesPath(metric.source, maximum)}
+                d={seriesPath(first, maximum)}
                 fill="none"
-                stroke="var(--aws)"
+                stroke={shared ? "var(--foreground)" : "var(--aws)"}
                 strokeWidth={emphasis === "source" ? 3 : 2}
                 strokeDasharray={emphasis === "target" ? "4 3" : undefined}
                 vectorEffect="non-scaling-stroke"
               />
               <path
-                d={seriesPath(metric.target, maximum)}
+                d={seriesPath(shared ? [] : metric.target, maximum)}
                 fill="none"
                 stroke="var(--gcp)"
                 strokeWidth={emphasis === "target" ? 3 : 2}
@@ -216,8 +221,8 @@ export function MetricChart({
           </button>
         </Button>
         <p id={`${id}-values`} className="sr-only">
-          {clockTime(at)}: {source} {number(a)} {definition.unit}, {target} {number(b)}{" "}
-          {definition.unit}
+          {clockTime(at)}: {label} {number(a)} {definition.unit}
+          {!shared && `, ${target} ${number(b)} ${definition.unit}`}
         </p>
         <div className="flex justify-between font-mono text-[10px] text-muted-foreground">
           <span>{clockTime(from)}</span>

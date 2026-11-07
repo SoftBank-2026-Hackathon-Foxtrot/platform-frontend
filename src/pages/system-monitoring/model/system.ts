@@ -8,7 +8,8 @@ export const categories = {
 export const systemSearchSchema = z.object({
   app: z.string().max(128).optional(),
   env: z.string().max(64).optional(),
-  host: z.string().max(128).optional(),
+  deployment: z.string().max(128).optional(),
+  instance: z.string().max(128).optional(),
   category: z.enum(["cpu", "memory", "disk", "network"]).catch("cpu"),
   minutes: z.union([z.literal(15), z.literal(60), z.literal(360)]).catch(15),
   workflow: z.string().max(128).optional(),
@@ -16,6 +17,7 @@ export const systemSearchSchema = z.object({
 export type SystemSearch = z.infer<typeof systemSearchSchema>;
 export const titles: Record<string, string> = {
   cpu: "CPU 사용률",
+  cpu_cores: "CPU 사용량",
   memory: "메모리 사용률",
   memory_bytes: "메모리 사용량",
   disk_usage: "디스크 사용률 (/)",
