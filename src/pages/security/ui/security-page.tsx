@@ -67,9 +67,7 @@ export function SecurityPage() {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <p role={query.error ? "alert" : "status"}>
-              {query.error
-                ? getApiErrorMessage(query.error)
-                : t("비교 결과 불러오는 중…")}
+              {query.error ? getApiErrorMessage(query.error) : t("비교 결과 불러오는 중…")}
             </p>
             {query.error && (
               <Button variant="outline" onClick={() => void query.refetch()}>
@@ -121,10 +119,7 @@ export function SecurityPage() {
             </p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs tabular-nums text-muted-foreground">
               <span>
-                {t("일치 {0}/{1}건", [
-                  review.checks.filter((c) => c.status === "pass").length,
-                  3,
-                ])}
+                {t("일치 {0}/{1}건", [review.checks.filter((c) => c.status === "pass").length, 3])}
               </span>
               <span>
                 {t("설정 차이 {0}건", [review.checks.filter((c) => c.status === "fail").length])}
@@ -221,9 +216,7 @@ export function SecurityPage() {
           </CardHeader>
           <CardContent className="px-5 py-1">
             {!review.events.length ? (
-              <p className="py-5 text-sm text-muted-foreground">
-                {t("검토 기록 없음")}
-              </p>
+              <p className="py-5 text-sm text-muted-foreground">{t("검토 기록 없음")}</p>
             ) : (
               <ol className="security-event-list">
                 {(showAll ? review.events : review.events.slice(0, 3)).map((event) => (
