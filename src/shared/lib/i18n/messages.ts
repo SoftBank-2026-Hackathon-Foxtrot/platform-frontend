@@ -439,10 +439,25 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Approve and continue",
     ja: "承認して続行",
   },
-  "이 단계는 되돌리기 어렵습니다. 현재 단계를 승인하면 엔진이 다음 작업을 진행합니다.": {
-    en: "This stage is difficult to reverse. Approval allows the engine to continue.",
-    ja: "元に戻すことが困難な段階です。承認すると処理が進みます。",
+  "현재 단계를 승인하면 엔진이 다음 작업을 진행합니다.": {
+    en: "Approving this stage lets the engine continue.",
+    ja: "この段階を承認すると、エンジンが次の作業を進めます。",
   },
+  "승인하면 대상 환경을 준비하고 데이터 동기화를 시작합니다. 원본은 그대로 운영되며, 언제든 취소할 수 있습니다.":
+    {
+      en: "Approving prepares the target and starts data sync. The source keeps serving, and you can cancel at any time.",
+      ja: "承認すると移行先を準備し、データ同期を始めます。移行元はそのまま稼働し、いつでも取り消せます。",
+    },
+  "승인하면 Redis를 전환하고 이어서 데이터베이스를 전환합니다. 전환 뒤에도 원본으로 역방향 동기화가 계속되어, 문제가 생기면 리소스별로 되돌릴 수 있습니다.":
+    {
+      en: "Approving switches Redis and then the database. Reverse sync to the source keeps running after the switch, so each resource can be rolled back if something goes wrong.",
+      ja: "承認すると Redis、続いてデータベースを切り替えます。切り替え後も移行元への逆方向同期が続くため、問題があればリソースごとに戻せます。",
+    },
+  "승인하면 역방향 동기화를 멈추고 원본 쪽 경로를 정리합니다. 이후에는 원본으로 되돌릴 수 없습니다.":
+    {
+      en: "Approving stops reverse sync and cleans up the source path. After this, you cannot roll back to the source.",
+      ja: "承認すると逆方向同期を止め、移行元の経路を片付けます。これ以降は移行元に戻せません。",
+    },
   "일시 정지": {
     en: "Pause",
     ja: "一時停止",

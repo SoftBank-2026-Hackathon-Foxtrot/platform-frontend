@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CircleCheck, CircleStop, Pause, Play, RotateCcw, ScanSearch } from "lucide-react";
 import {
   type ResourceKind,
+  STAGE_LABELS,
   type Workflow,
   type WorkflowCommand,
   commandWorkflow,
@@ -48,7 +49,7 @@ const COMMANDS: Record<CommandName, Spec> = {
     label: "승인하고 진행",
     icon: CircleCheck,
     variant: "default",
-    confirm: "이 단계는 되돌리기 어렵습니다. 현재 단계를 승인하면 엔진이 다음 작업을 진행합니다.",
+    confirm: "현재 단계를 승인하면 엔진이 다음 작업을 진행합니다.",
   },
   HALT: {
     label: "일시 정지",
@@ -83,6 +84,19 @@ const COMMANDS: Record<CommandName, Spec> = {
     confirm: "이 마이그레이션을 취소하고 원본 환경 기준으로 정리합니다. 되돌릴 수 없습니다.",
   },
 };
+/**
+ * What approving actually commits to at each approval stage. Every cutover keeps reverse sync
+ * running, so resources can still go back; only FINALIZE stops reverse sync and removes the way back.
+ */
+const APPROVE_CONFIRM: Record<string, string> = {
+  PREPARE:
+    "승인하면 대상 환경을 준비하고 데이터 동기화를 시작합니다. 원본은 그대로 운영되며, 언제든 취소할 수 있습니다.",
+  REDIS_CUTOVER:
+    "승인하면 Redis를 전환하고 이어서 데이터베이스를 전환합니다. 전환 뒤에도 원본으로 역방향 동기화가 계속되어, 문제가 생기면 리소스별로 되돌릴 수 있습니다.",
+  FINALIZE:
+    "승인하면 역방향 동기화를 멈추고 원본 쪽 경로를 정리합니다. 이후에는 원본으로 되돌릴 수 없습니다.",
+};
+const STAGE_ORDER = Object.keys(STAGE_LABELS);
 const ORDER: CommandName[] = [
   "APPROVE",
   "RESUME",
@@ -162,7 +176,16 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
           ) : (
             <ConfirmButton
               key={name}
-              spec={COMMANDS[name]}
+              spec={
+                name === "APPROVE"
+                  ? {
+                      ...COMMANDS.APPROVE,
+                      confirm:
+                        APPROVE_CONFIRM[STAGE_ORDER[workflow.currentStage] ?? ""] ??
+                        COMMANDS.APPROVE.confirm,
+                    }
+                  : COMMANDS[name]
+              }
               pending={mutation.isPending}
               onConfirm={() => send({ command: name })}
             />
