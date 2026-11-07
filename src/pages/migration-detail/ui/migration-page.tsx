@@ -80,12 +80,6 @@ function Workflow({ workspace, id }: { workspace: string; id: string }) {
         <>
           <Summary data={detail.data} refresh={() => void detail.refetch()} />
           <Card size="sm" className="gap-2">
-            <CardHeader className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <CardTitle>{t("전환 구성도")}</CardTitle>
-              <CardDescription className="text-xs">
-                {t("리소스 사용 위치 · 복제 상태 · 현재 전환 단계 · 2초마다 갱신")}
-              </CardDescription>
-            </CardHeader>
             <CardContent>
               <TransitionDiagram data={detail.data} suspended={Boolean(detail.error)} />
             </CardContent>
