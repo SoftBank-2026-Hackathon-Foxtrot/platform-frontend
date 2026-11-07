@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronDown, LoaderCircle, RefreshCw } from "lucide-react";
@@ -48,6 +48,15 @@ export function SecurityPage() {
   const session = useSession();
   const client = useQueryClient();
   const query = useQuery(reviewOptions(session.workspaceId));
+  const [, refreshPlanClock] = useReducer((value: number) => value + 1, 0);
+  const planExpiresAt = query.data?.plan?.expiresAt;
+  useEffect(() => {
+    if (!planExpiresAt) return;
+    const remaining = Date.parse(planExpiresAt) - Date.now();
+    if (remaining <= 0) return;
+    const timer = window.setTimeout(refreshPlanClock, remaining + 50);
+    return () => window.clearTimeout(timer);
+  }, [planExpiresAt]);
   const [selected, setSelected] = useState<ResourceId>("object");
   const [showAll, setShowAll] = useState(false);
   const primary = useRef<HTMLButtonElement>(null);
