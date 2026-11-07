@@ -1,6 +1,6 @@
 # OTEL 마이그레이션 화면
 
-각 모듈의 OTEL 로그를 Collector가 CP로 전달하고, CP는 기존 상세/이력 모델을 제공합니다. 리소스 카드에 수집 출처 OTEL을 표시합니다. `/v1/workflows/{id}/telemetry`는 Prometheus의 핵심 수치와 Tempo의 최근 trace ID/서비스/작업/소요 시간을 조회합니다. 프런트엔드는 공통 Axios + TanStack Query + Zod로 CP만 호출합니다.
+각 모듈의 OTEL 로그를 Collector가 CP로 전달하고, CP는 기존 상세/이력 모델을 제공합니다. 마이그레이션 리소스 카드에는 경로·쓰기 접근·현재 전환 조건과 최신성을 요약합니다. 수집 출처와 원본 측정 시각을 포함한 전체 상세는 모니터링의 상태 탭에 표시합니다. `/v1/workflows/{id}/telemetry`는 Prometheus의 핵심 수치와 Tempo의 최근 trace ID/서비스/작업/소요 시간을 조회합니다. 프런트엔드는 공통 Axios + TanStack Query + Zod로 CP만 호출합니다.
 
 Collector/backend 미설정, 단절, 아직 없는 표본을 구별합니다. metric 수집 시각과 원본 관측 경과를 함께 표시합니다. 수치가 없다고 0으로 표시하지 않습니다. 작업 ID는 span correlation용이며 브라우저에 OTLP SDK나 service token을 넣지 않습니다. 실제 앱 SDK는 demo 저장소에 있습니다.
 
@@ -43,3 +43,7 @@ ROLLING_BACK에서는 현재 정방향 단계가 아니라 workflow.rollback.res
 상세 응답의 `simulation`이 true이면 합성 수치이므로 화면에 MOCK을 표시합니다.
 
 객체 저장소는 전환 뒤에도 FINALIZE 전까지 원본 버킷을 읽기 보조로 사용하므로 route를 MIXED로 보고합니다. 이때 대상만 사용 중으로 표시하고 원본은 읽기 보조로 표시합니다.
+
+## 모니터링과 연결
+
+상단 버튼과 구성도 노드에서 현재 workflow·리소스·환경을 지정해 모니터링으로 이동합니다. 복제 상세 링크는 기존 상세 API의 관측 탭을 열고, 단계 이벤트 링크는 실제 이벤트 시각의 트레이스를 엽니다. 승인·명령 실행은 마이그레이션에 남으며 단계·명령 이력은 접어서 표시합니다. 출발 위치와 이력 페이지를 보존하는 복귀 계약은 `docs/monitoring.md`를 따릅니다.

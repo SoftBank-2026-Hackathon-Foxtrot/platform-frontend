@@ -1,8 +1,11 @@
 import { z } from "zod";
+import { monitoringOriginSchema } from "@/entities/migration";
 import { componentSchema, type TelemetryComponent } from "@/entities/telemetry";
 import type { Trace, TimeRange } from "../api/monitoring";
 
 export const monitoringSearchSchema = z.object({
+  from: monitoringOriginSchema.optional().catch(undefined),
+  side: z.enum(["source", "target"]).optional().catch(undefined),
   workflow: z.string().min(1).optional().catch(undefined),
   comp: componentSchema.catch("app"),
   at: z.iso.datetime({ offset: true }).optional().catch(undefined),
@@ -11,7 +14,7 @@ export const monitoringSearchSchema = z.object({
   scope: z.enum(["all", "component"]).optional().catch(undefined),
 });
 export type MonitoringSearch = z.infer<typeof monitoringSearchSchema>;
-export type MonitoringTab = "mx" | "tr" | "lg";
+export type MonitoringTab = "mx" | "tr" | "lg" | "obs";
 export type TraceFilter = "all" | "error" | "slow" | "target";
 export const components: Record<
   TelemetryComponent,
@@ -104,4 +107,12 @@ export function difference(source: number | null, target: number | null) {
   if (source === null || target === null || source === 0) return null;
   const ratio = target / source;
   return { ratio, warning: ratio >= 1.5 };
+}
+
+/** Tempo uses nanosecond strings; preserve actual time without guessing missing timestamps. */
+export function traceTimestamp(nanoseconds: string | null | undefined) {
+  if (!nanoseconds || !/^\d+$/.test(nanoseconds)) return undefined;
+  const milliseconds = Number(BigInt(nanoseconds) / 1_000_000n);
+  const date = new Date(milliseconds);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : undefined;
 }

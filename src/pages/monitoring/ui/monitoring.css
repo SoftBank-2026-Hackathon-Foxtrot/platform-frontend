@@ -38,3 +38,8 @@
     transform: none;
   }
 }
+
+.monitoring [role="tab"],
+.monitoring h2 {
+  scroll-margin-top: 7rem;
+}

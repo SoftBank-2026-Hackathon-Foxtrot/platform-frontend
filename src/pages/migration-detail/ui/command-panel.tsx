@@ -194,7 +194,7 @@ export function CommandPanel({ workflow, allowedCommands }: Props) {
       </div>
       {mutation.isPending && (
         <p role="status" className="text-sm text-muted-foreground">
-          {t("명령을 보내는 중입니다.")}
+          {t("요청 중…")}
         </p>
       )}
       {mutation.error && (

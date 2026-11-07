@@ -1,4 +1,80 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "서버 미지원": { en: "Not supported by server", ja: "サーバー未対応" },
+  "관측값 없음": { en: "No observations", ja: "観測値なし" },
+  "프로브 데이터 없음": { en: "No probe data", ja: "プローブデータなし" },
+  "HOLD · 검사 생략 ": { en: "HOLD · Check skipped ", ja: "HOLD · 検査省略 " },
+  "조회 중…": { en: "Loading…", ja: "読み込み中…" },
+  "표본 없음": { en: "No samples", ja: "サンプルなし" },
+  "지표 없음": { en: "No metrics", ja: "メトリクスなし" },
+  "트레이스 없음": { en: "No traces", ja: "トレースなし" },
+  " 이전 값 표시 중 · 최신 상태 미확인": {
+    en: " Showing cached values · Current state unconfirmed",
+    ja: " 前回の値を表示中 · 最新状態は未確認",
+  },
+  "갱신 실패": { en: "Refresh failed", ja: "更新失敗" },
+  "실행 결과 대기": { en: "Awaiting execution result", ja: "実行結果待ち" },
+  "명령 이력 없음": { en: "No command history", ja: "コマンド履歴なし" },
+  "이벤트 없음": { en: "No events", ja: "イベントなし" },
+  "등록된 마이그레이션 없음": { en: "No migrations registered", ja: "登録済みの移行なし" },
+  "미실행 · 이전 환경 데이터 없음": {
+    en: "Not started · No target data",
+    ja: "未実行 · 移行先データなし",
+  },
+  "요청 중…": { en: "Sending…", ja: "送信中…" },
+  경로·쓰기: { en: "Routing & writes", ja: "経路・書き込み" },
+  검증: { en: "Verification", ja: "検証" },
+  "복귀 방식": { en: "Rollback method", ja: "ロールバック方式" },
+  "대상 쓰기 가능": {
+    en: "Target writes possible",
+    ja: "移行先への書き込み可能性",
+  },
+  조건: { en: "Condition", ja: "条件" },
+  "최근 판정": { en: "Last decision", ja: "前回の判定" },
+  "판정 없음": { en: "No decisions", ja: "判定なし" },
+  "검증 결과": { en: "Verification result", ja: "検証結果" },
+  "측정 시각": { en: "Measured", ja: "測定時刻" },
+  "마지막 진전": { en: "Last progress", ja: "最終進捗" },
+  "수집 시각": { en: "Collected", ja: "収集時刻" },
+  "트래픽 분배": { en: "Traffic split", ja: "トラフィック配分" },
+  "프로브 결과": { en: "Probe results", ja: "プローブ結果" },
+  "테스트 요청 도착 비율": {
+    en: "Test request destinations",
+    ja: "テストリクエストの到達率",
+  },
+  "앱 상태": { en: "App status", ja: "アプリ状態" },
+  "잔여 WebSocket": { en: "Remaining WebSockets", ja: "残存 WebSocket" },
+  "관측 이력 · 전체 리소스": {
+    en: "Observation history · All resources",
+    ja: "観測履歴 · 全リソース",
+  },
+  "조회 시작": { en: "Since", ja: "取得開始" },
+  "수집 데이터": { en: "Collected data", ja: "収集データ" },
+  "수집 지표·트레이스 · 전체 리소스": {
+    en: "Collected metrics & traces · All resources",
+    ja: "収集メトリクス・トレース · 全リソース",
+  },
+  동기화: { en: "Sync", ja: "同期" },
+  연결: { en: "Connections", ja: "接続" },
+  "{0} 관측 상세 보기": { en: "View {0} observation details", ja: "{0} の観測詳細を見る" },
+  "마이그레이션 관측": { en: "Migration observations", ja: "移行の観測" },
+  "복제·동기화 상세": { en: "Replication details", ja: "複製・同期の詳細" },
+  "관측 상세": { en: "Observation details", ja: "観測の詳細" },
+  "단계·명령 이력 접기": {
+    en: "Hide stage and command history",
+    ja: "ステージ・コマンド履歴を閉じる",
+  },
+  "단계·명령 이력 보기": { en: "Stage and command history", ja: "ステージ・コマンド履歴を見る" },
+  "최신 이벤트": { en: "Latest events", ja: "最新イベント" },
+  "이 리소스의 관측값이 없습니다.": {
+    en: "No observations for this resource.",
+    ja: "このリソースの観測値はありません。",
+  },
+  관측값: { en: "Observations", ja: "観測値" },
+  "선택한 트레이스": { en: "Selected trace", ja: "選択したトレース" },
+  "{0} 계열 강조": { en: "Emphasizing {0}", ja: "{0} の系列を強調" },
+  "{0} 마이그레이션으로 돌아가기": { en: "Return to {0} migration", ja: "{0} の移行に戻る" },
+  "해당 마이그레이션 보기": { en: "View this migration", ja: "この移行を見る" },
+  "{0} · {1} 지표 보기": { en: "{0} · View {1} metrics", ja: "{0} · {1} のメトリクスを見る" },
   모니터링: { en: "Monitoring", ja: "モニタリング" },
   "지표 보기": { en: "View metrics", ja: "メトリクスを見る" },
   "OTEL 수집 정상": { en: "OTEL collection healthy", ja: "OTEL 収集正常" },
@@ -768,11 +844,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Traffic shift and public route verification",
     ja: "トラフィック切替と公開経路の確認",
   },
-  "LB 설정과 공용 probe의 실제 도착 위치를 구분합니다. probe 비율은 전체 사용자 트래픽 비율이 아닙니다.":
-    {
-      en: "LB settings and observed public probe destinations differ. Probe ratios do not represent all user traffic.",
-      ja: "LB 設定と公開プローブの到達先は別の値です。比率は全ユーザートラフィックの比率ではありません。",
-    },
   "요청 가중치": {
     en: "Requested weights",
     ja: "要求した重み",
@@ -881,10 +952,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "{0} (partial reports)",
     ja: "{0}（一部の報告）",
   },
-  "WebSocket은 기존 연결의 잔존 수입니다. 신규 HTTP 요청의 도착 위치와 별도로 확인합니다.": {
-    en: "Remaining WebSocket connections are separate from new HTTP request destinations.",
-    ja: "WebSocket は既存接続の残数です。新しい HTTP の到達先とは別に確認します。",
-  },
   "실행 명령": {
     en: "Executed operations",
     ja: "実行操作",
@@ -932,10 +999,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
   "최근 관측 표본": {
     en: "Recent observation samples",
     ja: "最近の観測サンプル",
-  },
-  "화면 진입 전 5분부터 수집된 표본입니다. 수집 실패도 남습니다.": {
-    en: "Samples since five minutes before opening this page, including collection failures.",
-    ja: "画面を開く5分前以降のサンプルです。収集失敗も記録されます。",
   },
   수집: {
     en: "Collected",
@@ -1025,11 +1088,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "OTEL collection and traces",
     ja: "OTEL 収集状態とトレース",
   },
-  "Prometheus 수치와 Tempo 추적을 컨트롤 플레인을 통해 조회합니다. 원본 관측 경과도 함께 확인하세요.":
-    {
-      en: "Query Prometheus metrics and Tempo traces through the control plane. Also check observation age.",
-      ja: "コントロールプレーン経由でメトリクスとトレースを取得します。観測からの経過も確認してください。",
-    },
   "수집 결과를 불러오는 중입니다.": {
     en: "Loading collection results…",
     ja: "収集結果を取得中です。",
@@ -1217,10 +1275,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
   "대상 쓰기 가능성:": {
     en: "Target writes possible:",
     ja: "移行先での書き込みの可能性:",
-  },
-  ". 실제 쓰기 건수를 뜻하지 않습니다.": {
-    en: ". This does not indicate actual write counts.",
-    ja: "。実際の書き込み件数ではありません。",
   },
   기록: {
     en: "History",

@@ -1,4 +1,7 @@
-import { useId } from "react";
+import { useId, type ComponentProps } from "react";
+import { ArrowUpRight } from "lucide-react";
+import { MonitoringEntryLink } from "./monitoring-entry";
+import { Button } from "@/shared/ui/button";
 import { t, useLocale, localeTag } from "@/shared/lib/i18n";
 import type { Detail, Resource } from "../api/migrations";
 import { FlowStory, PreparationActivity, TrafficMeter } from "./flow-activity";
@@ -100,6 +103,7 @@ function StackNode({
   stale,
   changing,
   width = 248,
+  inspect,
 }: {
   cx: number;
   top: number;
@@ -112,6 +116,10 @@ function StackNode({
   motion?: "copying" | "preparing";
   stale?: boolean;
   changing?: boolean;
+  inspect?: Pick<
+    ComponentProps<typeof MonitoringEntryLink>,
+    "workflow" | "comp" | "side" | "anchor" | "tab"
+  >;
 }) {
   useLocale();
   return (
@@ -124,6 +132,27 @@ function StackNode({
       data-changing={changing}
       title={t(name) + " · " + sub}
     >
+      {inspect && (
+        <Button
+          asChild
+          variant="ghost"
+          className="absolute inset-0 z-10 h-full w-full justify-end rounded-[10px] p-1 hover:bg-accent/30 focus-visible:ring-2"
+        >
+          <MonitoringEntryLink
+            {...inspect}
+            aria-label={
+              inspect.tab === "obs"
+                ? t("{0} 관측 상세 보기", [t(name)])
+                : t("{0} · {1} 지표 보기", [
+                    inspect.side === "source" ? t("기존") : t("이전"),
+                    t(name),
+                  ])
+            }
+          >
+            <ArrowUpRight aria-hidden="true" className="self-start size-3" />
+          </MonitoringEntryLink>
+        </Button>
+      )}
       <div className="tile">
         <img src={STACK_ICONS[icon]} alt="" />
         {state === "active" && <span className="dot" />}
@@ -280,7 +309,11 @@ export function TransitionDiagram({
             </div>
           )}
         </aside>
-        <div className="overflow-x-auto rounded-md border">
+        <div
+          id="migration-topology-scroll"
+          data-return-scroll
+          className="overflow-x-auto rounded-md border"
+        >
           <svg
             viewBox={`0 0 ${W} ${height}`}
             className="diagram-scene"
@@ -688,6 +721,7 @@ export function TransitionDiagram({
                   width={208}
                   icon="cloudflare"
                   name="Traffic LB"
+                  inspect={{ workflow: wf, comp: "app", tab: "obs", anchor: "node-traffic" }}
                   sub={t(
                     traffic.confirmed
                       ? "LB 확인 가중치"
@@ -724,6 +758,12 @@ export function TransitionDiagram({
                         top={264}
                         icon="app"
                         name={t("{0} 애플리케이션", [env])}
+                        inspect={{
+                          workflow: wf,
+                          comp: "app",
+                          side: index === 0 ? "source" : "target",
+                          anchor: `node-app-${index}`,
+                        }}
                         sub={t("{0}/{1} 프로세스", [reported, expected])}
                         state={
                           (traffic.confirmed?.[index === 0 ? 0 : 1] ?? 0) > 0 ? "active" : undefined
@@ -752,6 +792,17 @@ export function TransitionDiagram({
                             top={rows[row === 0 ? 0 : row === 1 ? 1 : 2]!}
                             icon={item.icon}
                             name={item.name}
+                            inspect={{
+                              workflow: wf,
+                              comp:
+                                item.kind === "DATABASE"
+                                  ? "db"
+                                  : item.kind === "REDIS"
+                                    ? "redis"
+                                    : "obj",
+                              side: index === 0 ? "source" : "target",
+                              anchor: `node-${item.kind}-${index}`,
+                            }}
                             description={
                               !suspended && liveStream
                                 ? t(

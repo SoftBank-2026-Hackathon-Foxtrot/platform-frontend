@@ -9,6 +9,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { z } from "zod";
+import { migrationViewSchema } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
 import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
@@ -104,9 +105,19 @@ const migrationsRoute = createRoute({
 const migrationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/migrations/$id",
+  validateSearch: migrationViewSchema,
   component: function MigrationRoute() {
     const { id } = migrationRoute.useParams();
-    return <MigrationPage key={id} id={id} />;
+    const view = migrationRoute.useSearch();
+    const navigate = migrationRoute.useNavigate();
+    return (
+      <MigrationPage
+        key={id}
+        id={id}
+        view={view}
+        onView={(search) => void navigate({ search, replace: true, resetScroll: false })}
+      />
+    );
   },
 });
 const securityRoute = createRoute({
@@ -125,9 +136,15 @@ const monitoringRoute = createRoute({
     return (
       <MonitoringPage
         search={search}
-        tab={hash === "tr" || hash === "lg" ? hash : "mx"}
+        tab={hash === "tr" || hash === "lg" || hash === "obs" ? hash : "mx"}
         onNavigate={(next, tab, replace) =>
-          void navigate({ search: next, hash: tab, replace, resetScroll: false })
+          void navigate({
+            search: next,
+            hash: tab,
+            replace,
+            resetScroll: false,
+            hashScrollIntoView: false,
+          })
         }
       />
     );
@@ -139,6 +156,8 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 export const router = createRouter({
+  scrollRestoration: true,
+  scrollToTopSelectors: ["#platform-content-scroll"],
   routeTree: rootRoute.addChildren([
     indexRoute,
     loginRoute,
