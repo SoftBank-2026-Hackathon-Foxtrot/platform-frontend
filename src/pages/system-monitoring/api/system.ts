@@ -36,6 +36,7 @@ const deploymentsSchema = z.object({
       deploymentId: z.string(),
       cloud: z.string(),
       status: z.string(),
+      access: z.enum(["personal", "shared"]).default("personal"),
     }),
   ),
 });

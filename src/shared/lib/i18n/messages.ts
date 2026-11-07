@@ -1,4 +1,6 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "공용 앱": { en: "Shared app", ja: "共有アプリ" },
+  "내 배포": { en: "My deployment", ja: "自分のデプロイ" },
   옵저버빌리티: { en: "Observability", ja: "オブザーバビリティ" },
   "수집 중인 마이그레이션이 없습니다": {
     en: "No migrations are reporting",
