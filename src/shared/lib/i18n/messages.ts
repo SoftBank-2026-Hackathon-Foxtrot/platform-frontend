@@ -1,4 +1,54 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "대상 사양 설정": { en: "Target sizing", ja: "移行先の仕様設定" },
+  "현재 사양 유지": { en: "Keep current sizing", ja: "現在の仕様を維持" },
+  "사양 변경": { en: "Change sizing", ja: "仕様を変更" },
+  "대상 사양을 불러오는 중입니다.": {
+    en: "Loading target sizing.",
+    ja: "移行先の仕様を読み込み中です。",
+  },
+  "대상 사양 조회 실패": {
+    en: "Could not load target sizing",
+    ja: "移行先の仕様を取得できませんでした",
+  },
+  "이 대상의 사양을 변경할 수 없습니다.": {
+    en: "Sizing cannot be changed for this target.",
+    ja: "この移行先の仕様は変更できません。",
+  },
+  "마이그레이션 대상과 연결된 배포 정보가 필요합니다.": {
+    en: "A deployment linked to the migration target is required.",
+    ja: "移行先に関連付けられたデプロイ情報が必要です。",
+  },
+  "사양 값과 선택한 대상을 확인하세요.": {
+    en: "Check the sizing values and selected target.",
+    ja: "仕様の値と選択した移行先を確認してください。",
+  },
+  "대상 사양": { en: "Target sizing", ja: "移行先の仕様" },
+  "사양 적용과 앱 준비 확인이 끝나면 복제를 시작합니다. 계획 생성 후에는 사양을 변경할 수 없습니다.":
+    {
+      en: "Replication starts after sizing is applied and the app is ready. Sizing is fixed when the plan is created.",
+      ja: "仕様の適用とアプリの準備確認後に複製を開始します。計画作成後は仕様を変更できません。",
+    },
+  "앱 CPU": { en: "App CPU", ja: "アプリのCPU" },
+  "앱 메모리 (MiB)": { en: "App memory (MiB)", ja: "アプリのメモリ (MiB)" },
+  "앱과 워커가 공유하는 할당량입니다.": {
+    en: "Allocation shared by the app and workers.",
+    ja: "アプリとワーカーが共有する割り当てです。",
+  },
+  "컨테이너마다 적용하는 할당량입니다.": {
+    en: "Allocation for each container.",
+    ja: "各コンテナへの割り当てです。",
+  },
+  "DB 인스턴스": { en: "DB instance", ja: "DBインスタンス" },
+  "DB 저장 공간 (GiB)": { en: "DB storage (GiB)", ja: "DBストレージ (GiB)" },
+  "DB 저장 공간 상한 (GiB)": { en: "DB storage limit (GiB)", ja: "DBストレージ上限 (GiB)" },
+  "DB 고가용성": { en: "DB high availability", ja: "DBの高可用性" },
+  "Redis 인스턴스": { en: "Redis instance", ja: "Redisインスタンス" },
+  "Redis 노드 수": { en: "Redis node count", ja: "Redisノード数" },
+  "Redis 메모리 (GiB)": { en: "Redis memory (GiB)", ja: "Redisメモリ (GiB)" },
+  "Redis 고가용성": { en: "Redis high availability", ja: "Redisの高可用性" },
+  사용: { en: "Enabled", ja: "有効" },
+  미사용: { en: "Disabled", ja: "無効" },
+  "확정한 대상 사양": { en: "Selected target sizing", ja: "確定した移行先の仕様" },
   "서버 미지원": { en: "Not supported by server", ja: "サーバー未対応" },
   "관측값 없음": { en: "No observations", ja: "観測値なし" },
   "프로브 데이터 없음": { en: "No probe data", ja: "プローブデータなし" },

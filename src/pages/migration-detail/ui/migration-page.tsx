@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronLeft, Info, RefreshCw } from "lucide-react";
 import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
+import { TargetSizingSummary } from "@/features/start-migration";
 import { getApiErrorMessage, isNotFound } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
@@ -215,6 +216,9 @@ function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
+        {d.workflow.targetConfiguration && (
+          <TargetSizingSummary configuration={d.workflow.targetConfiguration} />
+        )}
         <StageStepper data={d} />
         {(d.workflow.status === "PLANNED" ||
           d.workflow.status === "WAITING_APPROVAL" ||

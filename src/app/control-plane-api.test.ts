@@ -162,6 +162,26 @@ test("워크플로 생성·명령은 공통 백엔드 경로와 expectedVersion�
   await commandWorkflow(result.workflow, "ROLLBACK_RESOURCE", "REDIS", "rollback-request");
 });
 
+test("선택한 대상 사양은 별도 배포 요청 없이 마이그레이션 계획에 포함한다", async () => {
+  const targetConfiguration = {
+    environmentId: "env-aaaaaaaaaaaa",
+    expectedUpdatedAt: "2026-11-08T00:00:00Z",
+    sizing: { db_storage_gib: 40 },
+    app: { cpu: 2, memoryMiB: 4096 },
+  };
+  mock.onPost("/v1/workflows").reply((config) => {
+    expect(JSON.parse(config.data)).toEqual({
+      sourceEnv: "aws",
+      targetEnv: "gcp",
+      targetConfiguration,
+    });
+    expect(config.headers?.["Idempotency-Key"]).toBe("sized-plan");
+    return [201, detail];
+  });
+  await createWorkflow({ sourceEnv: "aws", targetEnv: "gcp", targetConfiguration }, "sized-plan");
+  expect(mock.history.post.map((request) => request.url)).toEqual(["/v1/workflows"]);
+});
+
 test("실제 세션과 workspace 목록을 읽고 로그아웃에 CSRF를 사용한다", async () => {
   mock.onGet("/v1/me").reply(200, {
     user: { id: "github:12", login: "user" },

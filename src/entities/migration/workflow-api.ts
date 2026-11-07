@@ -13,6 +13,24 @@ export const workflowCommandSchema = z.enum([
   "ABORT",
 ]);
 export type WorkflowCommand = z.infer<typeof workflowCommandSchema>;
+export const targetConfigurationSchema = z.object({
+  environmentId: z.string().regex(/^env-[a-f0-9]{12}$/),
+  expectedUpdatedAt: z.string(),
+  sizing: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  app: z.object({
+    cpu: z.number().positive().optional(),
+    memoryMiB: z.number().int().positive().optional(),
+    workerCount: z.number().int().positive().optional(),
+    apiWorkers: z.number().int().positive().optional(),
+  }),
+});
+export type TargetConfiguration = z.infer<typeof targetConfigurationSchema>;
+export type CreateWorkflowInput = {
+  applicationId?: string;
+  sourceEnv: string;
+  targetEnv: string;
+  targetConfiguration?: TargetConfiguration;
+};
 export const workflowSchema = z.object({
   id: z.string(),
   application: z.string(),
@@ -28,6 +46,7 @@ export const workflowSchema = z.object({
     .optional(),
   sourceEnv: z.string(),
   targetEnv: z.string(),
+  targetConfiguration: targetConfigurationSchema.nullish(),
   version: z.number(),
   currentStage: z.number(),
   createdAt: z.string(),
@@ -161,10 +180,7 @@ export const workflowEventsOptions = (workspace: string, id: string, after: stri
  * A registered application is named by `applicationId`. The seed application of the shared
  * release backend has none, and that backend refuses unknown fields, so it is left out.
  */
-export async function createWorkflow(
-  input: { applicationId?: string; sourceEnv: string; targetEnv: string },
-  key: string,
-) {
+export async function createWorkflow(input: CreateWorkflowInput, key: string) {
   const { applicationId, ...direction } = input;
   const body = applicationId ? { applicationId, ...direction } : direction;
   return workflowDetailSchema.parse(
