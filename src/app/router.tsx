@@ -16,7 +16,9 @@ import { LoginPage } from "@/pages/login";
 import { MigrationPage } from "@/pages/migration-detail";
 import { MigrationsPage } from "@/pages/migrations";
 import { SettingsPage } from "@/pages/settings";
-import { getApiErrorMessage } from "@/shared/api";
+import { getApiErrorMessage, isNotFound } from "@/shared/api";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { PlatformShell } from "@/widgets/platform-shell";
 /** The session decides between the login screen and the console; pages assume a session. */
 function Root() {
@@ -32,9 +34,23 @@ function Root() {
   }
   if (session.error) {
     return (
-      <p role="alert" className="grid min-h-dvh place-items-center text-destructive">
-        {getApiErrorMessage(session.error)}
-      </p>
+      <main className="grid min-h-dvh place-items-center bg-background px-4 text-foreground">
+        <Card className="w-full max-w-lg" role="alert">
+          <CardHeader>
+            <CardTitle>{t("플랫폼 API 연결 실패")}</CardTitle>
+            <CardDescription>
+              {isNotFound(session.error)
+                ? t("연결된 서버에 플랫폼 로그인 API가 없습니다. API 주소를 확인하십시오.")
+                : getApiErrorMessage(session.error)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" onClick={() => void session.refetch()}>
+              {t("다시 조회")}
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
     );
   }
   if (!session.data || location.pathname === "/login") {

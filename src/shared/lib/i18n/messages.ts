@@ -1393,4 +1393,21 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "{0} application",
     ja: "{0} アプリケーション",
   },
+
+  "플랫폼 API 연결 실패": {
+    en: "Platform API connection failed",
+    ja: "プラットフォーム API 接続失敗",
+  },
+  "연결된 서버에 플랫폼 로그인 API가 없습니다. API 주소를 확인하십시오.": {
+    en: "The connected server does not provide the platform sign-in API. Check the API address.",
+    ja: "接続先にプラットフォームのログイン API がありません。API のアドレスを確認してください。",
+  },
+  "마이그레이션을 찾을 수 없습니다": {
+    en: "Migration not found",
+    ja: "移行計画が見つかりません",
+  },
+  "이 작업이 삭제되었거나 다른 플랫폼 서버에 연결되어 있습니다.": {
+    en: "This operation was removed, or you are connected to a different platform server.",
+    ja: "この操作は削除されたか、別のプラットフォームサーバーに接続しています。",
+  },
 };

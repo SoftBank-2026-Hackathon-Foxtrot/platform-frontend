@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronLeft, Info, RefreshCw } from "lucide-react";
 import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
-import { getApiErrorMessage } from "@/shared/api";
+import { getApiErrorMessage, isNotFound } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -58,7 +58,24 @@ function Workflow({ workspace, id }: { workspace: string; id: string }) {
   return (
     <div className="space-y-2">
       {detail.isPending && <p role="status">{t("관측값을 불러오는 중입니다.")}</p>}
-      {detail.error && <ErrorNotice error={detail.error} retry={() => void detail.refetch()} />}
+      {detail.error &&
+        (isNotFound(detail.error) ? (
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>{t("마이그레이션을 찾을 수 없습니다")}</CardTitle>
+              <CardDescription>
+                {t("이 작업이 삭제되었거나 다른 플랫폼 서버에 연결되어 있습니다.")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link to="/migrations">{t("마이그레이션 목록")}</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <ErrorNotice error={detail.error} retry={() => void detail.refetch()} />
+        ))}
       {detail.data && (
         <>
           <Summary data={detail.data} refresh={() => void detail.refetch()} />
