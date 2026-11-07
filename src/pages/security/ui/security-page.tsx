@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronDown, LoaderCircle, RefreshCw } from "lucide-react";
@@ -10,6 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import {
   busyReview,
+  canApply,
   canContinue,
   changeReview,
   reviewKey,
@@ -35,9 +36,9 @@ const titles: Record<Review["phase"], string> = {
   error: "처리 결과 확인 필요",
 };
 function nextAction(review: Review): { action: Action; label: string } {
-  if (review.readOnly) return { action: "scan", label: "권한 조회" };
   if (review.phase === "gap" && review.appReady) return { action: "plan", label: "변경안 확인" };
-  if (review.phase === "plan") return { action: "apply", label: "변경안 보기" };
+  if (review.phase === "plan" && review.plan && Date.now() < Date.parse(review.plan.expiresAt))
+    return { action: "apply", label: "변경안 보기" };
   if (["applied", "matched", "verified"].includes(review.phase))
     return { action: "verify", label: "재검사" };
   return { action: "scan", label: "권한 조회" };
@@ -47,6 +48,15 @@ export function SecurityPage() {
   const session = useSession();
   const client = useQueryClient();
   const query = useQuery(reviewOptions(session.workspaceId));
+  const [, refreshPlanClock] = useReducer((value: number) => value + 1, 0);
+  const planExpiresAt = query.data?.plan?.expiresAt;
+  useEffect(() => {
+    if (!planExpiresAt) return;
+    const remaining = Date.parse(planExpiresAt) - Date.now();
+    if (remaining <= 0) return;
+    const timer = window.setTimeout(refreshPlanClock, remaining + 50);
+    return () => window.clearTimeout(timer);
+  }, [planExpiresAt]);
   const [selected, setSelected] = useState<ResourceId>("object");
   const [showAll, setShowAll] = useState(false);
   const primary = useRef<HTMLButtonElement>(null);
@@ -56,11 +66,25 @@ export function SecurityPage() {
     retry: false,
     onSuccess: (review) => {
       client.setQueryData(reviewKey(session.workspaceId), review);
-      primary.current?.focus();
+      if (review.phase === "plan") {
+        requestAnimationFrame(() => {
+          const title = document.getElementById("security-plan-title");
+          title?.scrollIntoView({ block: "nearest" });
+          title?.focus({ preventScroll: true });
+        });
+      } else primary.current?.focus();
     },
     onError: () => void client.invalidateQueries({ queryKey: reviewKey(session.workspaceId) }),
   });
-  const review = query.data;
+  const review =
+    query.data &&
+    (query.error
+      ? {
+          ...query.data,
+          checks: query.data.checks.map((check) => ({ ...check, status: "unknown" as const })),
+          appReady: null,
+        }
+      : query.data);
   if (!review)
     return (
       <div className="security-page">
@@ -92,6 +116,7 @@ export function SecurityPage() {
           : 0;
   const run = (action: Action) => {
     if (!busy) {
+      if (action === "apply" && (query.error || !canApply(review))) return;
       setSelected("object");
       mutation.mutate({ action, review });
     }
@@ -126,6 +151,11 @@ export function SecurityPage() {
               <span>
                 {t("설정 차이 {0}건", [review.checks.filter((c) => c.status === "fail").length])}
               </span>
+              {review.collectedAt && (
+                <time dateTime={review.collectedAt}>
+                  {t("마지막 수집 {0}", [new Date(review.collectedAt).toLocaleString(locale)])}
+                </time>
+              )}
               <span>
                 {t(
                   review.appReady === null
@@ -145,7 +175,7 @@ export function SecurityPage() {
               className="aria-disabled:opacity-50"
               onClick={() => {
                 if (busy) return;
-                if (!review.readOnly && review.phase === "plan") {
+                if (review.phase === "plan" && next.action === "apply") {
                   setSelected("object");
                   requestAnimationFrame(() => {
                     const title = document.getElementById("security-plan-title");
@@ -210,6 +240,7 @@ export function SecurityPage() {
           resource={resources(review).find((r) => r.id === selected)!}
           review={review}
           busy={busy}
+          canApply={!query.error && canApply(review)}
           onApply={() => run("apply")}
         />
         <Card className="security-audit gap-0 overflow-hidden py-0">

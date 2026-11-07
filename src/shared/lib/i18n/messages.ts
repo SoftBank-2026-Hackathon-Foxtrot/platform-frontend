@@ -2431,4 +2431,28 @@ export const messages: Record<string, { en: string; ja: string }> = {
   확인: { en: "Confirmed", ja: "確認済み" },
   기준: { en: "Source", ja: "基準" },
   결과: { en: "Result", ja: "結果" },
+  "공개 권한 확인 필요": { en: "Public grants need review", ja: "公開権限の確認が必要" },
+  "앱 응답을 확인한 뒤 다시 조회하세요.": {
+    en: "Check the app response, then scan again.",
+    ja: "アプリの応答を確認して再調査してください。",
+  },
+  "마지막 수집 {0}": { en: "Last collected {0}", ja: "最終取得 {0}" },
+  "변경안 유효 시각 {0}": { en: "Plan expires at {0}", ja: "変更案の有効期限 {0}" },
+  "변경안만 확인할 수 있습니다. 적용 권한은 연결되지 않았습니다.": {
+    en: "You can review the plan. Apply access is not connected.",
+    ja: "変更案を確認できます。適用権限は未接続です。",
+  },
+  "권한을 다시 조회하고 변경안을 확인하세요.": {
+    en: "Scan permissions again and review a new plan.",
+    ja: "権限を再取得して変更案を確認してください。",
+  },
+  "추가 권한 제거": { en: "Remove extra access", ja: "追加権限を削除" },
+  "이 추가 권한을 제거할까요?": {
+    en: "Remove this extra access?",
+    ja: "この追加権限を削除しますか？",
+  },
+  "데모 버킷의 접근 권한만 제거합니다. 앱 버킷 권한은 유지합니다.": {
+    en: "Removes access to the demo bucket only. App bucket access stays unchanged.",
+    ja: "デモバケットへのアクセスのみ削除します。アプリのバケット権限は維持します。",
+  },
 };
