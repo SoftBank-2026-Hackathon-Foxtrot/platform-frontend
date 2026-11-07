@@ -1,6 +1,7 @@
 export {
   apiBaseUrl,
   apiClient,
+  setCsrfToken,
   getApiErrorMessage,
   shouldRetryQuery,
   isUnauthorized,

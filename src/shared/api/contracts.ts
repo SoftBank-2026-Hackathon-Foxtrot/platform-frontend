@@ -15,4 +15,4 @@ export const resourceNames: Record<Resource, string> = {
   application: "애플리케이션",
 };
 export const eventSchema = z.object({ at: z.number(), message: z.string() });
-export const commandHeaders = () => ({ "Idempotency-Key": crypto.randomUUID() });
+export const commandHeaders = (key: string = crypto.randomUUID()) => ({ "Idempotency-Key": key });

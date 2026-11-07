@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
+import { isDemoMode } from "@/shared/config";
 import { apiClient, providerSchema } from "@/shared/api";
 export const repositorySchema = z.object({
   id: z.string(),
@@ -19,10 +20,22 @@ export type Workspace = z.infer<typeof workspaceSchema>;
 export const workspaceOptions = (workspaceId: string) =>
   queryOptions({
     queryKey: ["workspace", workspaceId],
-    queryFn: async ({ signal }) =>
-      workspaceSchema.parse(
-        (await apiClient.get(`/v1/workspaces/${workspaceId}`, { signal })).data,
-      ),
+    queryFn: async ({ signal }) => {
+      if (isDemoMode)
+        return workspaceSchema.parse(
+          (await apiClient.get(`/v1/workspaces/${workspaceId}`, { signal })).data,
+        );
+      const workspaces = z
+        .array(z.object({ id: z.string(), name: z.string(), role: z.literal("owner") }))
+        .parse((await apiClient.get("/v1/workspaces", { signal })).data);
+      const workspace = workspaces.find((item) => item.id === workspaceId);
+      if (!workspace) throw new Error("개인 workspace를 찾지 못했습니다.");
+      return workspaceSchema.parse({
+        ...workspace,
+        githubConnected: !workspaceId.includes("local:"),
+        connections: [],
+      });
+    },
   });
 export const repositoriesOptions = (workspaceId: string) =>
   queryOptions({
