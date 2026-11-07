@@ -9,7 +9,7 @@ export function resources(review: Review) {
       source: "AWS",
       target: review.application,
       principal: "",
-      status: "앱 준비 상태",
+      status: "앱 응답",
     },
     {
       id: "db",
@@ -18,7 +18,7 @@ export function resources(review: Review) {
       source: "AWS",
       target: "GCP",
       principal: "",
-      status: "이번 검사 제외",
+      status: "검사 제외",
     },
     {
       id: "redis",
@@ -27,7 +27,7 @@ export function resources(review: Review) {
       source: "AWS",
       target: "GCP",
       principal: "",
-      status: "이번 검사 제외",
+      status: "검사 제외",
     },
     {
       id: "object",

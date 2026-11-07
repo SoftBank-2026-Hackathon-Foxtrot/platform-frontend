@@ -57,19 +57,17 @@ export function ResourceDetail({
             <CircleHelp aria-hidden="true" />
             <p>
               {t(
-                resource.id === "app"
-                  ? "앱 준비 상태만 확인합니다. IAM 전체 검사는 포함하지 않습니다."
-                  : "이번 비교는 오브젝트 스토리지의 직접 부여 권한만 확인합니다.",
+                resource.id === "app" ? "준비 상태 응답만 확인합니다." : "검사 대상이 아닙니다.",
               )}
             </p>
             {resource.id === "app" && (
               <p>
                 {t(
                   review.appReady === null
-                    ? "앱 상태 미확인"
+                    ? "앱 응답 미확인"
                     : review.appReady
-                      ? "대상 앱 준비 응답 정상"
-                      : "대상 앱 준비 응답 확인 필요",
+                      ? "앱 준비 완료"
+                      : "앱 응답 확인 필요",
                 )}
               </p>
             )}
@@ -104,9 +102,7 @@ export function ResourceDetail({
                   </div>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                  {t(
-                    "추가 버킷의 해당 계정 권한만 제거합니다. 앱 버킷과 다른 계정 권한은 유지합니다.",
-                  )}
+                  {t("이 계정의 추가 버킷 권한만 제거합니다.")}
                 </p>
                 <Button className="mt-4 w-full" disabled={busy} onClick={onApply}>
                   {t("GCP에 적용")}
@@ -116,7 +112,7 @@ export function ResourceDetail({
             {!review.checks.length ? (
               <div className="security-empty">
                 <CircleHelp aria-hidden="true" />
-                <p>{t("조사를 시작하면 AWS 기준 정책과 GCP 버킷 권한을 비교합니다.")}</p>
+                <p>{t("아직 조회하지 않았습니다.")}</p>
               </div>
             ) : (
               <ul className="security-checks">
@@ -176,7 +172,7 @@ export function ResourceDetail({
                   <SheetHeader className="pr-12">
                     <SheetTitle>{t("검사 근거")}</SheetTitle>
                     <SheetDescription>
-                      {t("선택한 AWS 인라인 정책과 두 GCP 버킷의 직접 부여 권한을 조회했습니다.")}
+                      {t("AWS 인라인 정책 · GCP 버킷 IAM")}
                     </SheetDescription>
                   </SheetHeader>
                   <SheetClose asChild>
@@ -204,9 +200,7 @@ export function ResourceDetail({
                       </section>
                     ))}
                     <p className="text-xs leading-relaxed text-muted-foreground">
-                      {t(
-                        "상위 조직·프로젝트 권한, 다른 정책, 객체 ACL은 이번 비교에 포함하지 않습니다.",
-                      )}
+                      {t("검사 제외: 상속 권한 · 다른 정책 · 객체 ACL")}
                     </p>
                   </div>
                 </SheetContent>

@@ -26,7 +26,7 @@ export function ResourceStatus({
   return (
     <span className={`security-status ${!relevant || unknown ? "" : fail ? "is-gap" : "is-pass"}`}>
       <Icon aria-hidden="true" size={12} />
-      {t(!relevant ? resource.status : unknown ? "미확인" : fail ? "설정 차이" : "선택 조건 일치")}
+      {t(!relevant ? resource.status : unknown ? "미확인" : fail ? "설정 차이" : "차이 없음")}
     </span>
   );
 }
@@ -44,9 +44,8 @@ export function ResourceMap({
     <Card className="security-map-card gap-0 overflow-hidden py-0">
       <CardHeader className="flex flex-row items-center justify-between border-b px-5 py-4">
         <CardTitle className="text-sm font-medium">
-          <h2>{t("앱과 데이터 연결")}</h2>
+          <h2>{t("리소스 연결")}</h2>
         </CardTitle>
-        <span className="text-xs text-muted-foreground">{t("오브젝트 권한 비교")}</span>
       </CardHeader>
       <div className="security-map" role="group" aria-label={t("리소스별 보안 검사")}>
         <div className="security-map-label">{t("실행 환경")}</div>
@@ -92,10 +91,6 @@ export function ResourceMap({
             </Button>
           </div>
         ))}
-      </div>
-      <div className="flex flex-wrap justify-between gap-2 border-t px-5 py-3 text-xs text-muted-foreground">
-        <span>{t("앱 구성 관계 · 권한 검사는 오브젝트만")}</span>
-        <span>AWS → GCP</span>
       </div>
     </Card>
   );

@@ -1977,7 +1977,6 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Check access scope and connections for the app, DB, Redis and object storage.",
     ja: "アプリ、DB、Redis、オブジェクトストレージのアクセス範囲と接続設定を確認します。",
   },
-  "앱과 데이터 연결": { en: "App and data connections", ja: "アプリとデータの接続" },
   "연결선: 앱이 사용하는 계정": {
     en: "Connections show the app's accounts",
     ja: "接続線：アプリが使用するアカウント",
@@ -2057,9 +2056,9 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Scans, changes and approvals are simulated.",
     ja: "調査・設定適用・承認はデモ動作です。",
   },
-  "조사를 시작하면 기록이 표시됩니다.": {
-    en: "Events will appear after you start a scan.",
-    ja: "調査を開始すると履歴が表示されます。",
+  "검토 기록 없음": {
+    en: "No review history",
+    ja: "確認履歴なし",
   },
   "조사를 시작하면 현재 설정과 이전할 환경을 비교합니다.": {
     en: "Start a scan to compare the current and target settings.",
@@ -2084,127 +2083,128 @@ export const messages: Record<string, { en: string; ja: string }> = {
     ja: "移行元よりアクセス範囲が広くなっています。切り替え前に制限してください。",
   },
 
-  "AWS와 GCP의 접근 범위를 비교하세요": {
-    en: "Compare access in AWS and GCP",
-    ja: "AWSとGCPのアクセス範囲を比較",
+  "버킷 권한 비교": {
+    en: "Bucket permissions",
+    ja: "バケット権限の比較",
   },
-  "현재 설정을 조회하고 있습니다": { en: "Reading current settings", ja: "現在の設定を取得中" },
-  "GCP의 접근 범위가 기존보다 넓습니다": {
-    en: "GCP access is broader than the source",
-    ja: "GCPのアクセス範囲が移行元より広くなっています",
+  "권한 조회 중": {
+    en: "Reading permissions",
+    ja: "権限を取得中",
   },
-  "비교할 수 없는 설정이 있습니다": {
-    en: "Some settings need review",
-    ja: "比較できない設定があります",
+  "버킷 권한 차이 발견": {
+    en: "Bucket permission differences found",
+    ja: "バケット権限の差分を検出",
   },
-  "선택한 설정이 일치합니다": { en: "Selected settings match", ja: "選択した設定が一致しています" },
-  "앱 권한은 유지하고 추가 접근만 제거합니다": {
-    en: "Keep app access and remove the extra grant",
-    ja: "アプリの権限を維持し、追加アクセスのみ削除",
+  "일부 권한 미확인": {
+    en: "Some permissions unchecked",
+    ja: "一部の権限は未確認",
   },
-  "확인한 변경안을 GCP에 적용하고 있습니다": {
-    en: "Applying the reviewed change to GCP",
-    ja: "確認した変更をGCPに適用中",
+  "검사 항목 일치": {
+    en: "Checked settings match",
+    ja: "検査項目が一致",
   },
-  "설정을 적용했습니다. 다시 확인하세요": {
-    en: "Change applied. Verify the settings",
-    ja: "変更を適用しました。再確認してください",
+  "추가 권한 변경안": {
+    en: "Extra access change plan",
+    ja: "追加権限の変更案",
   },
-  "설정과 앱 상태를 다시 확인하고 있습니다": {
-    en: "Checking settings and app readiness",
-    ja: "設定とアプリの準備状態を再確認中",
+  "GCP에 적용 중": {
+    en: "Applying to GCP",
+    ja: "GCPに適用中",
   },
-  "선택한 조건이 기존 환경과 일치합니다": {
-    en: "Selected conditions match the source",
-    ja: "選択した条件が移行元と一致しています",
+  "적용 완료 · 재검사 필요": {
+    en: "Applied · Recheck required",
+    ja: "適用済み · 再検査が必要",
   },
-  "작업 결과를 확인해야 합니다": {
-    en: "Check the operation result",
-    ja: "操作結果を確認してください",
+  "권한·앱 상태 재검사 중": {
+    en: "Rechecking permissions and app readiness",
+    ja: "権限とアプリの準備状態を再検査中",
+  },
+  "재검사 완료": {
+    en: "Recheck complete",
+    ja: "再検査完了",
+  },
+  "처리 결과 확인 필요": {
+    en: "Operation result needs review",
+    ja: "処理結果の確認が必要",
   },
   "GCP에 적용": { en: "Apply to GCP", ja: "GCPに適用" },
-  "설정 재확인": { en: "Verify settings", ja: "設定を再確認" },
-  "설정 조사": { en: "Scan settings", ja: "設定を調査" },
-  "보안 비교 결과를 불러오는 중입니다.": {
-    en: "Loading security review…",
-    ja: "セキュリティ確認を読み込み中…",
+  "재검사": {
+    en: "Recheck",
+    ja: "再検査",
   },
-  "비교 대상 연결 후 실제 설정을 조회할 수 있습니다.": {
-    en: "Connect the review targets to read their settings.",
-    ja: "比較対象を接続すると、実際の設定を取得できます。",
+  "권한 조회": {
+    en: "Read permissions",
+    ja: "権限を取得",
+  },
+  "비교 결과 불러오는 중…": {
+    en: "Loading comparison…",
+    ja: "比較結果を読み込み中…",
   },
   "클라우드 조회": { en: "Cloud settings", ja: "クラウド設定" },
-  "로컬 시연 · 실제 클라우드는 변경하지 않습니다.": {
-    en: "Local example · No cloud changes.",
-    ja: "ローカルデモ · 実際のクラウドは変更しません。",
-  },
-  "AWS 기준 정책과 GCP 직접 부여 권한을 비교합니다.": {
-    en: "Compare the selected AWS policy with direct GCP grants.",
-    ja: "選択したAWSポリシーとGCPの直接付与権限を比較します。",
-  },
-  "다시 조사": { en: "Scan again", ja: "再調査" },
-  "앱에서 쓰는 버킷은 유지하고, 추가된 버킷 접근 권한만 확인합니다.": {
-    en: "Keep the app bucket unchanged and review access to the extra bucket.",
-    ja: "アプリのバケットを維持し、追加バケットへのアクセス権限を確認します。",
+  "실제 클라우드 변경 없음": {
+    en: "No live cloud changes",
+    ja: "実際のクラウドへの変更なし",
   },
   "검사 {0}/{1}건 확인": { en: "{0}/{1} checks confirmed", ja: "{0}/{1}件を確認" },
   "설정 차이 {0}건": { en: "{0} setting differences", ja: "設定の差分 {0}件" },
-  "앱 상태 미확인": { en: "App readiness not checked", ja: "アプリの状態は未確認" },
-  "대상 앱 준비 응답 정상": { en: "Target app reports ready", ja: "移行先アプリは準備完了" },
-  "대상 앱 준비 응답 확인 필요": {
-    en: "Target app readiness needs checking",
-    ja: "移行先アプリの準備状態を要確認",
+  "앱 응답 미확인": {
+    en: "App response unchecked",
+    ja: "アプリの応答は未確認",
+  },
+  "앱 준비 완료": {
+    en: "App reports ready",
+    ja: "アプリは準備完了",
+  },
+  "앱 응답 확인 필요": {
+    en: "App response needs review",
+    ja: "アプリの応答を要確認",
   },
   "처리 중…": { en: "Working…", ja: "処理中…" },
   변경안·적용: { en: "Review & apply", ja: "変更案・適用" },
   재확인: { en: "Verify", ja: "再確認" },
   계속: { en: "Continue", ja: "続行" },
-  "서버 저장": { en: "Saved on server", ja: "サーバーに保存" },
-  "검토를 마쳤습니다": { en: "Review complete", ja: "確認が完了しました" },
-  "설정과 앱 상태를 재확인한 뒤 계속할 수 있습니다": {
-    en: "Verify settings and app readiness to continue",
-    ja: "設定とアプリの準備状態を再確認すると続行できます",
+  "권한·앱 상태 재검사 필요": {
+    en: "Recheck permissions and app readiness",
+    ja: "権限とアプリの準備状態の再検査が必要",
   },
-  "이 화면의 진행 버튼만 제어합니다. 실제 마이그레이션 승인·전환은 기존 절차를 따릅니다.": {
-    en: "This controls this page’s continue button. Migration approval and cutover follow the existing workflow.",
-    ja: "この画面の続行ボタンのみを制御します。移行の承認と切り替えは既存の手順に従います。",
+  "검사 범위: AWS 지정 정책 · GCP 버킷 직접 권한": {
+    en: "Scope: selected AWS policy · direct GCP bucket grants",
+    ja: "検査範囲：指定のAWSポリシー · GCPバケットの直接権限",
   },
-  "마이그레이션 계속": { en: "Continue migration", ja: "移行を続行" },
-  "선택한 정책과 두 버킷의 직접 권한만 비교합니다. 상위 권한·전체 IAM·DB·Redis 보안 검사는 포함하지 않습니다.":
-    {
-      en: "Compares one policy and direct grants on two buckets. Inherited permissions, full IAM, DB and Redis security are outside this check.",
-      ja: "選択したポリシーと2つのバケットの直接権限のみを比較します。上位の権限、IAM全体、DB・Redisのセキュリティは対象外です。",
-    },
   "GCP 앱 계정": { en: "GCP app account", ja: "GCPアプリアカウント" },
-  "앱 준비 상태만 확인합니다. IAM 전체 검사는 포함하지 않습니다.": {
-    en: "Only app readiness is checked here. Full IAM review is outside this scope.",
-    ja: "アプリの準備状態のみを確認します。IAM全体の検査は含みません。",
+  "준비 상태 응답만 확인합니다.": {
+    en: "Checks the app readiness response only.",
+    ja: "アプリの準備状態の応答のみ確認します。",
   },
-  "이번 비교는 오브젝트 스토리지의 직접 부여 권한만 확인합니다.": {
-    en: "This review checks direct object storage grants only.",
-    ja: "今回の比較はオブジェクトストレージの直接付与権限のみを確認します。",
+  "검사 대상이 아닙니다.": {
+    en: "Not included in this check.",
+    ja: "検査対象外です。",
   },
-  "조사를 시작하면 AWS 기준 정책과 GCP 버킷 권한을 비교합니다.": {
-    en: "Start a scan to compare the AWS policy and GCP bucket grants.",
-    ja: "調査を開始するとAWSポリシーとGCPバケットの権限を比較します。",
+  "아직 조회하지 않았습니다.": {
+    en: "Not checked yet.",
+    ja: "まだ取得していません。",
   },
   "설정 차이": { en: "Difference", ja: "設定の差分" },
-  "선택 조건 일치": { en: "Selected conditions match", ja: "選択条件が一致" },
+  "차이 없음": {
+    en: "No differences",
+    ja: "差分なし",
+  },
   "GCP 권한 변경안": { en: "GCP permission change", ja: "GCP権限の変更案" },
-  "추가 버킷의 해당 계정 권한만 제거합니다. 앱 버킷과 다른 계정 권한은 유지합니다.": {
-    en: "Remove only this account’s extra bucket grant. Keep the app bucket and other accounts unchanged.",
-    ja: "追加バケットの該当アカウントの権限のみを削除します。アプリのバケットと他のアカウントは変更しません。",
+  "이 계정의 추가 버킷 권한만 제거합니다.": {
+    en: "Removes only this account’s extra bucket access.",
+    ja: "このアカウントの追加バケット権限のみ削除します。",
   },
-  "선택한 AWS 인라인 정책과 두 GCP 버킷의 직접 부여 권한을 조회했습니다.": {
-    en: "Read the selected AWS inline policy and direct grants on two GCP buckets.",
-    ja: "選択したAWSインラインポリシーと2つのGCPバケットの直接付与権限を取得しました。",
+  "AWS 인라인 정책 · GCP 버킷 IAM": {
+    en: "AWS inline policy · GCP bucket IAM",
+    ja: "AWSインラインポリシー · GCPバケットIAM",
   },
-  "앱 준비 상태": { en: "App readiness", ja: "アプリの準備状態" },
-  "이번 검사 제외": { en: "Outside this check", ja: "今回の対象外" },
-  "오브젝트 권한 비교": { en: "Object access review", ja: "オブジェクト権限の比較" },
-  "앱 구성 관계 · 권한 검사는 오브젝트만": {
-    en: "App connections · Object grants checked",
-    ja: "アプリの接続 · 権限検査はオブジェクトのみ",
+  "앱 응답": {
+    en: "App response",
+    ja: "アプリの応答",
+  },
+  "검사 제외": {
+    en: "Not checked",
+    ja: "検査対象外",
   },
   "AWS 기준 정책": { en: "AWS reference policy", ja: "AWS基準ポリシー" },
   "버킷 전용 정책 확인": { en: "Bucket-scoped policy confirmed", ja: "バケット専用ポリシーを確認" },
@@ -2261,13 +2261,13 @@ export const messages: Record<string, { en: string; ja: string }> = {
   유지: { en: "Keep", ja: "維持" },
   제거: { en: "Remove", ja: "削除" },
   "변경안 보기": { en: "View change plan", ja: "変更案を見る" },
-  "상위 조직·프로젝트 권한, 다른 정책, 객체 ACL은 이번 비교에 포함하지 않습니다.": {
-    en: "Organization and project permissions, other policies and object ACLs are outside this review.",
-    ja: "組織・プロジェクトの権限、他のポリシー、オブジェクトACLは比較の対象外です。",
+  "검사 제외: 상속 권한 · 다른 정책 · 객체 ACL": {
+    en: "Excluded: inherited permissions · other policies · object ACLs",
+    ja: "対象外：継承された権限 · 他のポリシー · オブジェクトACL",
   },
-  "선택 조건 일치 {0}/{1}건": {
-    en: "{0}/{1} selected conditions match",
-    ja: "選択条件 {0}/{1}件が一致",
+  "일치 {0}/{1}건": {
+    en: "{0}/{1} checks match",
+    ja: "{0}/{1}件が一致",
   },
   "AWS 기준": { en: "AWS reference", ja: "AWS基準" },
   "조회 결과": { en: "Observed", ja: "取得結果" },
