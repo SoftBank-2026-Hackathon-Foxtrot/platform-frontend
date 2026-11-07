@@ -25,6 +25,10 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-callout: var(--callout);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -81,6 +85,11 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Migration states. */
+  --success: oklch(0.56 0.15 155);
+  --warning: oklch(0.62 0.15 70);
+  --info: oklch(0.55 0.17 250);
+  --callout: oklch(0.6 0.22 25);
 }
 
 .dark {
@@ -116,6 +125,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --success: oklch(0.76 0.16 155);
+  --warning: oklch(0.8 0.15 80);
+  --info: oklch(0.72 0.14 245);
+  --callout: oklch(0.68 0.21 25);
 }
 
 @layer base {
@@ -127,5 +140,18 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Moving dashes on live edges of the migration diagram. */
+@keyframes diagram-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0s !important;
   }
 }

@@ -1,8 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { applyTheme } from "@/shared/lib/theme";
+
 import { App } from "./app";
 import "./styles/index.css";
+
+applyTheme();
 
 const root = document.getElementById("root");
 

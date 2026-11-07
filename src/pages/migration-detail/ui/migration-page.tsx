@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, ArrowRight, RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, Check, ChevronLeft, RefreshCw } from "lucide-react";
 
-import { apiBaseUrl, getApiErrorMessage } from "@/shared/api";
+import { STAGE_LABELS, WorkflowStatusBadge } from "@/entities/migration";
+import { sessionOptions } from "@/entities/session";
+import { getApiErrorMessage } from "@/shared/api";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
@@ -15,9 +17,10 @@ import {
   eventsQuery,
   historyQuery,
   telemetryQuery,
-  workflowsQuery,
 } from "../api/migrations";
+import { CommandPanel } from "./command-panel";
 import { Metric, ResourceCard, State, value, when } from "./resource-card";
+import { TransitionDiagram } from "./transition-diagram";
 
 function ErrorNotice({ error, retry }: { error: Error; retry: () => void }) {
   return (
@@ -39,59 +42,22 @@ function split(weights: Record<string, number> | null | undefined) {
         .join(" / ")
     : "미확인";
 }
-export function MigrationPage() {
-  const workflows = useQuery(workflowsQuery());
-  const [selected, setSelected] = useState<string | null>(null);
-  const id = selected ?? workflows.data?.[0]?.id;
+export function MigrationPage({ id }: { id: string }) {
+  const session = useQuery(sessionOptions());
   return (
-    <main className="mx-auto min-h-svh max-w-7xl space-y-7 px-4 py-8 sm:px-8">
-      <header className="flex flex-wrap items-start justify-between gap-5">
-        <div className="space-y-2">
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Activity className="size-4" /> FOXTROT / MIGRATION
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">마이그레이션 관측</h1>
-          <p className="text-sm text-muted-foreground">
-            단계, 데이터 경로, 전환의 실제 영향을 한곳에서 확인합니다.
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <a href={`${apiBaseUrl}/auth/github/start?returnTo=/`}>GitHub 로그인</a>
-        </Button>
-      </header>
-      {workflows.isPending && <p role="status">마이그레이션 목록을 불러오는 중입니다.</p>}
-      {workflows.error && (
-        <ErrorNotice error={workflows.error} retry={() => void workflows.refetch()} />
-      )}
-      {workflows.data?.length === 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>등록된 마이그레이션이 없습니다</CardTitle>
-            <CardDescription>
-              컨트롤 플레인에서 workflow를 생성하면 여기에 표시됩니다.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-      <nav aria-label="마이그레이션 선택" className="flex flex-wrap gap-2">
-        {workflows.data?.map((workflow) => (
-          <Button
-            key={workflow.id}
-            variant={id === workflow.id ? "default" : "outline"}
-            aria-pressed={id === workflow.id}
-            onClick={() => setSelected(workflow.id)}
-          >
-            {workflow.application} · {workflow.sourceEnv} → {workflow.targetEnv} ·{" "}
-            {workflow.id.slice(-8)}
-          </Button>
-        ))}
-      </nav>
-      {id && <Workflow key={id} id={id} />}
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-8">
+      <Link
+        to="/migrations"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ChevronLeft className="size-4" /> 마이그레이션 목록
+      </Link>
+      {session.data && <Workflow key={id} workspace={session.data.workspaceId} id={id} />}
     </main>
   );
 }
-function Workflow({ id }: { id: string }) {
-  const detail = useQuery(detailQuery(id));
+function Workflow({ workspace, id }: { workspace: string; id: string }) {
+  const detail = useQuery(detailQuery(workspace, id));
   return (
     <div className="space-y-6">
       {detail.isPending && <p role="status">관측값을 불러오는 중입니다.</p>}
@@ -99,7 +65,19 @@ function Workflow({ id }: { id: string }) {
       {detail.data && (
         <>
           <Summary data={detail.data} refresh={() => void detail.refetch()} />
-          <Preparation data={detail.data} />
+          <Card>
+            <CardHeader>
+              <CardTitle>전환 구성도</CardTitle>
+              <CardDescription>
+                리소스마다 지금 어느 환경을 쓰는지, 무엇을 복제 중인지, 현재 단계가 무엇을 바꾸는지
+                보여줍니다. 2초마다 갱신합니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TransitionDiagram data={detail.data} />
+            </CardContent>
+          </Card>
+          {Object.keys(detail.data.preparation).length > 0 && <Preparation data={detail.data} />}
           <div className="grid items-start gap-4 lg:grid-cols-3">
             {detail.data.resources.map((resource) => (
               <ResourceCard key={resource.kind} resource={resource} />
@@ -108,60 +86,116 @@ function Workflow({ id }: { id: string }) {
           <Traffic data={detail.data} />
           <Workload data={detail.data} />
           <Operations data={detail.data} />
-          <Telemetry id={id} />
-          <History id={id} />
+          <Telemetry workspace={workspace} id={id} />
+          <History workspace={workspace} id={id} />
         </>
       )}
     </div>
   );
 }
+const NEXT_STEP: Record<string, string> = {
+  PLANNED: "계획을 확인하고 승인하면 첫 단계가 시작됩니다.",
+  WAITING_APPROVAL: "되돌리기 어려운 단계입니다. 상태를 확인하고 승인하십시오.",
+  RUNNING: "엔진이 진행 중입니다. 문제가 보이면 일시 정지할 수 있습니다.",
+  HALTED: "멈췄습니다. 원인을 확인하고 재개·대조·되돌리기·취소 중 하나를 고르십시오.",
+  ROLLING_BACK: "리소스를 원본으로 되돌리는 중입니다.",
+  ABORTING: "취소하고 정리하는 중입니다.",
+  COMPLETED: "모든 단계가 끝났습니다.",
+  ABORTED: "취소된 마이그레이션입니다.",
+};
 function Summary({ data: d, refresh }: { data: Detail; refresh: () => void }) {
   const stage = d.stages.find((item) => item.index === d.workflow.currentStage);
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-3">
-            {d.workflow.sourceEnv}
-            <ArrowRight className="size-4" />
-            {d.workflow.targetEnv}
-            <State state={d.workflow.status} />
-          </CardTitle>
-          <Button variant="ghost" onClick={refresh}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            <CardTitle className="flex flex-wrap items-center gap-3 text-2xl">
+              {d.workflow.application}
+              <span className="flex items-center gap-2 text-lg font-normal text-muted-foreground">
+                {d.workflow.sourceEnv}
+                <ArrowRight className="size-4" />
+                {d.workflow.targetEnv}
+              </span>
+              <WorkflowStatusBadge status={d.workflow.status} />
+            </CardTitle>
+            <CardDescription>
+              {d.workflow.id} · 시작 {when(d.workflow.createdAt)}
+              {d.workflow.createdBy ? ` · ${d.workflow.createdBy}` : ""} · 버전 {d.workflow.version}
+            </CardDescription>
+          </div>
+          <Button variant="ghost" size="sm" onClick={refresh}>
             <RefreshCw />
             새로고침
           </Button>
         </div>
-        <CardDescription>
-          {d.workflow.id} · 시작 {when(d.workflow.createdAt)}
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-lg font-medium">
-          {stage?.kind ?? "단계 미확인"}{" "}
-          <span className="text-sm font-normal text-muted-foreground">{stage?.detail}</span>
-        </p>
-        {d.workflow.halt && (
-          <Alert variant="destructive">
-            <AlertTitle>{d.workflow.halt.code}</AlertTitle>
-            <AlertDescription>{d.workflow.halt.message}</AlertDescription>
-          </Alert>
-        )}
-        <ol className="flex flex-wrap gap-2">
-          {d.stages.map((item) => (
-            <li key={item.index}>
-              <Badge variant={item.index === d.workflow.currentStage ? "default" : "outline"}>
-                {item.index + 1}. {item.kind} · {item.status}
-              </Badge>
-            </li>
-          ))}
-        </ol>
-        <p className="text-xs text-muted-foreground">
-          모듈이 OTEL로 상태를 발행하고 컨트롤 플레인이 수집합니다. 미확인 값은 0으로 바꾸지
-          않습니다.
-        </p>
+      <CardContent className="space-y-6">
+        <StageStepper data={d} />
+        <div className="space-y-3 rounded-xl border bg-muted/30 p-4">
+          <p className="font-medium">
+            {stage
+              ? `${stage.index + 1}. ${STAGE_LABELS[stage.kind] ?? stage.kind}`
+              : "단계 미확인"}
+            {stage?.detail && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">{stage.detail}</span>
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground">{NEXT_STEP[d.workflow.status] ?? ""}</p>
+          {d.workflow.halt && (
+            <Alert variant="destructive">
+              <AlertTitle>{d.workflow.halt.code}</AlertTitle>
+              <AlertDescription>
+                {d.workflow.halt.message}
+                {d.workflow.halt.blockers.length > 0 && ` · ${d.workflow.halt.blockers.join(", ")}`}
+              </AlertDescription>
+            </Alert>
+          )}
+          <CommandPanel workflow={d.workflow} allowedCommands={d.allowedCommands} />
+        </div>
       </CardContent>
     </Card>
+  );
+}
+function StageStepper({ data: d }: { data: Detail }) {
+  const finished = d.workflow.status === "COMPLETED";
+  return (
+    <ol className="grid grid-cols-4 gap-y-4 md:grid-cols-8">
+      {d.stages.map((item) => {
+        const current = item.index === d.workflow.currentStage && !finished;
+        const passed = item.status === "PASSED" || (finished && item.status !== "FAILED");
+        const failed = item.status === "FAILED" || (current && d.workflow.status === "HALTED");
+        const waiting =
+          current && (d.workflow.status === "WAITING_APPROVAL" || d.workflow.status === "PLANNED");
+        const tone = failed
+          ? "border-destructive bg-destructive text-white"
+          : passed
+            ? "border-success bg-success text-background"
+            : waiting
+              ? "border-warning bg-warning/15 text-warning"
+              : current
+                ? "border-info bg-info/15 text-info"
+                : "border-border bg-muted text-muted-foreground";
+        return (
+          <li key={item.index} className="relative flex flex-col items-center gap-1.5 text-center">
+            {item.index > 0 && (
+              <span
+                className={`absolute top-4 right-1/2 h-0.5 w-full -translate-x-4 ${passed || current ? "bg-success/60" : "bg-border"}`}
+                aria-hidden
+              />
+            )}
+            <span
+              className={`relative z-10 grid size-8 place-items-center rounded-full border-2 text-sm font-semibold ${tone} ${current && d.workflow.status === "RUNNING" ? "animate-pulse" : ""}`}
+            >
+              {passed ? <Check className="size-4" /> : item.index + 1}
+            </span>
+            <span className={`text-xs ${current ? "font-semibold" : "text-muted-foreground"}`}>
+              {STAGE_LABELS[item.kind] ?? item.kind}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 function Preparation({ data }: { data: Detail }) {
@@ -383,12 +417,19 @@ function Operations({ data }: { data: Detail }) {
     </Card>
   );
 }
-function History({ id }: { id: string }) {
+function NotOffered() {
+  return (
+    <p className="text-sm text-muted-foreground">
+      연결된 컨트롤 플레인이 이 관측 정보를 제공하지 않습니다.
+    </p>
+  );
+}
+function History({ workspace, id }: { workspace: string; id: string }) {
   const [eventCursor, setEventCursor] = useState<string | null>(null);
   const [historyCursor, setHistoryCursor] = useState<string | null>(null);
   const [since] = useState(() => new Date(Date.now() - 5 * 60_000).toISOString());
-  const events = useQuery(eventsQuery(id, eventCursor));
-  const history = useQuery(historyQuery(id, historyCursor, since));
+  const events = useQuery(eventsQuery(workspace, id, eventCursor));
+  const history = useQuery(historyQuery(workspace, id, historyCursor, since));
   return (
     <section className="grid items-start gap-4 lg:grid-cols-2" aria-label="관측 이력">
       <Card>
@@ -453,6 +494,7 @@ function History({ id }: { id: string }) {
             </TableBody>
           </Table>
           {history.isPending && <p>표본을 불러오는 중입니다.</p>}
+          {history.data === null && <NotOffered />}
           {history.data?.observations.length === 0 && <p>이 구간에 표본이 없습니다.</p>}
           <Button
             variant="outline"
@@ -485,8 +527,8 @@ const metricNames: Record<string, string> = {
   foxtrot_probe_failed: "공용 검사 실패",
   foxtrot_probe_p95ms: "공용 검사 p95 (ms)",
 };
-function Telemetry({ id }: { id: string }) {
-  const query = useQuery(telemetryQuery(id));
+function Telemetry({ workspace, id }: { workspace: string; id: string }) {
+  const query = useQuery(telemetryQuery(workspace, id));
   return (
     <Card>
       <CardHeader>
@@ -499,6 +541,7 @@ function Telemetry({ id }: { id: string }) {
       <CardContent className="space-y-4">
         {query.isPending && <p role="status">수집 결과를 불러오는 중입니다.</p>}
         {query.error && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}
+        {query.data === null && <NotOffered />}
         {query.data && (
           <>
             <p className="flex flex-wrap gap-3">
