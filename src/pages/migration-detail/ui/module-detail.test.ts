@@ -4,8 +4,50 @@ import { describe, expect, it } from "vite-plus/test";
 import fixture from "../api/control-plane.fixture.json";
 import { detailSchema } from "../api/migrations";
 import { TransitionDiagram } from "./transition-diagram";
+import { proxyActivity } from "./module-detail-model";
+import { setLocale } from "@/shared/lib/i18n";
 
 describe("transient module detail nodes", () => {
+  it.each(["en", "ja"] as const)("translates module responsibilities in %s", (locale) => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    data.workflow.status = "RUNNING";
+    data.workflow.currentStage = 4;
+    data.stages.find((s) => s.index === 4)!.status = "RUNNING";
+    setLocale(locale);
+    try {
+      expect(
+        renderToStaticMarkup(createElement(TransitionDiagram, { data })).match(/[가-힣]/g),
+      ).toBeNull();
+    } finally {
+      setLocale("ko");
+    }
+  });
+  it("uses reported proxy state without inferring writes from the platform step", () => {
+    const data = detailSchema.parse(structuredClone(fixture));
+    const redis = data.resources.find((r) => r.kind === "REDIS")!;
+    redis.observation.freshness = "FRESH";
+    redis.route = "TARGET";
+    redis.details.redis = { proxy: { paused: true, inflight_writes: 3, freshness: "FRESH" } };
+    expect(proxyActivity(data, redis, false)).toMatchObject({
+      destination: data.workflow.targetEnv,
+      paused: true,
+      inflight: 3,
+      stale: false,
+    });
+    redis.details.redis.proxy = {};
+    expect(proxyActivity(data, redis, false).paused).toBeNull();
+    redis.details.redis.proxy = { freshness: "STALE", paused: false };
+    expect(proxyActivity(data, redis, false)).toMatchObject({
+      destination: null,
+      paused: null,
+      inflight: null,
+      stale: true,
+    });
+    expect(proxyActivity(data, redis, true).destination).toBeNull();
+    redis.details.redis.proxy = { freshness: "FRESH" };
+    redis.route = "MIXED";
+    expect(proxyActivity(data, redis, false).destination).toBeNull();
+  });
   it.each([
     [2, "OBJECT_STORAGE", "객체 라우터"],
     [4, "REDIS", "Redis proxy"],

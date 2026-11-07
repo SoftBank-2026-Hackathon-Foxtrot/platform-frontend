@@ -1,4 +1,31 @@
-import type { Detail } from "../api/migrations";
+import type { Detail, Resource } from "../api/migrations";
+import { hasCurrentObservation } from "./flow-model";
+
+export function proxyActivity(data: Detail, resource: Resource | undefined, suspended: boolean) {
+  const proxy = resource?.details.redis?.proxy;
+  const stale =
+    suspended ||
+    !resource ||
+    !hasCurrentObservation(resource) ||
+    ["STALE", "UNAVAILABLE"].includes(proxy?.freshness ?? "");
+  const destination = stale
+    ? null
+    : resource.route === "SOURCE"
+      ? data.workflow.sourceEnv
+      : resource.route === "TARGET"
+        ? data.workflow.targetEnv
+        : null;
+  const paused = stale
+    ? null
+    : resource.kind === "REDIS"
+      ? (proxy?.paused ?? null)
+      : (resource.details.database?.proxyPaused ?? null);
+  const inflight =
+    !stale && proxy?.inflight_writes != null && proxy.inflight_writes >= 0
+      ? proxy.inflight_writes
+      : null;
+  return { destination, paused, inflight, stale };
+}
 
 export const STEP_LABELS: Record<string, string> = {
   CHECK: "전환 조건 확인",

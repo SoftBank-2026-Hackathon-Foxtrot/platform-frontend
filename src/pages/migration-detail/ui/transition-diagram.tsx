@@ -11,7 +11,7 @@ import {
   trafficFlow,
 } from "./flow-model";
 import { STACK_ICONS } from "./stack-icons";
-import { activeModule, STEP_LABELS } from "./module-detail-model";
+import { activeModule, proxyActivity } from "./module-detail-model";
 import "./flow-visuals.css";
 
 // stack-diagram tiles and orthogonal edges, arranged as paired source/target rows.
@@ -93,6 +93,7 @@ function StackNode({
   icon,
   name,
   sub,
+  description,
   state,
   motion,
   stale,
@@ -104,6 +105,7 @@ function StackNode({
   icon: keyof typeof STACK_ICONS;
   name: string;
   sub: string;
+  description?: string;
   width?: number;
   state?: "active" | "focus" | "error";
   motion?: "copying" | "preparing";
@@ -127,6 +129,7 @@ function StackNode({
       </div>
       <div className="min-w-0">
         <div className="name truncate">{t(name)}</div>
+        {description && <div className="sub truncate">{description}</div>}
         <div className="sub truncate">{sub}</div>
       </div>
     </div>
@@ -181,6 +184,22 @@ export function TransitionDiagram({
   const expandedTop = expanded >= 0 ? rows[expanded]! : 0;
   const expandedResource = data.resources.find((item) => item.kind === expandedItem?.kind);
   const detailFlow = resourceFlow(data, expandedResource);
+  const proxy = proxyActivity(data, expandedResource, suspended);
+  const proxyLabel = proxy.stale
+    ? t("관측 갱신 대기")
+    : proxy.paused === true
+      ? t("쓰기 일시 정지")
+      : proxy.destination
+        ? t("요청 → {0}", [proxy.destination])
+        : t("목적지 미확인");
+  const copyDirection =
+    detailFlow.forward && detailFlow.reverse
+      ? `${wf.sourceEnv} ↔ ${wf.targetEnv}`
+      : detailFlow.reverse
+        ? `${wf.targetEnv} → ${wf.sourceEnv}`
+        : detailFlow.forward
+          ? `${wf.sourceEnv} → ${wf.targetEnv}`
+          : t(detailFlow.label);
   const preparing = !suspended && stage?.kind === "PREPARE" && preparation.running;
   const environments = [wf.sourceEnv, wf.targetEnv] as const;
   const byKind = new Map(data.resources.map((resource) => [resource.kind, resource]));
@@ -207,6 +226,38 @@ export function TransitionDiagram({
           )}
           <TrafficMeter data={data} />
           {stage?.kind === "PREPARE" && <PreparationActivity data={data} />}
+          {expandedItem?.kind === "REDIS" && (
+            <div className="space-y-3 border-t pt-3 text-xs" data-module-role-summary>
+              <div>
+                <p className="font-semibold">Redis proxy</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  {t("앱의 Redis 요청을 라우팅합니다.")}
+                </p>
+                <p className="mt-1 text-info">{proxyLabel}</p>
+                {!proxy.stale && proxy.paused === false && (
+                  <p className="mt-1 text-[10px] text-muted-foreground">{t("쓰기 허용")}</p>
+                )}
+                {proxy.inflight !== null && (
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    {t("처리 중인 쓰기 {0}건", [proxy.inflight])}
+                  </p>
+                )}
+              </div>
+              <div>
+                <p className="font-semibold">Sync Worker</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  {t("저장소 간 변경 데이터를 복제합니다.")}
+                </p>
+                <p className="mt-1 text-info">
+                  {t(suspended ? "관측 갱신 대기" : detailFlow.label)}
+                </p>
+                <p className="mt-1 text-[10px] text-muted-foreground">{copyDirection}</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {transferMetric(expandedResource)}
+                </p>
+              </div>
+            </div>
+          )}
         </aside>
         <div className="overflow-x-auto rounded-md border">
           <svg
@@ -347,8 +398,8 @@ export function TransitionDiagram({
                             : t("미확인");
                     if (index === expanded) {
                       const top = y - 28;
-                      const sourceActive = resource?.route === "SOURCE";
-                      const targetActive = resource?.route === "TARGET";
+                      const sourceActive = proxy.destination === wf.sourceEnv;
+                      const targetActive = proxy.destination === wf.targetEnv;
                       const reverseOnly = flow.reverse && !flow.forward;
                       return (
                         <g
@@ -358,30 +409,47 @@ export function TransitionDiagram({
                         >
                           <path
                             className="edge control"
-                            d={`M636 292 H666 V${top + 18} H626`}
+                            d={`M636 292 H666 V${top + 18} H646`}
                             markerEnd={arrow}
                           />
                           <path
                             className="edge"
                             style={{ stroke: sourceActive ? "var(--info)" : undefined }}
                             opacity={sourceActive ? 1 : 0.25}
-                            d={`M330 ${top + 22} H454`}
+                            d={`M434 ${top + 38} H330`}
                             markerEnd={arrow}
                           />
                           <path
                             className="edge"
                             style={{ stroke: targetActive ? "var(--info)" : undefined }}
                             opacity={targetActive ? 1 : 0.25}
-                            d={`M626 ${top + 22} H750`}
+                            d={`M646 ${top + 38} H750`}
                             markerEnd={arrow}
                           />
                           {[
+                            `M330 302 H390 V${top + 12} H434`,
+                            `M750 302 H690 V${top + 12} H646`,
+                          ].map((path, line) => (
+                            <path
+                              key={line}
+                              data-app-proxy-route={line === 0 ? wf.sourceEnv : wf.targetEnv}
+                              className="edge"
+                              d={path}
+                              style={{
+                                stroke:
+                                  !proxy.stale && proxy.destination ? "var(--info)" : undefined,
+                              }}
+                              opacity={proxy.stale ? 0.25 : 0.65}
+                              markerEnd={arrow}
+                            />
+                          ))}
+                          {[
                             reverseOnly
-                              ? `M454 ${top + 98} H370 V${top + 44} H330`
-                              : `M330 ${top + 44} H370 V${top + 98} H454`,
+                              ? `M434 ${top + 98} H370 V${top + 44} H330`
+                              : `M330 ${top + 44} H370 V${top + 98} H434`,
                             reverseOnly
-                              ? `M750 ${top + 44} H710 V${top + 98} H626`
-                              : `M626 ${top + 98} H710 V${top + 44} H750`,
+                              ? `M750 ${top + 44} H710 V${top + 98} H646`
+                              : `M646 ${top + 98} H710 V${top + 44} H750`,
                           ].map((path, line) => (
                             <path
                               key={line}
@@ -463,7 +531,7 @@ export function TransitionDiagram({
                     <StackNode
                       cx={540}
                       top={expandedTop}
-                      width={164}
+                      width={204}
                       icon="server"
                       name={
                         expandedItem.kind === "REDIS"
@@ -472,20 +540,22 @@ export function TransitionDiagram({
                             ? "PgBouncer"
                             : "객체 라우터"
                       }
-                      sub={t(
-                        suspended
-                          ? "관측 갱신 대기"
-                          : (STEP_LABELS[stage?.step ?? ""] ?? stage?.step ?? "단계 보고 대기"),
+                      description={t(
+                        expandedItem.kind === "OBJECT_STORAGE"
+                          ? "객체 요청 라우팅"
+                          : "앱 요청 전달",
                       )}
+                      sub={proxyLabel}
                       state="focus"
                     />
                     <StackNode
                       cx={540}
                       top={expandedTop + 70}
-                      width={164}
+                      width={204}
                       icon="server"
                       name={expandedItem.kind === "REDIS" ? "Sync Worker" : "데이터 복제"}
-                      sub={t(suspended ? "관측 갱신 대기" : detailFlow.label)}
+                      description={t("변경 데이터 복제")}
+                      sub={suspended || detailFlow.stale ? t("관측 갱신 대기") : copyDirection}
                       motion={!suspended && detailFlow.moving ? "copying" : undefined}
                       stale={detailFlow.stale}
                     />

@@ -6,6 +6,7 @@ import { Badge } from "@/shared/ui/badge";
 
 import type { Detail } from "../api/migrations";
 import { isMoving, preparationFlow, STAGE_EXPLANATION, trafficFlow } from "./flow-model";
+import { STEP_LABELS } from "./module-detail-model";
 
 export function FlowStory({ data }: { data: Detail }) {
   useLocale();
@@ -43,7 +44,9 @@ export function FlowStory({ data }: { data: Detail }) {
         </Badge>
       )}
       {!done && stage?.step && (
-        <span className="ml-auto font-mono text-[10px] text-info">{stage.step}</span>
+        <span className="ml-auto text-[10px] text-info">
+          {t(STEP_LABELS[stage.step] ?? stage.step)}
+        </span>
       )}
     </div>
   );

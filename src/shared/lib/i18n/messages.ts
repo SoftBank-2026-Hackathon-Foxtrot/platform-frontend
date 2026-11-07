@@ -1601,4 +1601,44 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Awaiting stage report",
     ja: "段階の報告待ち",
   },
+  "쓰기 일시 정지": {
+    en: "Writes paused",
+    ja: "書き込み一時停止",
+  },
+  "요청 → {0}": {
+    en: "Requests → {0}",
+    ja: "リクエスト → {0}",
+  },
+  "목적지 미확인": {
+    en: "Destination unknown",
+    ja: "接続先未確認",
+  },
+  "앱의 Redis 요청을 라우팅합니다.": {
+    en: "Routes the application's Redis requests.",
+    ja: "アプリのRedisリクエストをルーティングします。",
+  },
+  "쓰기 허용": {
+    en: "Writes enabled",
+    ja: "書き込み許可",
+  },
+  "처리 중인 쓰기 {0}건": {
+    en: "{0} writes in flight",
+    ja: "処理中の書き込み {0}件",
+  },
+  "저장소 간 변경 데이터를 복제합니다.": {
+    en: "Replicates changed data between stores.",
+    ja: "ストレージ間で変更データを複製します。",
+  },
+  "객체 요청 라우팅": {
+    en: "Object request routing",
+    ja: "オブジェクト要求の経路制御",
+  },
+  "앱 요청 전달": {
+    en: "Route app requests",
+    ja: "アプリ要求を転送",
+  },
+  "변경 데이터 복제": {
+    en: "Replicate changes",
+    ja: "変更データを複製",
+  },
 };
