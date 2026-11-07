@@ -67,3 +67,33 @@ it("uses the live deployment API instead of the full deployment history", async 
   client.clear();
   get.mockRestore();
 });
+
+it("preserves shared deployment identifiers and separates their query cache", async () => {
+  const row = {
+    environmentId: "shared:env-000000000001",
+    deploymentId: "chiikawa-aws-demo",
+    cloud: "aws",
+    status: "REPORTING",
+    access: "shared",
+  };
+  const get = vi.spyOn(apiClient, "get").mockResolvedValue({
+    data: { state: "OK", environments: [row] },
+  });
+  const client = new QueryClient();
+  try {
+    const result = await client.fetchQuery(deploymentsOptions("workspace", "chiikawa"));
+    expect(result.environments).toEqual([row]);
+    const search = systemSearchSchema.parse({
+      app: "chiikawa",
+      deployment: result.environments[0]!.environmentId,
+      instance: "api-1",
+    });
+    expect(search.deployment).toBe("shared:env-000000000001");
+    expect(seriesOptions("workspace", search).queryKey).not.toEqual(
+      seriesOptions("workspace", { ...search, deployment: "env-000000000001" }).queryKey,
+    );
+  } finally {
+    client.clear();
+    get.mockRestore();
+  }
+});

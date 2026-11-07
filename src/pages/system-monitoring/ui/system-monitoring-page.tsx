@@ -128,7 +128,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
             value={deployment}
             choices={choices.map((row) => ({
               value: row.environmentId,
-              label: `${row.cloud} · ${row.deploymentId}`,
+              label: `${row.cloud} · ${row.deploymentId}${row.access === "shared" ? ` · ${t("공용 앱")}` : ""}`,
             }))}
             onChange={(value) =>
               onNavigate({ ...resolved, deployment: value, env: undefined, instance: undefined })
@@ -179,6 +179,7 @@ export function SystemMonitoringPage({ search, onNavigate }: Props) {
       </div>
       {selectedDeployment && (
         <p className="break-all text-xs text-muted-foreground">
+          {selectedDeployment.access === "shared" ? t("공용 앱") : t("내 배포")} ·{" "}
           {selectedDeployment.cloud} · {selectedDeployment.environmentId}
           <br />
           {selectedDeployment.deploymentId}
