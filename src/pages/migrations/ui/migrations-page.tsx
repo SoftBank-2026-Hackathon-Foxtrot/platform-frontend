@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 const STAGE_ORDER = Object.keys(STAGE_LABELS);
-const FINISHED = new Set(["COMPLETED", "ABORTED"]);
+const FINISHED = new Set(["COMPLETED", "ABORTED", "ROLLED_BACK"]);
 export function MigrationsPage() {
   useLocale();
   const session = useQuery(sessionOptions());

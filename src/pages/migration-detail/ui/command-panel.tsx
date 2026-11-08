@@ -77,6 +77,20 @@ const COMMANDS: Record<CommandName, Spec> = {
     confirm:
       "선택한 리소스를 원본 환경으로 되돌립니다. 되돌린 뒤 계속하려면 새 마이그레이션이 필요합니다.",
   },
+  ROLLBACK_ALL: {
+    label: "전체 원본 복귀",
+    icon: RotateCcw,
+    variant: "outline",
+    confirm:
+      "모든 리소스와 트래픽을 원본 환경으로 되돌립니다. 서버가 확인한 복귀 조건을 만족해야 진행할 수 있습니다.",
+  },
+  FINALIZE: {
+    label: "마이그레이션 정리",
+    icon: CircleCheck,
+    variant: "default",
+    confirm:
+      "복귀용 동기화와 임시 구성을 정리합니다. 정리 후에는 이 작업으로 원본에 복귀할 수 없습니다.",
+  },
   ABORT: {
     label: "마이그레이션 취소",
     icon: CircleStop,
@@ -99,10 +113,12 @@ const APPROVE_CONFIRM: Record<string, string> = {
 const STAGE_ORDER = Object.keys(STAGE_LABELS);
 const ORDER: CommandName[] = [
   "APPROVE",
+  "FINALIZE",
   "RESUME",
   "HALT",
   "RECONCILE",
   "ROLLBACK_RESOURCE",
+  "ROLLBACK_ALL",
   "ABORT",
 ];
 const RESOURCE_NAMES: Record<string, string> = {

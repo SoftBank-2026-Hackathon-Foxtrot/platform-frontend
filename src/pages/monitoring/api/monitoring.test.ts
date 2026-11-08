@@ -92,8 +92,8 @@ describe("monitoring API boundary", () => {
   });
 });
 
-it("loads planned and completed migrations for direct navigation", async () => {
-  const workflows = ["PLANNED", "COMPLETED"].map((status) => ({
+it("loads cutover and rollback states without breaking monitoring navigation", async () => {
+  const workflows = ["PLANNED", "CUTOVER_COMPLETE", "COMPLETED", "ROLLED_BACK"].map((status) => ({
     id: status,
     application: "goods",
     sourceEnv: "aws",

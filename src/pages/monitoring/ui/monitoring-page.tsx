@@ -259,7 +259,7 @@ function MonitoringContent({
           </Button>
         </div>
       </header>
-      {["COMPLETED", "ABORTED"].includes(workflow.status) && (
+      {["COMPLETED", "ABORTED", "ROLLED_BACK"].includes(workflow.status) && (
         <p role="status" className="text-sm text-muted-foreground">
           {t("종료된 마이그레이션")}
         </p>

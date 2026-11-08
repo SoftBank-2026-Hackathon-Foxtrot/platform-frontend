@@ -20,11 +20,13 @@ const STATUS: Record<
   PLANNED: { label: "승인 대기", tone: "wait" },
   WAITING_APPROVAL: { label: "승인 대기", tone: "wait" },
   RUNNING: { label: "진행 중", tone: "run" },
+  CUTOVER_COMPLETE: { label: "전환 완료 · 정리 대기", tone: "wait" },
   HALTED: { label: "멈춤", tone: "bad" },
   ROLLING_BACK: { label: "되돌리는 중", tone: "wait" },
   ABORTING: { label: "취소 중", tone: "wait" },
   COMPLETED: { label: "완료", tone: "ok" },
   ABORTED: { label: "취소됨", tone: "idle" },
+  ROLLED_BACK: { label: "원본 복귀 완료", tone: "idle" },
 };
 const TONES = {
   ok: "border-success/40 bg-success/15 text-success",

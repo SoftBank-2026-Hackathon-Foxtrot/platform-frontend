@@ -1,4 +1,20 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "전환 완료 · 정리 대기": {
+    en: "Cutover complete · awaiting cleanup",
+    ja: "切替完了・後処理待ち",
+  },
+  "원본 복귀 완료": { en: "Returned to source", ja: "移行元への復帰完了" },
+  "전체 원본 복귀": { en: "Return all to source", ja: "すべてを移行元へ戻す" },
+  "마이그레이션 정리": { en: "Finalize migration", ja: "移行を確定" },
+  "모든 리소스와 트래픽을 원본 환경으로 되돌립니다. 서버가 확인한 복귀 조건을 만족해야 진행할 수 있습니다.":
+    {
+      en: "Return all resources and traffic to the source environment. The server must confirm that rollback conditions are met.",
+      ja: "すべてのリソースとトラフィックを移行元へ戻します。サーバーが復帰条件を確認してから実行します。",
+    },
+  "복귀용 동기화와 임시 구성을 정리합니다. 정리 후에는 이 작업으로 원본에 복귀할 수 없습니다.": {
+    en: "Remove rollback synchronization and temporary configuration. This migration cannot return to the source after finalization.",
+    ja: "復帰用の同期と一時構成を削除します。確定後はこの移行で移行元へ戻せません。",
+  },
   "조사 시점의 마이그레이션": { en: "Migration at scan time", ja: "調査時点の移行" },
   "검사 환경": { en: "Inspection target", ja: "検査対象" },
   "온프렘 샌드박스": { en: "On-prem sandbox", ja: "オンプレサンドボックス" },
