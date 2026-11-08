@@ -16,6 +16,7 @@ import {
 import { STACK_ICONS } from "@/shared/lib/stack-icons";
 import { activeModule, proxyActivity, runningStreams, STREAM_NAMES } from "./module-detail-model";
 import "./flow-visuals.css";
+import { CompletionPeek } from "./completion-peek";
 
 // stack-diagram tiles and orthogonal edges, arranged as paired source/target rows.
 const W = 1080;
@@ -324,6 +325,13 @@ export function TransitionDiagram({
             <title>{label}</title>
             <foreignObject width={W} height={height}>
               <div className="canvas" style={{ height }} data-expanded-module={expandedItem?.kind}>
+                <CompletionPeek
+                  id={wf.id}
+                  status={wf.status}
+                  suspended={suspended}
+                  cx={GROUPS[1].cx}
+                  top={264}
+                />
                 {environments.map((env, index) => {
                   const provider = cloud(env);
                   return (
