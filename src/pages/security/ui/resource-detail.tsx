@@ -85,6 +85,54 @@ export function ResourceDetail({
           </div>
         ) : (
           <>
+            <section className="space-y-2 text-sm">
+              <h3 className="font-medium">{t("객체 접근 실측")}</h3>
+              {review.copyContext && (
+                <div className="space-y-1 text-xs">
+                  <p>{t("조사 시점의 마이그레이션")}</p>
+                  <code className="block break-all">
+                    {review.copyContext.workflowId} · {review.copyContext.status}
+                  </code>
+                  {review.copyContext.migrationId && (
+                    <code className="block break-all">{review.copyContext.migrationId}</code>
+                  )}
+                </div>
+              )}
+              {review.accessProbe ? (
+                <dl className="space-y-2">
+                  {(
+                    [
+                      ["receipt", "앱 · 시험 영수증 읽기"],
+                      ["otherBucket", "앱 · 업무 외 버킷 목록"],
+                      ["copy", "복사 계정 · 시험 영수증 읽기"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <div key={key} className="border-b pb-2">
+                      <dt>{t(label)}</dt>
+                      <dd>
+                        {t(
+                          { allowed: "허용", denied: "거부", unknown: "미확인" }[
+                            review.accessProbe![key]
+                          ],
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                  <div>
+                    <dt>{t("복사 계정")}</dt>
+                    <dd className="break-all font-mono text-xs">{review.copyPrincipal}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="text-muted-foreground">
+                  {t(
+                    review.probeConfigured
+                      ? "현재 실측 결과 없음"
+                      : "실측 계정 미연결 · 정책만 비교합니다.",
+                  )}
+                </p>
+              )}
+            </section>
             {review.plan && review.phase === "plan" && (
               <section className="security-plan" aria-labelledby="security-plan-title">
                 <h3
