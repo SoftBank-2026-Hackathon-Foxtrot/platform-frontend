@@ -14,6 +14,9 @@ describe("console language", () => {
     expect(translate("{0}단계 중 {1}단계 완료", [8, 3], "ja")).toBe("8段階中3段階完了");
     expect(translate("wf-123 / aws / gcp", [], "ja")).toBe("wf-123 / aws / gcp");
     expect(translate(" ", [], "en")).toBe(" ");
+    expect(translate("배포 진행하기", [], "en")).toBe("Deploy now");
+    expect(translate("배포 진행하기", [], "ja")).toBe("デプロイを実行");
+    expect(translate("답변 근거 {0}개", [3], "ja")).toBe("回答の根拠 3件");
   });
 
   it("has complete translations and matching placeholders for every message", () => {

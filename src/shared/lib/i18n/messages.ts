@@ -2492,4 +2492,255 @@ export const messages: Record<string, { en: string; ja: string }> = {
     en: "Removes access to the demo bucket only. App bucket access stays unchanged.",
     ja: "デモバケットへのアクセスのみ削除します。アプリのバケット権限は維持します。",
   },
+
+  "AI 도우미": { en: "AI assistant", ja: "AIアシスタント" },
+  "AI API 또는 선택한 배포 정보가 없습니다. 서버 반영 상태와 배포 목록을 확인하세요.": {
+    en: "The AI API or selected deployment is unavailable. Check the server version and deployment list.",
+    ja: "AI APIまたは選択したデプロイがありません。サーバーの反映状況とデプロイ一覧を確認してください。",
+  },
+  "AI 모델 설정 필요": { en: "AI model setup required", ja: "AIモデルの設定が必要です" },
+  "AI 설정을 확인하는 중입니다.": { en: "Checking AI configuration…", ja: "AI設定を確認中…" },
+  "AI 요청 실패": { en: "AI request failed", ja: "AIリクエストに失敗しました" },
+  "AI 정보를 불러오지 못했습니다": {
+    en: "Could not load AI information",
+    ja: "AI情報を取得できませんでした",
+  },
+  "CPU 사용률 P95": { en: "CPU utilization P95", ja: "CPU使用率 P95" },
+  "CPU·메모리와 요청 성능을 조회하고 근거와 함께 해석합니다.": {
+    en: "Read CPU, memory and request performance, with evidence-based interpretation.",
+    ja: "CPU・メモリ・リクエスト性能を取得し、根拠とともに分析します。",
+  },
+  "CPU는 분 단위 집계의 P95이며, 메모리는 관측한 최대값입니다.": {
+    en: "CPU is P95 of minute aggregates. Memory is the observed high-water value.",
+    ja: "CPUは分単位の集計値のP95、メモリは観測した最大値です。",
+  },
+  "DB 호출 P95": { en: "DB call P95", ja: "DB呼び出し P95" },
+  "Redis 호출 P95": { en: "Redis call P95", ja: "Redis呼び出し P95" },
+  "관련 요청 추적 {0}개": {
+    en: "{0} related request traces",
+    ja: "関連リクエストのトレース {0}件",
+  },
+  "관측 메모리 최대값": { en: "Observed memory peak", ja: "観測メモリ最大値" },
+  "관측 자료 부족": { en: "Insufficient observations", ja: "観測データ不足" },
+  근거: { en: "Evidence", ja: "根拠" },
+  "누락 지표: {0}": { en: "Missing metrics: {0}", ja: "不足している指標：{0}" },
+  "답변 근거 {0}개": { en: "{0} answer sources", ja: "回答の根拠 {0}件" },
+  "대화 기록": { en: "Conversation history", ja: "会話履歴" },
+  "대화 다시 조회": { en: "Reload conversation", ja: "会話を再取得" },
+  "마지막 배포 적용 기록을 근거로 답합니다. 실시간 상태와 다를 수 있습니다.": {
+    en: "Answers use the last applied deployment record. Live state may differ.",
+    ja: "最終適用時のデプロイ記録に基づいて回答します。現在の状態とは異なる場合があります。",
+  },
+  "배포 요청 보기": { en: "View deployment request", ja: "デプロイリクエストを表示" },
+  "복사하지 못했습니다.": { en: "Could not copy.", ja: "コピーできませんでした。" },
+  "분석 기간": { en: "Analysis period", ja: "分析期間" },
+  "분석할 기간을 선택하고 지표 분석을 실행하세요.": {
+    en: "Choose a period and run metric analysis.",
+    ja: "期間を選択して指標分析を実行してください。",
+  },
+  "분석할 앱 배포": { en: "Application deployment to analyse", ja: "分析対象のアプリデプロイ" },
+  "분석할 앱 배포가 없습니다.": {
+    en: "No application deployments to analyse.",
+    ja: "分析できるアプリデプロイがありません。",
+  },
+  "사양 추천": { en: "Sizing recommendations", ja: "リソース構成の推奨" },
+  "새 대화": { en: "New conversation", ja: "新しい会話" },
+  "서버 오류율": { en: "Server error rate", ja: "サーバーエラー率" },
+  "서버에 AI 모델 인증 정보가 설정되지 않았습니다. 관리자에게 설정을 요청하세요.": {
+    en: "AI credentials are not configured on the server. Ask an administrator to configure them.",
+    ja: "サーバーにAIモデルの認証情報が設定されていません。管理者に設定を依頼してください。",
+  },
+  "선택한 앱의 사양과 리소스 구성을 물어보세요.": {
+    en: "Ask about the selected application’s sizing and resources.",
+    ja: "選択したアプリのリソース構成について質問してください。",
+  },
+  "온프렘 사용량 기반 사양 추천은 아직 지원하지 않습니다.": {
+    en: "Usage-based sizing for on-premises deployments is not supported yet.",
+    ja: "オンプレミスの使用量に基づくリソース推奨は、まだ対応していません。",
+  },
+  "요청 복사": { en: "Copy request", ja: "リクエストをコピー" },
+  "운영 지표 분석": { en: "Operational metric analysis", ja: "運用指標の分析" },
+  "응답 시간 P95": { en: "Response time P95", ja: "応答時間 P95" },
+  "응답 완료": { en: "Response ready", ja: "応答完了" },
+  "인프라 변경안": { en: "Infrastructure changes", ja: "インフラ変更案" },
+  "인프라 채팅": { en: "Infrastructure chat", ja: "インフラチャット" },
+  "일부 지표 누락": { en: "Some metrics missing", ja: "一部の指標が不足" },
+  "자료 없음": { en: "No data", ja: "データなし" },
+  "지표 종류 확보율 {0}%": { en: "{0}% of metric types available", ja: "指標種類の取得率 {0}%" },
+  질문: { en: "Question", ja: "質問" },
+  "초당 요청 수": { en: "Requests per second", ja: "秒あたりリクエスト数" },
+  "최근 15분": { en: "Last 15 minutes", ja: "直近15分" },
+  "최근 1시간": { en: "Last hour", ja: "直近1時間" },
+  "최근 1시간의 CPU·메모리 사용량으로 대상 사양을 추천합니다.": {
+    en: "Recommend target sizing from CPU and memory usage over the last hour.",
+    ja: "直近1時間のCPU・メモリ使用量から、移行先のリソース構成を推奨します。",
+  },
+  "최근 24시간": { en: "Last 24 hours", ja: "直近24時間" },
+  "최근 대화 10개를 참고합니다.": {
+    en: "Uses the last 10 conversation turns.",
+    ja: "直近10件の会話を参照します。",
+  },
+  "추천 대상 클라우드": { en: "Target cloud for sizing", ja: "推奨対象のクラウド" },
+  코어: { en: "cores", ja: "コア" },
+  "허용 사양 초과": { en: "Exceeds allowed capacity", ja: "許可された構成の上限超過" },
+  "현재 앱과 DB는 어떤 사양으로 배포되어 있나요?": {
+    en: "What resources are allocated to this application and database?",
+    ja: "現在のアプリとDBは、どのような構成でデプロイされていますか？",
+  },
+  "답변 생성 중…": { en: "Generating answer…", ja: "回答を生成中…" },
+  "질문 보내기": { en: "Send question", ja: "質問を送信" },
+  "분석 중…": { en: "Analysing…", ja: "分析中…" },
+  "지표 분석": { en: "Analyse metrics", ja: "指標を分析" },
+  "추천 생성 중…": { en: "Generating recommendation…", ja: "推奨を生成中…" },
+  "추천 받기": { en: "Get recommendation", ja: "推奨を取得" },
+  "CPU·메모리 지표와 관측 시간이 충분하지 않아 추천을 만들지 않았습니다.": {
+    en: "CPU, memory or observation coverage is insufficient. No recommendation was generated.",
+    ja: "CPU・メモリ指標または観測時間が不足しているため、推奨を生成しませんでした。",
+  },
+  "현재 허용 사양으로 관측 사용량을 수용할 수 없습니다.": {
+    en: "The currently allowed configurations cannot support the observed usage.",
+    ja: "現在許可されたリソース構成では、観測使用量を処理できません。",
+  },
+  "Foxtrot 마스코트": { en: "Foxtrot mascot", ja: "Foxtrotマスコット" },
+  "화면 데모": { en: "UI demo", ja: "画面デモ" },
+  "현재 화면을 유지하며 AI와 대화합니다.": {
+    en: "Chat with AI while keeping the current screen open.",
+    ja: "現在の画面を開いたままAIと会話できます。",
+  },
+  "AI 패널 닫기": { en: "Close AI panel", ja: "AIパネルを閉じる" },
+  "패널 줄이기": { en: "Narrow panel", ja: "パネルを狭くする" },
+  "패널 넓히기": { en: "Widen panel", ja: "パネルを広げる" },
+  "AI 도우미 열기": { en: "Open AI assistant", ja: "AIアシスタントを開く" },
+  "앱 AI 도우미": { en: "Application AI assistant", ja: "アプリのAIアシスタント" },
+  채팅: { en: "Chat", ja: "チャット" },
+  "데모 배포가 완료됐습니다. 실제 클라우드 리소스는 변경하지 않았습니다.": {
+    en: "Demo deployment complete. No live cloud resources were changed.",
+    ja: "デモのデプロイが完了しました。実際のクラウドリソースは変更していません。",
+  },
+  "배포가 완료됐고 앱의 정상 응답을 확인했습니다.": {
+    en: "Deployment complete. The application is responding normally.",
+    ja: "デプロイが完了し、アプリの正常な応答を確認しました。",
+  },
+  "배포를 완료하지 못했습니다. 작업 상태를 확인하세요.": {
+    en: "Deployment did not complete. Check the job status.",
+    ja: "デプロイが完了しませんでした。ジョブの状態を確認してください。",
+  },
+  "사양 적용은 끝났지만 앱의 정상 응답은 확인하지 못했습니다.": {
+    en: "Sizing was applied, but the application response has not been confirmed.",
+    ja: "リソース構成の適用は完了しましたが、アプリの正常な応答は確認できていません。",
+  },
+  "배포 요청을 접수했습니다. 사양 적용과 앱 응답을 확인하고 있습니다.": {
+    en: "Deployment request accepted. Applying sizing and checking the application response.",
+    ja: "デプロイリクエストを受け付けました。構成の適用とアプリの応答を確認しています。",
+  },
+  "데모 배포 흐름을 실행합니다. 실제 클라우드 리소스는 변경하지 않습니다.": {
+    en: "Runs the demo deployment flow. No live cloud resources will be changed.",
+    ja: "デモのデプロイ手順を実行します。実際のクラウドリソースは変更しません。",
+  },
+  "추천한 사양으로 대상 환경을 새로 배포합니다.": {
+    en: "Deploy a new target environment with the recommended sizing.",
+    ja: "推奨された構成で移行先の環境を新規デプロイします。",
+  },
+  "대상 환경을 추천한 사양으로 변경합니다.": {
+    en: "Update the target environment to the recommended sizing.",
+    ja: "移行先の環境を推奨された構成に変更します。",
+  },
+  "배포 접수 중…": { en: "Submitting deployment…", ja: "デプロイを送信中…" },
+  "배포 완료": { en: "Deployment complete", ja: "デプロイ完了" },
+  "배포 진행 중…": { en: "Deploying…", ja: "デプロイ中…" },
+  "배포 요청 접수됨": { en: "Deployment request accepted", ja: "デプロイリクエスト受付済み" },
+  "배포 진행하기": { en: "Deploy now", ja: "デプロイを実行" },
+  "상태 다시 확인": { en: "Check status again", ja: "状態を再確認" },
+  "배포 상태 조회 실패": {
+    en: "Could not load deployment status",
+    ja: "デプロイ状態の取得に失敗しました",
+  },
+  "배포 요청 실패": { en: "Deployment request failed", ja: "デプロイリクエストに失敗しました" },
+  "무엇을 도와드릴까요?": { en: "How can I help?", ja: "何をお手伝いしましょうか？" },
+  "현재 앱 사양을 요약해줘": {
+    en: "Summarize the current application sizing",
+    ja: "現在のアプリの構成をまとめて",
+  },
+  "클라우드를 옮기기 전에 무엇을 확인해야 해?": {
+    en: "What should I check before moving to another cloud?",
+    ja: "クラウドを移行する前に何を確認すればいい？",
+  },
+  "추천 결과를 확인한 뒤 배포를 진행할 수 있습니다.": {
+    en: "Review the recommendation, then deploy it.",
+    ja: "推奨結果を確認してからデプロイできます。",
+  },
+  "배포 진행하기를 누르면 이 요청을 전송합니다.": {
+    en: "Select Deploy now to submit this request.",
+    ja: "「デプロイを実行」を押すと、このリクエストを送信します。",
+  },
+  "적용할 배포 요청이 없습니다. 사양을 다시 추천받으세요.": {
+    en: "No deployment request is available. Generate a new sizing recommendation.",
+    ja: "適用するデプロイリクエストがありません。構成の推奨を再度取得してください。",
+  },
+  "화면 데모용 예제입니다. CPU P95는 28%, 메모리 관측 최대값은 620 MiB입니다. 실제 운영 지표를 조회한 결과는 아닙니다.":
+    {
+      en: "UI demo example: CPU P95 is 28% and observed peak memory is 620 MiB. These are sample values, not live operational metrics.",
+      ja: "画面デモの例です。CPU P95は28%、観測メモリ最大値は620 MiBです。実際の運用指標を取得した結果ではありません。",
+    },
+  "예제 구간에서는 CPU와 메모리에 여유가 있습니다. 실제 사양 변경은 운영 지표를 확인한 뒤 결정하세요.":
+    {
+      en: "The sample period shows spare CPU and memory capacity. Check live operational metrics before changing real resources.",
+      ja: "サンプル期間ではCPUとメモリに余裕があります。実際の構成変更は運用指標を確認してから判断してください。",
+    },
+  "같은 요청 키에 다른 사양을 보낼 수 없습니다.": {
+    en: "The same request key cannot be used for different sizing.",
+    ja: "同じリクエストキーで異なる構成は送信できません。",
+  },
+  "대상 데모 배포가 없습니다.": {
+    en: "Target demo deployment not found.",
+    ja: "対象のデモデプロイが見つかりません。",
+  },
+  "이미 배포가 진행 중입니다.": {
+    en: "A deployment is already in progress.",
+    ja: "デプロイはすでに実行中です。",
+  },
+  "배포 작업이 없습니다.": {
+    en: "Deployment job not found.",
+    ja: "デプロイジョブが見つかりません。",
+  },
+  "DEMO · 예제 응답": { en: "DEMO · Sample response", ja: "DEMO · サンプル応答" },
+  "대화를 찾을 수 없습니다.": { en: "Conversation not found.", ja: "会話が見つかりません。" },
+  "선택한 데모 배포가 없습니다.": {
+    en: "Selected demo deployment not found.",
+    ja: "選択したデモデプロイが見つかりません。",
+  },
+  "이전 전에 앱, DB, Redis와 파일 저장소의 연결을 확인하세요.\n\n대상 리소스를 준비하고 변경분 복제가 따라잡으면 컷오버를 승인합니다. 전환 뒤에는 롤백 또는 전환 완료를 선택합니다.\n\n이 답변은 화면 데모용 예제이며 실제 배포 상태를 조회하지 않았습니다.":
+    {
+      en: "Before migrating, check the connections to the application, database, Redis and file storage.\n\nPrepare the target resources. Once change replication catches up, approve cutover. After cutover, choose rollback or finalize migration.\n\nThis is a UI demo response. No live deployment state was queried.",
+      ja: "移行前にアプリ、DB、Redis、ファイルストレージの接続を確認してください。\n\n移行先のリソースを準備し、差分複製が追いついたら切り替えを承認します。切り替え後は、ロールバックまたは移行の確定を選択します。\n\nこれは画面デモのサンプル回答です。実際のデプロイ状態は取得していません。",
+    },
+  "선택한 예제 앱의 구성입니다.\n\n• 앱: CPU 1 vCPU · 메모리 2 GiB\n• 데이터베이스: PostgreSQL\n• 캐시: Redis\n• CPU P95: 28% · 메모리 최대: 620 MiB\n\n실제 운영 데이터가 아닌 화면 데모용 예제입니다. 지표 분석과 사양 추천도 위에서 직접 확인할 수 있습니다.":
+    {
+      en: "Configuration of the selected sample application:\n\n• Application: 1 vCPU · 2 GiB memory\n• Database: PostgreSQL\n• Cache: Redis\n• CPU P95: 28% · Peak memory: 620 MiB\n\nThese are UI demo values, not live data. You can also try metric analysis and sizing recommendations above.",
+      ja: "選択したサンプルアプリの構成です。\n\n• アプリ：CPU 1 vCPU · メモリ 2 GiB\n• データベース：PostgreSQL\n• キャッシュ：Redis\n• CPU P95：28% · 最大メモリ：620 MiB\n\n実際の運用データではなく、画面デモのサンプルです。上の指標分析と構成の推奨も試すことができます。",
+    },
+  "예제 사용량에 CPU 여유를 둡니다.": {
+    en: "Reserve CPU headroom for the sample workload.",
+    ja: "サンプルの使用量にCPUの余裕を確保します。",
+  },
+  "예제 메모리 사용량과 여유 공간을 반영합니다.": {
+    en: "Account for sample memory usage and headroom.",
+    ja: "サンプルのメモリ使用量と余裕を反映します。",
+  },
+  "화면 데모용 예제입니다. 실제 분석이나 배포는 실행하지 않았습니다.": {
+    en: "UI demo example. No live analysis or deployment was performed.",
+    ja: "画面デモのサンプルです。実際の分析やデプロイは実行していません。",
+  },
+  "지원하지 않는 AI 데모 API입니다.": {
+    en: "Unsupported AI demo API.",
+    ja: "未対応のAIデモAPIです。",
+  },
+
+  분석: { en: "Analysis", ja: "分析" },
+  추천: { en: "Sizing", ja: "推奨" },
+  미지원: { en: "Unsupported", ja: "未対応" },
+  "온프렘 대상 사양 추천은 아직 지원하지 않습니다.": {
+    en: "Sizing recommendations for on-premises targets are not supported yet.",
+    ja: "オンプレミスを移行先とする構成の推奨には、まだ対応していません。",
+  },
 };
