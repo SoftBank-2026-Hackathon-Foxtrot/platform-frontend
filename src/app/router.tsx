@@ -11,6 +11,7 @@ import {
 import { z } from "zod";
 import { migrationViewSchema } from "@/entities/migration";
 import { sessionOptions } from "@/entities/session";
+import { AIPage } from "@/pages/ai";
 import { ApplicationDetailPage } from "@/pages/application-detail";
 import { ApplicationsPage } from "@/pages/applications";
 import { LoginPage } from "@/pages/login";
@@ -67,7 +68,7 @@ function Root() {
     );
   }
   return (
-    <PlatformShell session={session.data}>
+    <PlatformShell session={session.data} assistant={<AIPage key={session.data.workspaceId} />}>
       <Outlet />
     </PlatformShell>
   );

@@ -1,6 +1,6 @@
 import MockAdapter from "axios-mock-adapter";
 import { QueryClient } from "@tanstack/react-query";
-import { afterEach, beforeEach, expect, test } from "vite-plus/test";
+import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 import { ZodError } from "zod";
 import { apiClient, setCsrfToken } from "@/shared/api";
 import {
@@ -16,6 +16,8 @@ import {
 import { commandWorkflow, createWorkflow } from "@/entities/migration";
 import { sessionOptions, logout } from "@/entities/session";
 import { workspaceOptions } from "@/entities/workspace";
+import { createAiDemo } from "./mocks/ai";
+import { setLocale } from "@/shared/lib/i18n";
 
 const image = {
   imageRef: `registry/app@sha256:${"a".repeat(64)}`,
@@ -200,4 +202,71 @@ test("감사 이력의 다음 커서를 서버에 보내고 페이지 캐시를 
   expect(first.events[0]?.type).toBe("FIRST");
   expect(second.events[0]?.type).toBe("SECOND");
   expect(second.nextCursor).toBeNull();
+});
+
+test("AI 데모는 추천부터 배포 접수와 앱 정상 응답 확인까지 연결한다", () => {
+  const clock = vi.spyOn(Date, "now").mockReturnValue(10000);
+  try {
+    setLocale("en");
+    const demo = createAiDemo();
+    const result = demo.handle("post", "/v1/ai/recommendations", {
+      applicationId: "app-chiikawa",
+      sourceDeploymentId: "env-333333333333",
+      targetEnvironment: "gcp",
+    })!;
+    expect(demo.handle("get", "/v1/ai/deployments")?.[1]).toEqual(
+      expect.objectContaining({
+        deployments: expect.arrayContaining([expect.objectContaining({ environment: "onprem" })]),
+      }),
+    );
+    const onpremAnalysis = demo.handle("post", "/v1/ai/analyses", {
+      deploymentId: "env-333333333333",
+    });
+    expect(onpremAnalysis).toEqual([200, expect.objectContaining({ environment: "onprem" })]);
+    expect(
+      demo.handle("post", "/v1/ai/recommendations", {
+        sourceDeploymentId: "env-333333333333",
+        targetEnvironment: "onprem",
+      })?.[0],
+    ).toBe(422);
+    expect(result[0]).toBe(200);
+    expect(JSON.stringify(result[1])).toContain("UI demo example");
+    expect(JSON.stringify(result[1])).not.toMatch(/[가-힣]/);
+    const { iac } = result[1] as { iac: { endpoint: string; body: Record<string, unknown> } };
+    expect(iac.endpoint).toBe("/v1/provisioning/environments/env-222222222222/update");
+    const accepted = demo.handle("post", iac.endpoint, iac.body, "demo-deploy")!;
+    expect(accepted[0]).toBe(202);
+    expect(demo.handle("post", iac.endpoint, iac.body, "demo-deploy")).toEqual(accepted);
+    const { jobId, environmentId } = accepted[1] as { jobId: string; environmentId: string };
+    const jobPath = "/v1/provisioning/jobs/" + jobId;
+    const environmentPath = "/v1/provisioning/environments/" + environmentId;
+    expect(demo.handle("get", jobPath)).toEqual([
+      200,
+      expect.objectContaining({ status: "QUEUED" }),
+    ]);
+    clock.mockReturnValue(15000);
+    expect(demo.handle("get", jobPath)).toEqual([
+      200,
+      expect.objectContaining({ status: "SUCCEEDED" }),
+    ]);
+    expect(demo.handle("get", environmentPath)).toEqual([
+      200,
+      expect.objectContaining({ status: "VERIFYING_APP" }),
+    ]);
+    clock.mockReturnValue(17000);
+    expect(demo.handle("get", environmentPath)).toEqual([
+      200,
+      expect.objectContaining({ status: "READY" }),
+    ]);
+    setLocale("ja");
+    const reply = demo.handle("post", "/v1/ai/chat", {
+      deploymentId: "env-111111111111",
+      message: "クラウド移行",
+    })!;
+    expect(JSON.stringify(reply[1])).toContain("移行前");
+    expect(JSON.stringify(reply[1])).not.toMatch(/[가-힣]/);
+  } finally {
+    setLocale("ko");
+    clock.mockRestore();
+  }
 });

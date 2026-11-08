@@ -1,5 +1,5 @@
-import { LOCALES, setLocale, t, useLocale } from "@/shared/lib/i18n";
-import type { ReactNode } from "react";
+import { t, useLocale } from "@/shared/lib/i18n";
+import { useRef, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { CloudIcon, LogOut, Moon, Sun } from "lucide-react";
@@ -10,6 +10,10 @@ import {
   RiSettings3Fill,
   RiShieldCheckFill,
 } from "react-icons/ri";
+import { mascot } from "@/shared/brand";
+import { isDemoMode } from "@/shared/config";
+import { AssistantInset } from "./assistant-inset";
+import { LanguageSwitcher } from "./language-switcher";
 import { type Session, logout } from "@/entities/session";
 import { setTheme, useTheme } from "@/shared/lib/theme";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/shared/ui/breadcrumb";
@@ -120,7 +124,22 @@ function PlatformSidebar({ pathname, session }: { pathname: string; session: Ses
   );
 }
 /** Taehyun's inset sidebar shell, driven by the router. */
-export function PlatformShell({ session, children }: { session: Session; children: ReactNode }) {
+export function PlatformShell({
+  session,
+  children,
+  assistant,
+}: {
+  session: Session;
+  children: ReactNode;
+  assistant: ReactNode;
+}) {
+  const [aiOpen, setAiOpen] = useState(isDemoMode);
+  const [aiMounted, setAiMounted] = useState(isDemoMode);
+  const aiTrigger = useRef<HTMLButtonElement>(null);
+  const closeAi = () => {
+    setAiOpen(false);
+    aiTrigger.current?.focus();
+  };
   useLocale();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const theme = useTheme();
@@ -182,6 +201,23 @@ export function PlatformShell({ session, children }: { session: Session; childre
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
           <LanguageSwitcher />
+          <Separator orientation="vertical" className="mx-1 h-4 self-center!" />
+          <Button
+            ref={aiTrigger}
+            variant={aiOpen ? "secondary" : "outline"}
+            size="sm"
+            className="h-8 gap-2 px-2"
+            aria-label={t(aiOpen ? "AI 패널 닫기" : "AI 도우미 열기")}
+            aria-expanded={aiOpen}
+            aria-controls="ai-assistant-inset"
+            onClick={() => {
+              setAiMounted(true);
+              setAiOpen(!aiOpen);
+            }}
+          >
+            <img src={mascot} alt="" className="size-6 rounded-md bg-white object-contain" />
+            <span className="hidden sm:inline">{t("AI 도우미")}</span>
+          </Button>
         </header>
         <div
           id="platform-content"
@@ -191,31 +227,9 @@ export function PlatformShell({ session, children }: { session: Session; childre
           {children}
         </div>
       </SidebarInset>
+      <AssistantInset open={aiOpen} onClose={closeAi}>
+        {aiMounted && assistant}
+      </AssistantInset>
     </SidebarProvider>
-  );
-}
-
-function LanguageSwitcher() {
-  const locale = useLocale();
-  return (
-    <div
-      role="group"
-      aria-label={t("언어")}
-      className="flex shrink-0 items-center rounded-md border p-0.5"
-    >
-      {LOCALES.map((option) => (
-        <Button
-          key={option.value}
-          variant={locale === option.value ? "secondary" : "ghost"}
-          size="sm"
-          className="h-6 px-2 text-[11px]"
-          lang={option.value}
-          aria-pressed={locale === option.value}
-          onClick={() => setLocale(option.value)}
-        >
-          {option.label}
-        </Button>
-      ))}
-    </div>
   );
 }
