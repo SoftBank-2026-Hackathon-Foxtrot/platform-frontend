@@ -13,7 +13,12 @@ import {
   managedApplicationsOptions,
   type ManagedApplication,
 } from "@/entities/application";
-import { commandWorkflow, createWorkflow } from "@/entities/migration";
+import {
+  commandWorkflow,
+  createWorkflow,
+  workflowOptions,
+  workflowsOptions,
+} from "@/entities/migration";
 import { sessionOptions, logout } from "@/entities/session";
 import { workspaceOptions } from "@/entities/workspace";
 import { createAiDemo } from "./mocks/ai";
@@ -163,6 +168,45 @@ test("워크플로 생성·명령은 공통 백엔드 경로와 expectedVersion�
   });
   await commandWorkflow(result.workflow, "ROLLBACK_RESOURCE", "REDIS", "rollback-request");
 });
+
+test.each(["FINALIZE", "ROLLBACK_ALL"] as const)(
+  "전환 완료 상태에서 %s 명령의 목록·상세·접수 응답을 검증한다",
+  async (command) => {
+    const cutover = {
+      ...detail,
+      workflow: { ...detail.workflow, status: "CUTOVER_COMPLETE", currentStage: 7 },
+      allowedCommands: ["FINALIZE", "ROLLBACK_ALL"],
+    };
+    mock.onGet("/v1/workflows").reply(200, [cutover.workflow]);
+    mock.onGet("/v1/workflows/wf-one").reply(200, cutover);
+    expect((await query.fetchQuery(workflowsOptions("personal:one")))[0]?.status).toBe(
+      "CUTOVER_COMPLETE",
+    );
+    const current = await query.fetchQuery(workflowOptions("personal:one", "wf-one"));
+    expect(current.allowedCommands).toEqual(["FINALIZE", "ROLLBACK_ALL"]);
+    mock.onPost("/v1/workflows/wf-one/commands").reply((config) => {
+      expect(JSON.parse(config.data)).toEqual({ command, expectedVersion: 4 });
+      expect(config.headers?.["Idempotency-Key"]).toBe("cutover-command");
+      return [200, cutover];
+    });
+    expect(
+      (await commandWorkflow(current.workflow, command, undefined, "cutover-command")).workflow
+        .status,
+    ).toBe("CUTOVER_COMPLETE");
+    mock
+      .onGet("/v1/workflows")
+      .reply(200, [{ ...cutover.workflow, status: "ROLLED_BACK", finishedAt: app.createdAt }]);
+    await query.invalidateQueries({ queryKey: ["workflows", "personal:one"] });
+    expect((await query.fetchQuery(workflowsOptions("personal:one")))[0]?.status).toBe(
+      "ROLLED_BACK",
+    );
+    mock.onGet("/v1/workflows").reply(200, [{ ...cutover.workflow, status: "UNSUPPORTED" }]);
+    await query.invalidateQueries({ queryKey: ["workflows", "personal:one"] });
+    await expect(query.fetchQuery(workflowsOptions("personal:one"))).rejects.toBeInstanceOf(
+      ZodError,
+    );
+  },
+);
 
 test("실제 세션과 workspace 목록을 읽고 로그아웃에 CSRF를 사용한다", async () => {
   mock.onGet("/v1/me").reply(200, {

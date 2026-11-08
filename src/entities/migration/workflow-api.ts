@@ -10,6 +10,8 @@ export const workflowCommandSchema = z.enum([
   "RESUME",
   "RECONCILE",
   "ROLLBACK_RESOURCE",
+  "ROLLBACK_ALL",
+  "FINALIZE",
   "ABORT",
 ]);
 export type WorkflowCommand = z.infer<typeof workflowCommandSchema>;
@@ -38,11 +40,13 @@ export const workflowSchema = z.object({
     "PLANNED",
     "RUNNING",
     "WAITING_APPROVAL",
+    "CUTOVER_COMPLETE",
     "HALTED",
     "ROLLING_BACK",
     "ABORTING",
     "COMPLETED",
     "ABORTED",
+    "ROLLED_BACK",
   ]),
   halt: z
     .object({ code: z.string(), message: z.string(), blockers: z.array(z.string()).default([]) })
@@ -119,11 +123,13 @@ export const workflowStatus: Record<Workflow["status"], string> = {
   PLANNED: "시작 승인 대기",
   RUNNING: "진행 중",
   WAITING_APPROVAL: "승인 대기",
+  CUTOVER_COMPLETE: "전환 완료 · 정리 대기",
   HALTED: "중단됨",
   ROLLING_BACK: "리소스 복귀 중",
   ABORTING: "취소 중",
   COMPLETED: "완료",
   ABORTED: "취소 완료",
+  ROLLED_BACK: "원본 복귀 완료",
 };
 export const workflowKeys = {
   all: (workspace: string) => ["workflows", workspace] as const,

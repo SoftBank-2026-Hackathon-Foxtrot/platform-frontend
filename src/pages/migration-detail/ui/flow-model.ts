@@ -140,7 +140,7 @@ export function resourceFlow(data: Detail, resource: Resource | undefined) {
     moving:
       (isMoving(data) ||
         (streams.length > 0 &&
-          !["PLANNED", "COMPLETED", "ABORTED"].includes(data.workflow.status))) &&
+          !["PLANNED", "COMPLETED", "ABORTED", "ROLLED_BACK"].includes(data.workflow.status))) &&
       !stale &&
       !failed &&
       copying,
