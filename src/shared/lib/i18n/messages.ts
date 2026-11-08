@@ -1,4 +1,72 @@
 export const messages: Record<string, { en: string; ja: string }> = {
+  "조사 시점의 마이그레이션": { en: "Migration at scan time", ja: "調査時点の移行" },
+  "검사 환경": { en: "Inspection target", ja: "検査対象" },
+  "온프렘 샌드박스": { en: "On-prem sandbox", ja: "オンプレサンドボックス" },
+  "객체 접근 실측": { en: "Observed object access", ja: "オブジェクトアクセスの実測" },
+  "앱 · 시험 영수증 읽기": { en: "App · read test receipt", ja: "アプリ · テスト領収書の読み取り" },
+  "앱 · 업무 외 버킷 목록": {
+    en: "App · list unrelated bucket",
+    ja: "アプリ · 対象外バケットの一覧取得",
+  },
+  "복사 계정 · 시험 영수증 읽기": {
+    en: "Copy account · read test receipt",
+    ja: "コピーアカウント · テスト領収書の読み取り",
+  },
+  "복사 계정": { en: "Copy account", ja: "コピーアカウント" },
+  "현재 실측 결과 없음": { en: "No current observation", ja: "現在の実測結果なし" },
+  "실측 계정 미연결 · 정책만 비교합니다.": {
+    en: "Probe identities are disconnected. Only policies are compared.",
+    ja: "実測アカウント未接続。ポリシーのみ比較します。",
+  },
+  "온프렘 버킷 권한 시험": { en: "On-prem bucket access test", ja: "オンプレのバケット権限試験" },
+  "SeaweedFS에서 배포 번들의 앱 권한과 변경안을 각각 실행합니다. 시험 데이터와 계정은 격리됩니다.":
+    {
+      en: "Test the deployment bundle and proposed app permissions on SeaweedFS with isolated data and accounts.",
+      ja: "隔離されたデータとアカウントで、配備設定と変更案をSeaweedFS上で試験します。",
+    },
+  "샌드박스 시험": { en: "Run sandbox test", ja: "サンドボックス試験" },
+  "실행기 연결 필요": { en: "Connect a sandbox runner", ja: "実行環境の接続が必要" },
+  "실행 근거": { en: "Observed requests", ja: "実行結果" },
+  "앱 · 영수증 쓰기와 읽기": {
+    en: "App · write and read receipt",
+    ja: "アプリ · 領収書の書き込みと読み取り",
+  },
+  "복사 계정 · 복사와 내용 확인": {
+    en: "Copy account · copy and verify content",
+    ja: "コピーアカウント · コピーと内容確認",
+  },
+  "기존 설정": { en: "Original", ja: "元の設定" },
+  "변경 설정": { en: "Proposed", ja: "変更設定" },
+  "앱 계정 변경안": { en: "App account change", ja: "アプリ権限の変更案" },
+  "Bedrock 제안 · 실행 결과로 검증": {
+    en: "Bedrock proposal · tested in sandbox",
+    ja: "Bedrock 提案 · 実行結果で検証",
+  },
+  "규칙 제안 · 실행 결과로 검증": {
+    en: "Rule proposal · tested in sandbox",
+    ja: "ルールによる提案 · 実行結果で検証",
+  },
+  "시험한 후보 보기": { en: "View tested candidates", ja: "試験した候補を見る" },
+  "승인하면 변경·복구 패치를 받을 수 있습니다. 온프렘 반영은 운영자가 수행합니다.": {
+    en: "Approval releases the change and rollback patches. An operator applies them on-prem.",
+    ja: "承認後に変更・復旧パッチを取得できます。オンプレへの適用は運用者が行います。",
+  },
+  "변경 패치 받기": { en: "Download change patch", ja: "変更パッチを取得" },
+  "복구 패치 받기": { en: "Download rollback patch", ja: "復旧パッチを取得" },
+  "설정안 승인": { en: "Approve proposal", ja: "変更案を承認" },
+  "변경안 만료 · 다시 시험하세요.": {
+    en: "Proposal expired. Run the test again.",
+    ja: "変更案の期限切れ。再試験してください。",
+  },
+  "검사 전": { en: "Not tested", ja: "未試験" },
+  "검사 중": { en: "Testing", ja: "試験中" },
+  "변경안 검토 가능": { en: "Ready for review", ja: "変更案のレビュー待ち" },
+  "승인 기록 완료": { en: "Approval recorded", ja: "承認を記録済み" },
+  "검사 실패 · 재실행 필요": { en: "Test failed. Run again.", ja: "試験失敗。再実行が必要です。" },
+  거부: { en: "Denied", ja: "拒否" },
+  허용: { en: "Allowed", ja: "許可" },
+  검사: { en: "Check", ja: "検査" },
+  보류: { en: "On hold", ja: "保留" },
   "마이그레이션이 없습니다": { en: "No migrations", ja: "移行はありません" },
   "마이그레이션 선택": { en: "Select migration", ja: "移行を選択" },
   "등록된 앱 배포가 없습니다": {

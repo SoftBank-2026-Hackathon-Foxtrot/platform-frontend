@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { apiClient } from "@/shared/api";
+import { observations } from "./rehearsal";
 
 const time = z.iso.datetime({ offset: true });
 export const reviewSchema = z.object({
@@ -8,6 +9,18 @@ export const reviewSchema = z.object({
   application: z.string(),
   mode: z.enum(["cloud", "fixture"]),
   readOnly: z.boolean().default(true),
+  accessProbe: observations.optional(),
+  probeConfigured: z.boolean().optional(),
+  copyPrincipal: z.string().nullable().optional(),
+  copyContext: z
+    .object({
+      workflowId: z.string(),
+      stage: z.number().int(),
+      status: z.string(),
+      migrationId: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
   phase: z.enum([
     "idle",
     "scanning",

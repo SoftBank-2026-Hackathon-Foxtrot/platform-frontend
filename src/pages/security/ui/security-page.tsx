@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronDown, LoaderCircle, RefreshCw } from "lucide-react";
 import { useSession } from "@/entities/session";
 import { getApiErrorMessage } from "@/shared/api";
@@ -21,6 +21,7 @@ import {
 import { resources, type ResourceId } from "../model/resources";
 import { ResourceDetail } from "./resource-detail";
 import { ResourceMap } from "./resource-map";
+import { RehearsalPanel } from "./rehearsal-panel";
 import "./security.css";
 const titles: Record<Review["phase"], string> = {
   idle: "버킷 권한 비교",
@@ -44,6 +45,31 @@ function nextAction(review: Review): { action: Action; label: string } {
   return { action: "scan", label: "권한 조회" };
 }
 export function SecurityPage() {
+  useLocale();
+  const target = useRouterState({
+    select: (state) => (state.location.hash === "onprem" ? "onprem" : "gcp"),
+  });
+  return (
+    <>
+      <nav className="security-page flex flex-wrap gap-2 !pb-0" aria-label={t("검사 환경")}>
+        {(["gcp", "onprem"] as const).map((value) => (
+          <Button key={value} asChild size="sm" variant={target === value ? "secondary" : "ghost"}>
+            <Link
+              to="/security"
+              hash={value === "onprem" ? "onprem" : ""}
+              hashScrollIntoView={false}
+              aria-current={target === value ? "page" : undefined}
+            >
+              {value === "gcp" ? "AWS → GCP" : t("온프렘 샌드박스")}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      {target === "gcp" ? <GcpReview /> : <RehearsalPanel />}
+    </>
+  );
+}
+function GcpReview() {
   const locale = useLocale();
   const session = useSession();
   const client = useQueryClient();
@@ -83,6 +109,8 @@ export function SecurityPage() {
           ...query.data,
           checks: query.data.checks.map((check) => ({ ...check, status: "unknown" as const })),
           appReady: null,
+          accessProbe: undefined,
+          copyContext: undefined,
         }
       : query.data);
   if (!review)
